@@ -1,0 +1,6 @@
+tornado
+mako
+sqlalchemy
+dogpile.cache
+pylibmc
+MySQL-python

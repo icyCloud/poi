@@ -1,0 +1,146 @@
+# -*- coding: utf-8 -*-
+
+<%inherit file="nav_frame.html" />
+
+<%def name="body_define()">
+    ng-app="roomtypeapp"
+    ng-controller="roomtypeController"
+</%def>
+
+<%def name="content()" >
+
+<div class="container">
+    <div class="row">
+            <h3 ng-cloak>{{hotel.name}}</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary"
+                ng-click="openRoomTypeModal()">+增加房型</button>
+        </div>
+    </div>
+    <div class="row well">
+        <table class="table table-hover">
+            <tr>
+                <th>ID</th>
+                <th>名称</th>
+                <th>床型</th>
+                <th>楼层</th>
+                <th>面积</th>
+                <th>入住人数</th>
+                <th>状态</th>
+                <th></th>
+            </tr>
+            <tr ng-repeat="roomtype in roomtypes | orderBy: 'name'" data-id={{roomtype.id}} ng-if="!roomtype.is_delete">
+                <td ng-cloak>{{roomtype.id}}</td>
+                <td ng-cloak>{{roomtype.name}}</td>
+                <td ng-cloak>{{getBedNameByType(roomtype.bed_type)}}</td>
+                <td ng-cloak>{{roomtype.floor}}</td>
+                <td ng-cloak>{{roomtype.area}}</td>
+                <td ng-cloak>{{roomtype.capacity}}</td>
+                <td ng-cloak>{{showValidStatus(roomtype)}}</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-flat btn-modify"
+                        style="margin: -7px 0 0 0"
+                        ng-click="openRoomTypeModal(roomtype)">修改</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script type="text/ng-template" id="modal-new-roomtype.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="closeRoomTypeModal()" aria-hidden="true">×</button>
+        <h4 class="modal-title">房型信息</h4>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="control-label col-lg-2">*名称</label>
+                <div class="col-lg-10">
+                    <input type="text" placeholder="名称" class="form-control"
+                        ng-model="roomtype.name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">*面积</label>
+                <div class="col-lg-10">
+                    <input type="text" placeholder="面积" class="form-control"
+                        ng-model="roomtype.area">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">楼层</label>
+                <div class="col-lg-10">
+                    <input type="text" placeholder="楼层" class="form-control"
+                        ng-model="roomtype.floor">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">Comments</label>
+                <div class="col-lg-10">
+                    <input type="text" placeholder="Comments" class="form-control"
+                        ng-model="roomtype.comments">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">Description</label>
+                <div class="col-lg-10">
+                    <input type="text" placeholder="Description" class="form-control"
+                        ng-model="roomtype.description">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">*房型</label>
+                <div class="col-lg-5">
+                    <select class="form-control" ng-model="roomtype._bedtype"
+                        ng-options="bedtype.name for bedtype in baseBedTypes">
+                    </select>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">*入住人数</label>
+                <div class="col-lg-10">
+                    <input type="text" placeholder="入住人数" class="form-control"
+                        ng-model="roomtype.capacity">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-lg-2">*网络</label>
+                <div class="col-lg-2 ">
+                    <label>
+                        <input type="checkbox"
+                            ng-model="roomtype._broadnet_access"
+                        >
+                        是否有网络
+                    </label>
+                </div>
+                <div class="col-lg-2 ">
+                    <label>
+                        <input type="checkbox"
+                        ng-model="roomtype._broadnet_fee"
+                        >
+                        网络是否收费
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="closeRoomTypeModal()">关闭</button>
+        <button type="button" class="btn btn-primary" ng-click="saveRoomTypeModal()">保存</button>
+    </div>
+</script>
+
+</%def>
+
+<%def name="end()">
+    ${parent.end()}
+    <script type="text/javascript" charset="utf-8">
+        var hotel_id = ${hotel_id};
+    </script>
+    <script src="${static_url('js/hotel_helper.js')}"></script>
+    <script src="${static_url('js/roomtype_page.js')}"></script>
+</%def>

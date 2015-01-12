@@ -1,0 +1,11 @@
+/tmp
+
+# Python
+*.py[cod]
+
+# Editor
+*.sw[opn]
+
+.DS_Store
+._.DS_Store
+._README.md

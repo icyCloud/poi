@@ -1,0 +1,57 @@
+<%inherit file="base.html" />
+
+<%!
+from constants import NAVIGATION
+%>
+
+<%def name="header()">
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+<%
+c_user = ""
+c_provider = ""
+c_firstvalid = ""
+c_secondvalid = ""
+c_polymer = ""
+nav = context.get('nav', '')
+if nav == NAVIGATION.USERMANAGER:
+    c_user = "active"
+if nav == NAVIGATION.PROVIDER:
+    c_provider = "active"
+if nav == NAVIGATION.FIRSTVALID:
+    c_firstvalid = "active"
+if nav == NAVIGATION.SECONDVALID:
+    c_secondvalid = "active"
+if nav == NAVIGATION.POLYMER:
+    c_polymer = "active"
+%>
+    <div class="container">
+        <div class="nav-header">
+            <a class="navbar-brand" href="#"><b>百达屋后台</b></a>
+        </div>
+
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="${c_user}"><a href="/usermanager/"><b>用户管理</b></a></li>
+                <li class="${c_provider}"><a href="/provider/"><b>供应商管理</b></a></li>
+                <li class="${c_firstvalid}"><a href="/firstvalid/"><b>匹配初审</b></a></li>
+                <li class="${c_secondvalid}"><a href="/secondvalid/"><b>匹配终审</b></a></li>
+                <li class="${c_polymer}"><a href="/polymer/"><b>聚合管理</b></a></li>
+                <li ><a target="blank" href="http://open.betterwood.com/pricing/pages/pricing.html"><b>酒店定价</b></a></li>
+            </ul>
+
+            % if current_user is not UNDEFINED and current_user is not None:
+            <a type="button" class="btn btn-default navbar-btn navbar-right" href="/logout/" >登出</a>
+            % else:
+            <a type="button" class="btn btn-primary navbar-btn navbar-right" href="/login/" >登录</a>
+            % endif
+        </div>
+    </div>
+</nav>
+
+</%def>
+
+<%def name="css()">
+body {
+    padding-top: 70px;
+}
+</%def>

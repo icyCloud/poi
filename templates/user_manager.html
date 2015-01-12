@@ -1,0 +1,377 @@
+# -*- coding: utf-8 -*-
+<%inherit file="nav_frame.html" />
+
+<%!
+from constants import PERMISSIONS
+%>
+
+<%def name="body_define()">
+    ng-app="userapp" ng-controller="userController"
+</%def>
+
+<%def name="content()" >
+
+
+<div class="container">
+
+    <div class="row well">
+
+        <div class="col-md-12">
+
+            <table class="table table-hover">
+
+                <tr>
+                    <th>ID</th>
+                    <th>部门</th>
+                    <th>姓名</th>
+                    <th>用户名</th>
+                    <th>权限</th>
+                    <th></th>
+                </tr>
+                <tr ng-repeat="user in users" data-id={{user.id}} ng-if="!user.is_delete">
+                        <td ng-cloak>{{ user.id }}</td>
+                        <td ng-cloak>
+                            {{ user.department }}
+                        </td>
+                        <td ng-cloak>
+                            {{ user.nickname }}
+                        </td>
+                        <td ng-cloak>
+                            {{ user.username }}
+                        </td ng-cloak>
+                        <td ng-cloak>
+                            {{ showPermission(user.permission) }}
+                        </td ng-cloak>
+                        <td>
+                            <button type="button" class="btn btn-default btn-modify" ng-click="editUser(user.id)">修改</button>
+                            <button type="button" class="btn btn-danger btn-delete"
+                                ng-if="user.username != 'admin'"
+                                ng-click="deleteUser(user.id)">删除</button>
+                        </td>
+                    </tr>
+
+            </table>
+
+        </div>
+
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary" ng-click="editUser('new')">+增加用户</button>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="modal-edit" role="dialog"
+    aria-hidden="true" 
+    aria-labelledby="#modal-edit-title">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="modal-edit-title">修改用户</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-11 col-sm-offset-1">
+                        <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">用户名</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="用户名" class="form-control" ng-model="editingUser.username">
+                                    <p class="help-block">1-20</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">密码</label>
+                                <div class="col-sm-10">
+                                    <input type="password" placeholder="密码" class="form-control" ng-model="editingUser.password">
+                                    <p class="help-block">1-50</p>
+                                </div>
+                            </div>
+
+
+                           <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">姓名</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="姓名" class="form-control" ng-model="editingUser.nickname">
+                                    <p class="help-block">1-20</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">部门</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="部门" class="form-control" ng-model="editingUser.department">
+                                    <p class="help-block">1-20</p>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="cb-provider" type="checkbox" ng-model="cbProvider" >
+                                        供应商列表
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="cb-polymer" type="checkbox" ng-model="cbPolymer">
+                                        聚合信息维护
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="cb-firstvalid" type="checkbox" ng-model="cbFirstValid">
+                                        聚合请求初审
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="cb-secondvalid" type="checkbox" ng-model="cbSecondValid">
+                                        聚合请求终审
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="cb-price-rule" type="checkbox" ng-model="cbPriceRule">
+                                        定价策略
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="cb-poi" type="checkbox" ng-model="cbPoi">
+                                        POI基础信息维护
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary " id="modal-btn-save" ng-click="saveEdit()">Save changes</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+</%def>
+
+<%def name="js()">
+var permission_admin = ${PERMISSIONS['admin']};
+var permission_polymer = ${PERMISSIONS['polymer']};
+var permission_provider = ${PERMISSIONS['provider_list']};
+var permission_firstvalid = ${PERMISSIONS['first_valid']};
+var permission_secondvalid = ${PERMISSIONS['second_valid']};
+var permission_price_rule = ${PERMISSIONS['price_rule']};
+var permission_poi = ${PERMISSIONS['POI']};
+
+var userapp = angular.module('userapp', []);
+
+userapp.controller('userController', ['$scope', '$http', function($scope, $http) {
+    $scope.users = ${users_json};
+    $scope.editingUser = {}
+    $scope.cbPolymer = false;
+    $scope.cbProvider = false;
+    $scope.cbFirstValid = false;
+    $scope.cbSecondValid = false;
+    $scope.cbPriceRule = false;
+    $scope.cbPoi = false;
+
+    $scope.showPermission = getPermissionText;
+
+    $scope.editUser = function(id) {
+
+        var user;
+        if (id == 'new') {
+            user = {};
+            user.id = 0;
+            user.username = '';
+            user.password = '';
+            user.nickname = '';
+            user.department = '';
+            user.permission = 0;           
+        } else {
+            user = getUser(id);
+        }
+
+
+        $scope.editingUser.id = user.id;
+        $scope.editingUser.username = user.username;
+        $scope.editingUser.password = user.password;
+        $scope.editingUser.nickname = user.nickname;
+        $scope.editingUser.department = user.department;
+        $scope.editingUser.permission = user.permission;
+
+        $scope.cbPolymer = validPermission(user.permission, permission_polymer);
+        $scope.cbProvider = validPermission(user.permission, permission_provider);
+        $scope.cbFirstValid = validPermission(user.permission, permission_firstvalid);
+        $scope.cbSecondValid = validPermission(user.permission, permission_secondvalid);
+        $scope.cbPriceRule = validPermission(user.permission, permission_price_rule);
+        $scope.cbPoi = validPermission(user.permission, permission_poi);
+
+
+        $('#modal-edit').modal('show');
+    }
+
+    $scope.saveEdit = function() {
+
+        var permission = 0;
+        if ($scope.cbPolymer) {
+            permission |= permission_polymer;
+        }
+        if ($scope.cbProvider) {
+            permission |= permission_provider;
+        }
+        if ($scope.cbFirstValid) {
+            permission |= permission_firstvalid;
+        }
+        if ($scope.cbSecondValid) {
+            permission |= permission_secondvalid;
+        }
+        if ($scope.cbPriceRule) {
+            permission |= permission_price_rule;
+        }
+        if ($scope.cbPoi) {
+            permission |= permission_poi;
+        }
+        if (validPermission($scope.editingUser.permission, permission_admin)) {
+            permission |= permission_admin;
+        }
+        $scope.editingUser.permission = permission;
+        var user = {};
+        $.extend(user, $scope.editingUser);
+
+        if (user.id == 0) {
+            $http.post("/usermanager/new/", user)
+                .success(function(data) {
+                    if (data.errcode == 0) {
+                        user.id =data.result.id;
+                        $scope.users.push(user)
+
+                        $('#modal-edit').modal('hide');
+                        alert('success');
+                    } else {
+                        alert(data.errmsg);
+                    }
+                })
+                .error(function() {
+                        alert("network error");
+                });
+
+        } else {
+            $http.put("/usermanager/update/"+user.id, user)
+                .success(function(data) {
+                    if (data.errcode == 0) {
+                        var u = getUser(user.id);
+                        u.username = user.username;
+                        u.password = user.password;
+                        u.nickname = user.nickname;
+                        u.department = user.department;
+                        u.permission = user.permission;
+
+                        $('#modal-edit').modal('hide');
+                        alert('success');
+                    } else {
+                        alert(data.errmsg);
+                    }
+                })
+                .error(function() {
+                        alert("network error");
+                });
+        }
+    }
+
+    $scope.deleteUser = function(id) {
+        if(!confirm("删除?")) {
+            return;
+        }
+
+
+        $http.delete("/usermanager/delete/"+id)
+            .success(function(data) {
+                if (data.errcode == 0) {
+                    getUser(id).is_delete = 1;
+                    alert("已删除");
+                } else {
+                    alert(data.errmsg);
+                }
+            })
+            .error(function() {
+                alert("network error");
+            });
+    }
+
+    $scope.isShowUser = function(id) {
+        var user = getUser(id);
+        if (user != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function getUser(id) {
+        for (var i = 0; i < $scope.users.length; i++) {
+            var user = $scope.users[i];
+            if (id == user.id) {
+                return user;
+            }
+        }
+        return null;
+    }
+}]);
+
+userapp.filter('password', function() {
+    return function(input) {
+        var len = input.length;
+        var result = [];
+        while(result.length < len) {
+            result.push('*');
+        }
+        return result.join('');
+    }
+});
+
+
+function getPermissionText(permission) {
+    var text = [];
+    if (validPermission(permission, permission_polymer)) {
+        text.push('聚合信息维护');
+    }
+    if (validPermission(permission, permission_provider)) {
+        text.push('供应商列表');
+    }
+    if (validPermission(permission, permission_firstvalid)) {
+        text.push('聚合请求初审');
+    }
+    if (validPermission(permission, permission_secondvalid)) {
+        text.push('聚合请求终审');
+    }
+    if (validPermission(permission, permission_price_rule)) {
+        text.push('定价策略');
+    }
+    if (validPermission(permission, permission_poi)) {
+        text.push('POI基础信息维护');
+    }
+
+    return text.join(',');
+
+}
+
+function validPermission(permission, request_permission) {
+    if ((permission &  request_permission) == request_permission) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+</%def>

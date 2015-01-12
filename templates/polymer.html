@@ -1,0 +1,621 @@
+# -*- coding: utf-8 -*-
+
+<%inherit file="nav_frame.html" />
+
+<%!
+from models.hotel_mapping import HotelMappingModel
+from models.room_type_mapping import RoomTypeMappingModel
+%>
+
+<%def name="body_define()">
+    ng-app="validapp"
+    ng-controller="validController"
+</%def>
+
+<%def name="content()" >
+
+<div class="container">
+    <div class="cow" style="margin-top: 20px">
+        <div class="col-lg-3">
+            <select class="form-control"
+                data-ng-model="searchProvider"
+                style="argin-top:6px;">
+                <option >任意</option>
+                <option data-ng-repeat="provider in providers">{{provider.name}}</option>
+            </select>
+        </div>
+        <div class="col-lg-3">
+            <input class="form-control floating-label" type="text"
+                data-ng-model="searchHotelName"
+                placeholder="酒店名称">
+        </div>
+        <div class="col-lg-3">
+            <input class="form-control floating-label" type="text"
+                data-ng-model="searchCityName"
+                typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
+                placeholder="城市">
+        </div>
+        <div class="col-lg-3">
+            <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
+            <button class="btn btn-default pull-left" data-ng-click="resetSearch()" style="margin-top: -7px; margin-left: 5px">重置</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <h4 class="col-md-6 title">供应商酒店</h3>
+        <h4 class="col-md-6 title">基础酒店</h3>
+    </div>
+
+    <div class="row panel panel-default" ng-repeat="mapping in hotelMappings" ng-if="!mapping.is_delete && mapping.status == ${HotelMappingModel.STATUS.valid_complete}">
+        <div class=" panel-body clearfix">
+            <div class="col-md-1 " style="margin-top:0; margin-buttom: 0;">
+                <span class="glyphicon glyphicon-chevron-down" ng-click="mapping.isCollapsed = !mapping.isCollapsed" data-ng-show="mapping.roomtype_mappings.length > 0"></span>
+                <p class="pull-right text-center" ng-bind="getProvider(mapping.provider_id).name"></p>
+            </div>
+            <div class="col-md-2 ">
+                <b><p class="text-primary text-center" data-ng-bind="mapping.provider_hotel_name"></p></b>
+            </div>
+            <div class="col-md-2 ">
+                <p class="text-center" data-ng-bind="mapping.provider_hotel_address"></p>
+            </div>
+
+            <div class="col-md-1 ">
+                <span class="span-center glyphicon glyphicon-arrow-right"></span>
+            </div>
+
+            <div class="col-md-2 " style="margin-top:0; margin-buttom: 0;">
+                <b><a class="text-center text-primary" ng-bind="mapping.main_hotel.name" data-ng-click="showHotelInfo(mapping)"></a></b>
+            </div>
+            <div class="col-md-2 ">
+                <p class="text-center" data-ng-bind="mapping.main_hotel.address"></p>
+            </div>
+            <div class="col-md-2">
+                <i class="btn btn-primary btn-raised mdi-navigation-close pull-left hotel-mapping-btn"
+                    data-ng-click="rejectHotel(mapping)" data-ng-show="mapping.status == ${HotelMappingModel.STATUS.valid_complete}"></i>
+                <toggle-switch
+                    class="hotel-switch pull-right"
+                    ng-model="mapping.toggle"
+                    ng-click="hotelOnline(mapping)"
+                    data-ng-show="mapping.status == ${HotelMappingModel.STATUS.valid_complete}">
+                </toggle-switch>
+
+            </div>
+        </div>
+
+        <div class="panel-footer" collapse="mapping.isCollapsed || mapping.roomtype_mappings.length == 0">
+            <div class="row" style="margin: 10px;" ng-repeat="room_mapping in mapping.roomtype_mappings" data-ng-if="room_mapping.status ==${RoomTypeMappingModel.STATUS.valid_complete}">
+                <div class="col-sm-1">
+                    <p ng-cloak>{{ room_mapping.provider_roomtype_id }}</p>
+                </div>
+                <div class="col-sm-2">
+                    <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.provider_roomtype_name }}</b></a>
+                </div>
+                <div class="col-sm-1">
+                    <span class="span-center glyphicon glyphicon-arrow-right"></span>
+                </div>
+                <div class="col-sm-2">
+                    <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.main_roomtype.name }}</b></a>
+                </div>
+                <div class="col-sm-1">
+                </div>
+                <div class="col-sm-1 ">
+                    <i class="btn btn-primary btn-sm room-mapping-btn  mdi-navigation-close pull-right"
+                        data-ng-disabled="mapping.status != ${HotelMappingModel.STATUS.valid_complete}"
+                        data-ng-show="room_mapping.status == ${RoomTypeMappingModel.STATUS.valid_complete}"
+                        data-ng-click="rejectRoomMapping(room_mapping)" >
+                    </i>
+                </div>
+                <div class="col-sm-1">
+                    <toggle-switch
+                        ng-model="room_mapping.toggle"
+                        class="room-switch "
+                        data-ng-disabled="room_mapping.main_roomtype_id == 0 ||  mapping.status != ${HotelMappingModel.STATUS.valid_complete} || mapping.is_online == 0"
+                        data-ng-show="room_mapping.status == ${RoomTypeMappingModel.STATUS.valid_complete}"
+                        ng-click="roomOnline(mapping, room_mapping)">
+                    </toggle-switch>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <nav style="text-align: center">
+            <pagination ng-hide="searchMode" total-items="totalItems" ng-model="currentPage" boundary-links="true" rotate="false" items-per-page="itemsPerPage" max-size="maxSize" ng-change="pageChanged()" ></pagination>
+        </nav>
+    </div>
+</div>
+
+<div class="modal" id="modal-hotel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">酒店信息</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <label class="col-sm-2">名称:</label>
+                    <p class="col-sm-10">{{dialogHotel.name}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">地址:</label>
+                    <p class="col-sm-10">{{dialogHotel.address}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">城市:</label>
+                    <p class="col-sm-10">{{getCity(dialogHotel.city_id)}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">地区:</label>
+                    <p class="col-sm-10">{{getDistrict(dialogHotel.district_id)}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2">星级:</label>
+                    <rating ng-model="dialogHotel.star" max="5" readonly="true"></rating>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="modal-roomtype">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">房型信息</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <h3 class="col-lg-5 col-lg-offset-2"><b>供应商</b></h3>
+                    <h3 class="col-lg-5"><b>基础</b></h3>
+                </div>
+                <div class="row">
+                    <label class="col-lg-2">名称:</label>
+                    <p class="col-lg-5">{{dialogProviderRoomType.name}}</p>
+                    <p class="col-lg-5">{{dialogMainRoomType.name}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-lg-2">面积:</label>
+                    <p class="col-lg-5">{{dialogProviderRoomType.area}}</p>
+                    <p class="col-lg-5">{{dialogMainRoomType.area}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-lg-2">床型:</label>
+                    <p class="col-lg-5">{{getProviderBedNameByType(dialogProviderRoomType.bed_type)}}</p>
+                    <p class="col-lg-5">{{getBedNameByType(dialogMainRoomType.bed_type)}}</p>
+                </div>
+                <div class="row">
+                    <label class="col-lg-2">楼层:</label>
+                    <p class="col-lg-5">{{dialogProviderRoomType.floor }}</p>
+                    <p class="col-lg-5">{{dialogMainRoomType.floor }}</p>
+                </div>
+                <div class="row">
+                    <label class="col-lg-2">入住人数:</label>
+                    <p class="col-lg-5">{{dialogProviderRoomType.capacity }}</p>
+                    <p class="col-lg-5">{{dialogMainRoomType.capacity }}</p>
+                </div>
+                <div class="row">
+                    <label class="col-lg-2">描述:</label>
+                    <p class="col-lg-5">{{dialogProviderRoomType.description }}</p>
+                    <p class="col-lg-5">{{dialogMainRoomType.description }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</%def>
+
+
+<%def name="css()">
+${parent.css()}
+
+h4.title {
+    text-align: center;
+}
+
+.span-center {
+    width: 100%;
+    text-align: center;
+}
+
+p.text-center {
+    margin: 0 0 0 0;
+    text-align: center;
+    verial-align: center;
+}
+
+.hotel-mapping-btn {
+    margin: 0px -10px 0px 0px;
+}
+
+.room-mapping-btn {
+    margin: -7px 0px 0px 0px;
+}
+
+.hotel-switch {
+    border: 0px;
+    min-width: 50px;
+}
+
+.room-switch {
+    border: 0px;
+    min-width: 50px;
+    margin-top: -7px;
+}
+</%def>
+
+<%def name="js()"> 
+
+var validapp = angular.module('validapp', ['ui.bootstrap', 'toggle-switch']);
+
+
+validapp.controller('validController',
+        ['$scope', '$http', '$location',
+        function($scope, $http, $location) {
+
+    $scope.totalItems = 0;
+    $scope.currentPage = 0;
+    $scope.itemsPerPage = 0;
+    $scope.maxSize = 10;
+
+    $scope.hotelMappings = [];
+    $scope.providers = [];
+    $scope.dialogMainRoomType = {};
+    $scope.dialogProviderRoomType = {};
+    $scope.dialogHotel = {};
+    $scope.changeHotel = {};
+    $scope.citys = [];
+    $scope.districts = [];
+
+    $scope.searchProvider = undefined;
+    $scope.searchHotelName = undefined;
+    $scope.searchCityName = undefined;
+
+    var roomtypes = [];
+
+    $http.get("/api/provider/")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.providers = resp.result.providers;
+            } else {
+                alert(resp.errmsg);
+            }
+        })
+        .error(function() {
+            //alert("网络错误");
+        });
+
+    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
+        var url = "/api/polymer?start=" + start + "&limit=" + limit;
+        if (provider_id != undefined) {
+            url += ("&provider_id=" + provider_id);
+        }
+        if (city_id != undefined) {
+            url += ("&city_id=" + city_id);
+        }
+        if (hotel_name != undefined) {
+            url += ("&hotel_name=" + hotel_name);
+        }
+
+        $http.get(url)
+            .success(function(data) {
+                console.log(data);
+                if (data.errcode == 0) {
+                    var result = data.result;
+                    $scope.hotelMappings = result.hotel_mappings;
+                    checkHotelMappingOnline($scope.hotelMappings);
+                    roomtypes = result.roomtypes;
+                    $scope.citys = result.citys;
+                    $scope.districts = result.districts;
+
+
+                    $scope.totalItems = result.total;
+                    $scope.currentPage = Math.floor(result.start / result.limit) + 1;
+                    $scope.itemsPerPage = result.limit;
+                } else {
+                    alert(data.errmsg);
+                }
+            })
+            .error(function(data, status){
+                if (status != 0) {
+                    alert("网络错误");
+                }
+            });
+    }
+
+    function checkHotelMappingOnline(hotelMappings) {
+        for (var i = 0; i < hotelMappings.length; i++) {
+            var hotelMapping = hotelMappings[i];
+            hotelMapping.toggle = hotelMapping.is_online == 1;
+
+            for (var j = 0; j < hotelMapping.roomtype_mappings.length; j++) {
+                var roomtype_mapping = hotelMapping.roomtype_mappings[j];
+                roomtype_mapping.toggle = roomtype_mapping.is_online == 1;
+            }
+        }
+    }
+    function toggleHotelMappingOnline(hotelMapping) {
+        hotelMapping.toggle = hotelMapping.is_online == 1;
+
+        for (var j = 0; j < hotelMapping.roomtype_mappings.length; j++) {
+            var roomtype_mapping = hotelMapping.roomtype_mappings[j];
+            if (hotelMapping.is_online == 0) {
+                roomtype_mapping.is_online = 0;
+            }
+            roomtype_mapping.toggle = roomtype_mapping.is_online == 1;
+        }
+    }
+
+    $scope.showRoomType = function(mapping) {
+        $.extend($scope.dialogMainRoomType, mapping.main_roomtype);
+        $.extend($scope.dialogProviderRoomType, mapping.provider_roomtype);
+        $('#modal-roomtype').modal('show');
+    }
+
+
+    $scope.getDistrict = function(district_id) {
+        for (var i = 0; i < $scope.districts.length; i++) {
+            if ($scope.districts[i].id == district_id) {
+                return $scope.districts[i].name;   
+            }
+        }
+        return '';
+    }
+    $scope.getDistrictId = function(name) {
+        for (var i = 0; i < $scope.districts.length; i++) {
+            if ($scope.districts[i].name == name) {
+                return $scope.districts[i].id;   
+            }
+        }
+        return -1;
+    }
+    $scope.getCity = function(city_id) {
+        for (var i = 0; i < $scope.citys.length; i++) {
+            if ($scope.citys[i].id == city_id) {
+                return $scope.citys[i].name;   
+            }
+        }
+        return '';
+    }
+
+    $scope.getCityId = function(city) {
+        for (var i = 0; i < $scope.citys.length; i++) {
+            if ($scope.citys[i].name == city) {
+                return $scope.citys[i].id;   
+            }
+        }
+        return -1;
+    }
+
+    $scope.getProvider = function(id) {
+        for (var i = 0; i < $scope.providers.length; i++) {
+            var p = $scope.providers[i];
+            if (id == p.id) {
+                return p;
+            }
+        }
+    }
+
+    function getProviderId(provider_name) {
+        for (var i = 0; i < $scope.providers.length; i++) {
+            var provider = $scope.providers[i];
+            if (provider.name == provider_name) {
+                return provider.id;
+            }
+        }
+
+        return null;
+    }
+
+
+
+    function getRoomTypesByHotelId(hotel_id) {
+        var r = [];
+        for (var i = 0; i < roomtypes.length; i++) {
+            var roomtype = roomtypes[i];
+            if (roomtype.hotel_id == hotel_id) {
+                r.push(roomtype);
+            }
+        }
+
+        return r;
+    }
+
+    $scope.rejectRoomMapping = function(room_mapping) {
+        if (!confirm("Reject ?")) {
+            return;
+        }
+
+        $http.delete('/api/polymer/roomtype/' + room_mapping.id + '/reject/')
+            .success(function(resp) {
+                if (resp.errcode == 0) {
+                    room_mapping.status = resp.result.roomtype_mapping.status;
+                } else {
+                    alert(resp.errmsg);
+                }
+            })
+            .error(function() {
+                alert('network error');
+            });
+    }
+
+
+    $scope.showHotelInfo = function(hotelMapping) {
+        var hotel = hotelMapping.main_hotel;
+        currentEditHotelMapping = hotelMapping;
+
+        $scope.dialogHotel.name =hotel.name;
+        $scope.dialogHotel.address = hotel.address;
+        $scope.dialogHotel.city_id = hotel.city_id;
+        $scope.dialogHotel.district_id = hotel.district_id;
+        $scope.dialogHotel.star = hotel.star;
+        $scope.dialogHotel.status = hotelMapping.status;
+
+        console.log(hotel)
+
+
+        $('#modal-hotel').modal('show');
+    }
+
+    $scope.pageChanged = function() {
+        var params = $location.search();
+        params.start = ($scope.currentPage - 1) * $scope.itemsPerPage;
+        params.limit = $scope.itemsPerPage;
+        $location.search(params);
+    };
+
+
+
+    $scope.$watch(function() {
+        return $location.url();
+    },
+    function() {
+        var params = $location.search();
+        var start = params.start != undefined ? params.start : 0;
+        var limit = params.limit != undefined ? params.limit : 10;
+        var provider_id = params.provider_id;
+        var city_id = params.city_id;
+        var hotel_name = params.hotel_name;
+        loadHotelMappings(start, limit, provider_id, city_id, hotel_name);
+
+    });
+
+
+
+    $scope.search = function() {
+        console.log($scope.searchProvider);
+        console.log($scope.searchHotelName);
+        console.log($scope.searchCityName);
+
+        var provider_id;
+        if ($scope.searchProvider != 'any' || $scope.searchProvider != undefined) {
+            provider_id = getProviderId($scope.searchProvider);
+        } else {
+            provider_id = null;
+        }
+
+        var city_id = $scope.getCityId($scope.searchCityName);
+
+        var urlParams = {};
+        
+        if (provider_id != null) {
+            urlParams.provider_id = provider_id;
+        }
+        if (city_id != -1) {
+            urlParams.city_id = city_id;
+        }
+        if ($scope.searchHotelName != undefined) {
+            urlParams.hotel_name = $scope.searchHotelName;
+        }
+
+        console.log(urlParams);
+        $location.search(urlParams);
+    }
+
+    $scope.resetSearch = function() {
+        $scope.searchProvider = 'any';
+        $scope.searchHotelName = undefined;
+        $scope.searchCityName = undefined;
+
+        $location.search({});
+    }
+
+    $scope.rejectHotel = function(hotelMapping) {
+        if (!confirm("Reject ?")) {
+            return;
+        }
+
+        $http.delete('/api/polymer/hotel/' + hotelMapping.id + '/reject/')
+            .success(function(resp) {
+                if (resp.errcode == 0) {
+                    hotelMapping.status = resp.result.hotel_mapping.status;
+                } else {
+                    alert(resp.errmsg);
+                }
+            })
+            .error(function() {
+                alert("network error");
+            });
+    }
+
+    $scope.hotelOnline = function(hotelMapping) {
+        if (!confirm("Change ?")) {
+            hotelMapping.toggle = hotelMapping.is_online == 1;
+            return;
+        }
+
+        var isOnline = hotelMapping.is_online == 1 ? 0 : 1;
+        var params = {'hotel_mapping_id': hotelMapping.id, 'is_online': isOnline};
+
+        $http.put('/api/polymer/hotel/online/', params)
+            .success(function(resp) {
+                if (resp.errcode == 0) {
+                    hotelMapping.is_online = resp.result.hotel_mapping.is_online;
+                    alert("success");
+                } else {
+                    alert(resp.errmsg);
+                }
+                toggleHotelMappingOnline(hotelMapping);
+            })
+            .error(function() {
+                checkHotelMappingOnline([hotelMapping]);
+                alert("network error");
+            });
+    }
+
+    $scope.roomOnline = function(hotelMapping, roomMapping) {
+        if (hotelMapping.is_online == 0) {
+            return;
+        }
+        if (!confirm("Change ?")) {
+            roomMapping.toggle = roomMapping.is_online == 1;
+            return;
+        }
+
+        var isOnline = roomMapping.is_online == 1 ? 0 : 1;
+        var params = {'roomtype_mapping_id': roomMapping.id,
+            'is_online': isOnline,
+            'hotel_mapping_id': hotelMapping.id};
+
+        $http.put('/api/polymer/roomtype/online/', params)
+            .success(function(resp) {
+                if (resp.errcode == 0) {
+                    roomMapping.is_online = resp.result.roomtype_mapping.is_online;
+                    roomMapping.toggle = roomMapping.is_online == 1;
+                    alert("success");
+                } else {
+                    alert(resp.errmsg);
+                }
+                toggleHotelMappingOnline(hotelMapping);
+            })
+            .error(function() {
+                alert("network error");
+                toggleHotelMappingOnline(hotelMapping);
+            });
+    }
+
+    $scope.getBedNameByType = getBedNameByType;
+    $scope.getProviderBedNameByType = getProviderBedNameByType;
+}]);
+
+</%def>
+
+<%def name="end()">
+    ${parent.end()}
+    <script src="${static_url('js/angular-toggle-switch.min.js')}"></script>
+    <script src="${static_url('js/hotel_helper.js')}"></script>
+</%def>
+
+<%def name="head()">
+    ${parent.head()}
+    <link href="${static_url('css/angular-toggle-switch.css')}" rel="stylesheet">
+</%def>

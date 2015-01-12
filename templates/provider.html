@@ -1,0 +1,311 @@
+# -*- coding: utf-8 -*-
+<%inherit file="nav_frame.html" />
+
+<%def name="body_define()">
+    ng-app="providerapp"
+    ng-controller="providerController"
+</%def>
+
+<%def name="content()" >
+
+<div class="container"
+    >
+
+    <div class="row">
+        <div class="col-md-12">
+            <form class="form-inline" role="form">
+                <div class="form-group ">
+                        <input type="text" class="form-control" placeholder="供应商" data-ng-model="searchProvider">
+                </div>
+                <div class="form-group">
+                        <input type="text" class="form-control" placeholder="联系人" data-ng-model="searchContact">
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary btn-flat" data-ng-click="search()">搜索</button>
+                    <button type="button" class="btn btn-default btn-flat" data-ng-click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row well" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <table class="table table-hover">
+                <tr>
+                    <th>供应商编码</th>
+                    <th>供应商</th>
+                    <th>联系人</th>
+                    <th>联系方式</th>
+                    <th>邮箱</th>
+                    <th></th>
+                </tr>
+                <tr ng-repeat="provider in providers" ng-if="!provider.is_delete">
+
+                    <td class="vertical-center" ng-bind="provider.id"></td>
+                    <td ng-bind="provider.name"></td>
+                    <td ng-bind="provider.contact"></td>
+                    <td ng-bind="provider.phone"></td>
+                    <td ng-bind="provider.email"></td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-flat btn-modify" ng-click="editProvider(provider.id)">修改</button>
+                    </td>
+
+
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <pagination ng-hide="searchMode" total-items="totalItems" ng-model="currentPage" boundary-links="true" rotate="false" items-per-page="itemsPerPage" max-size="maxSize" ng-change="pageChanged()" ></pagination>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-1">
+            <button type="buttion" class="btn btn-primary " ng-click="editProvider('new')">+增加供应商</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modal-edit" role="dialog"
+    aria-hidden="true" 
+    aria-labelledby="#modal-edit-title">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="modal-edit-title">供应商</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-11 col-sm-offset-1">
+                        <form class="form-horizontal" role="form">
+
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">供应商名称</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="供应商名称" class="form-control" ng-model="editingProvider.name">
+                                    <p class="help-block">1-20</p>
+                                </div>
+                            </div>
+
+
+                           <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">联系人</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="联系人" class="form-control" ng-model="editingProvider.contact">
+                                    <p class="help-block">1-20</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">联系方式</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="联系方式" class="form-control" ng-model="editingProvider.phone">
+                                    <p class="help-block">1-50</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">邮箱</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="邮箱" class="form-control" ng-model="editingProvider.email">
+                                    <p class="help-block">1-200</p>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary " id="modal-btn-save" ng-click="saveEdit()">Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+</%def>
+
+<%def name="css()">
+${parent.css()}
+
+.btn-modify {
+    margin: 0;
+    padding: 0;
+}
+</%def>
+
+<%def name="js()">
+
+var providerapp = angular.module('providerapp', ['ui.bootstrap']);
+
+
+providerapp.controller('providerController', ['$scope', '$http', '$location', function($scope, $http, $location) {
+
+    $scope.providers = [];
+    $scope.editingProvider = {};
+    $scope.totalItems = 0;
+    $scope.currentPage = 0;
+    $scope.itemsPerPage = 0;
+    $scope.maxSize = 10;
+    $scope.searchProvider = "";
+    $scope.searchContact = "";
+    $scope.searchMode = false;
+
+    function loadProviders(start, limit) {
+        $http.get("/api/provider?start="+start+"&limit="+limit)
+            .success(function(data) {
+                if (data.errcode == 0) {
+                    var result = data.result;
+
+                    $scope.providers = result.providers;
+                    $scope.totalItems = result.total;
+                    $scope.currentPage = Math.floor(result.start / result.limit) + 1;
+                    $scope.itemsPerPage = result.limit;
+
+                } else {
+                    alert(data.errmsg);
+                }
+            })
+            .error(function() {
+                alert("网络错误");
+            });
+    }
+
+    $scope.editProvider = function(id) {
+        if (id == 'new') {
+            $scope.editingProvider.id = 0;
+            $scope.editingProvider.name = '';
+            $scope.editingProvider.contact = '';
+            $scope.editingProvider.phone = '';
+            $scope.editingProvider.email = '';
+        } else {
+            var provider = getProvider(id);
+            console.log(provider);
+            $scope.editingProvider.id = provider.id;
+            $scope.editingProvider.name = provider.name;
+            $scope.editingProvider.contact = provider.contact;
+            $scope.editingProvider.phone = provider.phone;
+            $scope.editingProvider.email = provider.email;
+        }
+
+        $('#modal-edit').modal('show');
+    }
+
+    $scope.saveEdit = function() {
+        var provider = {};
+        $.extend(provider, $scope.editingProvider);       
+        if (provider.id == 0) {
+            $http.post("/api/provider/", provider)
+                .success(function(data) {
+                    if (data.errcode == 0) {
+                        provider.id = data.result.id;
+                        $scope.providers.push(provider);
+
+                        $('#modal-edit').modal('hide');
+                        alert('success');
+                    } else {
+                        alert(data.errmsg);
+                    }
+                })
+                .error(function() {
+                    alert('network error');
+                });
+        } else {
+            $http.put("/api/provider/", provider)
+               .success(function(data) {
+                    if (data.errcode == 0) {
+                        var p = getProvider(provider.id);
+                        p.name = data.result.name;
+                        p.contact = data.result.contact;
+                        p.phone = data.result.phone;
+                        p.email = data.result.email;
+
+                        $('#modal-edit').modal('hide');
+                        alert('success');
+                    } else {
+                        alert(data.errmsg);
+                    }
+
+               })
+               .error(function(data) {
+                    alert('network error');
+               }); 
+
+        }
+    }
+
+    function getProvider(id) {
+        for (var i = 0; i < $scope.providers.length; i++) {
+            if (id == $scope.providers[i].id) {
+                return $scope.providers[i];
+            }
+        }
+        return null;
+    }
+
+
+    $scope.pageChanged = function() {
+        console.log($scope.currentPage);
+        $location.search({start: ($scope.currentPage - 1) * $scope.itemsPerPage, limit: $scope.itemsPerPage});
+    };
+
+    $scope.$watch(function() {
+        return $location.url();
+    },
+    function() {
+
+        var params = $location.search();
+        if(params.provider != undefined || params.contact != undefined) {
+            var provider = params.provider != undefined ? params.provider : '';
+            var contact = params.contact != undefined ? params.contact : '';
+            console.log({provider: $scope.searchProvider, contact: $scope.searchContact});
+            loadQuery(provider, contact);
+        } else {
+            var start = params.start != undefined ? params.start : 0;
+            var limit = params.limit != undefined ? params.limit : 10;
+            loadProviders(start, limit);
+        }
+
+    });
+
+    $scope.search = function() {
+        $location.search({provider: $scope.searchProvider, contact: $scope.searchContact});
+    }
+
+    function loadQuery(provider, contact) {
+        $http.get("/api/provider/query?provider=" + provider + "&contact=" + contact)
+            .success(function(data) {
+                if (data.errcode == 0) {
+                    $scope.providers = data.result.providers;
+                    $scope.searchProvider = provider;
+                    $scope.searchContact = contact;
+                    $scope.searchMode = true;
+                } else {
+                    alert(data.errmsg);
+                }
+            })
+            .error(function() {
+                alert("网络错误");
+            });
+    }
+
+    $scope.reset = function() {
+        $scope.searchProvider = '';
+        $scope.searchContact = '';
+        $scope.searchMode = false;
+        $location.search({});
+    }
+
+}]);
+
+
+</%def>
+
