@@ -51,32 +51,33 @@ function getBedNameByType(bedtype) {
 }
 
 function getProviderBedNameByType(bedtype) {
-	var name = '';
-	switch(bedtype) {
-		case 1:
-			name = '大床';
-			break;
-		case 2:
-			name = '双床';
-			break;
-		case 3:
-			name = '三床';
-			break;
-		case 4:
-			name = '一单一双';
-			break;
-		case 5:
-			name = '大床或双床';
-			break;
-		case 6:
-			name = '榻榻米';
-			break;
-		case 7:
-			name = '单人床';
-			break;
-		default:
-			name = '未知';
-	}
+	return getBedNameByType(bedtype);
+	//var name = '';
+	//switch(bedtype) {
+		//case 1:
+			//name = '大床';
+			//break;
+		//case 2:
+			//name = '双床';
+			//break;
+		//case 3:
+			//name = '三床';
+			//break;
+		//case 4:
+			//name = '一单一双';
+			//break;
+		//case 5:
+			//name = '大床或双床';
+			//break;
+		//case 6:
+			//name = '榻榻米';
+			//break;
+		//case 7:
+			//name = '单人床';
+			//break;
+		//default:
+			//name = '未知';
+	//}
 
-	return name;
+	//return name;
 }
