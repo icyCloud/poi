@@ -17,6 +17,7 @@ class HotelMixin(object):
         roomtypes = RoomTypeModel.gets_by_hotel_ids(session, hotel_ids)
         roomtypes = [roomtype.todict() for roomtype in roomtypes]
         session.close()
+        Log.info(">>>> roomtypes: {}".format(roomtypes))
         return roomtypes
 
     def merge_provider_roomtypes(self, hotels, roomtypes):
@@ -28,6 +29,7 @@ class HotelMixin(object):
                         roomtype_mapping['provider_roomtype']['area'] = roomtype.get('room_size', 0)
                         roomtype_mapping['provider_roomtype']['description'] = roomtype.get('desc', '')
                         roomtype_mapping['provider_roomtype']['capacity'] = roomtype.get('occupancy', '')
+                        roomtype_mapping['provider_roomtype_name'] = roomtype.get('name')
                         break
 
 
