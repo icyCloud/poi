@@ -29,3 +29,9 @@ class HotelMappingAPIHandler(BtwBaseHandler):
             ))
 
 
+class HotelMappingEbookingPushAPIHandler(BtwBaseHandler):
+
+    def post(self):
+        pass
+
+
