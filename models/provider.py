@@ -69,12 +69,12 @@ class ProviderModel(Base):
             provider.phone = phone
             provider.email = email
             session.commit()
-            cache.delete(cls.MC_ALL_PROVIDERS_COUNT)
             cache.delete(cls.MC_ALL_PROVIDERS)
             return provider
 
 
     @classmethod
+    @cache.mc(MC_ALL_PROVIDERS)
     def get_all(cls, session, start=None, limit=None):
         query = session.query(ProviderModel)\
                 .filter(ProviderModel.is_delete == 0)

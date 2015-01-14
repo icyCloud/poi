@@ -44,7 +44,6 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
         self.merge_main_hotel_info(hotels)
         t2 = time.time()
 
-        t3 = time.time()
         self.merge_room_type_mapping(hotels)
         t4 = time.time()
         self.add_provider_roomtype(hotels)
@@ -52,14 +51,13 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
 
 
 
-        t6 = time.time()
         citys = [city.todict() for city in CityModel.get_all(self.db)]
         t7 = time.time()
         districts = [district.todict()
                      for district in DistrictModel.get_all(self.db)]
         t8 = time.time()
 
-        cost = t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t6-t5, t7-t6, t8-t7
+        cost = t1-t0, t2-t1, t4-t2, t5-t4, t7-t5, t8-t7
         Log.info(cost)
 
         self.finish_json(result=dict(

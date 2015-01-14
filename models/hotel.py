@@ -50,7 +50,6 @@ class HotelModel(Base):
 
 
     @classmethod
-    @exe_time
     def get_by_ids(cls, session, ids, need_online=False):
         query = session.query(HotelModel)\
                 .filter(HotelModel.id.in_(ids))\

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from dogpile.cache import make_region 
 from dogpile.cache.api import NO_VALUE
 
@@ -28,8 +30,12 @@ def join_keys(*args):
 def mc(key):
     def wrap(fn):
         def _(*args, **kwargs):
+            t0 = time.time()
             mc_key = join_keys(MC_PREFIX, key)
             r = region.get(mc_key)
+            t1 = time.time()
+            print '=' * 20
+            print t1-t0
             if r is NO_VALUE:
                 r = fn(*args, **kwargs)
                 region.set(mc_key, r)

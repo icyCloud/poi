@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME
 from tornado.util import ObjectDict
 
 import cache
+from tools.utils import exe_time
 
 class DistrictModel(Base):
 
@@ -24,6 +25,7 @@ class DistrictModel(Base):
 
     @classmethod
     @cache.mc(MC_ALL_DISTRICT)
+    @exe_time
     def get_all(self,session):
         return session.query(DistrictModel).all()
 
@@ -35,6 +37,13 @@ class DistrictModel(Base):
 
     def todict(self):
         return ObjectDict(
+                id=self.id,
+                city_id=self.city_id,
+                name=self.name,
+                )
+
+    def tojson(self):
+        return dict(
                 id=self.id,
                 city_id=self.city_id,
                 name=self.name,
