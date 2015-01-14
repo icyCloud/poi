@@ -18,15 +18,15 @@ from models.room_type import RoomTypeModel as RoomType
 from models.city import CityModel
 from models.district import DistrictModel
 
-from tools.utils import exeTime
+from tools.log import Log, log_request
 
 
 class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
 
     @gen.coroutine
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
+    @log_request
     def get(self):
-
         start = self.get_query_argument('start', 0)
         limit = self.get_query_argument('limit', 20)
 
@@ -34,20 +34,32 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
 
+        t0 = time.time()
         hotel_mappings, total = HotelMapping.gets_show_in_firstvalid(self.db,
                                                                      provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
                                                                      start=start, limit=limit)
         hotels = [hotel.todict() for hotel in hotel_mappings]
 
+        t1 = time.time()
         self.merge_main_hotel_info(hotels)
+        t2 = time.time()
 
+        t3 = time.time()
         self.merge_room_type_mapping(hotels)
+        t4 = time.time()
         self.add_provider_roomtype(hotels)
+        t5 = time.time()
 
 
+
+        t6 = time.time()
         citys = [city.todict() for city in CityModel.get_all(self.db)]
+        t7 = time.time()
         districts = [district.todict()
                      for district in DistrictModel.get_all(self.db)]
+        t8 = time.time()
+
+        print t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t6-t5, t7-t6, t8-t7
 
         self.finish_json(result=dict(
             hotel_mappings=hotels,
@@ -67,6 +79,7 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
                 if main_hotel.id == hotel.main_hotel_id:
                     hotel['main_hotel'] = main_hotel.todict()
                     break
+
 
     def merge_room_type_mapping(self, hotel_dicts):
 
