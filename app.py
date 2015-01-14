@@ -49,13 +49,13 @@ class Application(tornado.web.Application):
 
         # db
         engine = create_engine(
-                Config['db'], encoding='utf-8', echo=True,
+                Config['db'], encoding='utf-8', echo=False,
                 pool_recycle=3600
                 )
         self.DB_Session = sessionmaker(bind=engine)
 
         engine_stock = create_engine(
-                Config['db_stock'], encoding='utf-8', echo=True,
+                Config['db_stock'], encoding='utf-8', echo=False,
                 pool_recycle=3600
                 )
         self.DB_Session_stock = sessionmaker(bind=engine_stock)
