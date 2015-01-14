@@ -20,13 +20,7 @@ class ProviderAPIHandler(BtwBaseHandler):
         providers = ProviderModel.get_all(self.db, start, limit)
         total = ProviderModel.get_count(self.db)
 
-        providers = [dict(
-            id=provider.id,
-            name=provider.name,
-            contact=provider.contact,
-            phone=provider.phone,
-            email=provider.email)
-            for provider in providers]
+        providers = [provider.tojson() for provider in providers]
 
 
         self.finish_json(result=dict(

@@ -5,6 +5,8 @@ from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT, DOUBLE, TEXT
 from tornado.util import ObjectDict
 
+from tools.utils import exe_time
+
 class HotelModel(Base):
 
     __tablename__ = 'hotel'
@@ -48,6 +50,7 @@ class HotelModel(Base):
 
 
     @classmethod
+    @exe_time
     def get_by_ids(cls, session, ids, need_online=False):
         query = session.query(HotelModel)\
                 .filter(HotelModel.id.in_(ids))\

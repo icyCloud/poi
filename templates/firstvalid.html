@@ -496,7 +496,6 @@ validapp.controller('validController',
             }
         })
         .error(function() {
-            alert("网络错误");
         });
 
     function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
@@ -602,7 +601,7 @@ validapp.controller('validController',
         for (var i = 0; i < $scope.providers.length; i++) {
             var provider = $scope.providers[i];
             if (provider.name == provider_name) {
-                return provider.id;
+                return provider.chain_id;
             }
         }
 

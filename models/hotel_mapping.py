@@ -3,7 +3,7 @@
 from models import Base
 from sqlalchemy import Column, or_, and_
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT
-from sqlalchemy.sql import exists
+from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
 
 
@@ -35,7 +35,10 @@ class HotelMappingModel(Base):
     is_online = Column('isOnline', BIT, nullable=False)
     is_delete = Column('isDelete', BIT, nullable=False)
     info = Column(VARCHAR(100))
-    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False)
+    merchant_id = Column("merchantId", INTEGER, nullable=False, default=0)
+    merchant_name = Column("merchantName", VARCHAR(50), nullable=False, default='')
+    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
 
     @classmethod
     def get_by_id(cls, session, id):
@@ -51,6 +54,15 @@ class HotelMappingModel(Base):
             .offset(start)\
             .limit(limit)\
             .all()
+
+    @classmethod
+    def new_hotel_mapping_from_ebooking(cls, session, provider_hotel_id, provider_hotel_name, provider_hotel_address, city_id, main_hotel_id, merchant_id, merchant_name):
+        mapping = HotelMappingModel(provider_id=6, provider_hotel_id=provider_hotel_id, provider_hotel_name=provider_hotel_name,
+                provider_hotel_address=provider_hotel_address, city_id=city_id, main_hotel_id=main_hotel_id,
+                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merge_facility)
+        session.add(mapping)
+        return mapping
+
 
 
     @classmethod
@@ -221,4 +233,7 @@ class HotelMappingModel(Base):
             status=self.status,
             is_online=self.is_online,
             is_delete=self.is_delete,
-            info=self.info)
+            info=self.info,
+            merchant_id=self.merchant_id,
+            merchant_name=self.merchant_name,
+            )

@@ -14,6 +14,7 @@ class ProviderModel(Base):
         'mysql_charset': 'utf8', 'mysql_engine': 'InnoDB'}
 
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    chain_id = Column("chainId", INTEGER, nullable=False)
     name = Column(VARCHAR(20), nullable=False)
     contact = Column(VARCHAR(20), nullable=False)
     phone = Column(VARCHAR(50), nullable=False)
@@ -95,6 +96,7 @@ class ProviderModel(Base):
     def tojson(self):
         return dict(
                 id=self.id,
+                chain_id=self.chain_id,
                 name=self.name,
                 contact=self.contact,
                 phone=self.phone,
