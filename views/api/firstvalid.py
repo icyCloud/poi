@@ -59,7 +59,8 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
                      for district in DistrictModel.get_all(self.db)]
         t8 = time.time()
 
-        print t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t6-t5, t7-t6, t8-t7
+        cost = t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t6-t5, t7-t6, t8-t7
+        Log.info(cost)
 
         self.finish_json(result=dict(
             hotel_mappings=hotels,
