@@ -11,7 +11,7 @@ region = make_region().configure(
         'dogpile.cache.redis',
         expiration_time=3600,
         arguments = {
-        'host': 'localhost',
+        'host': '10.168.168.101',
         'port': 6379,
         'db': 0,
         'redis_expiration_time': 60*60*2,   # 2 hours
