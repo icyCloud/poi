@@ -6,13 +6,21 @@ from dogpile.cache.api import NO_VALUE
 from constants import MC_PREFIX
 
 region = make_region().configure(
-        'dogpile.cache.pylibmc',
+        'dogpile.cache.redis',
         expiration_time=3600,
-        arguments={
-            'url':["127.0.0.1"],
-            'binary':True,
-            'behaviors':{"tcp_nodelay": True,"ketama":True},
-            })
+        arguments = {
+        'host': 'localhost',
+        'port': 6379,
+        'db': 0,
+        'redis_expiration_time': 60*60*2,   # 2 hours
+        'distributed_lock': True
+        }
+        #arguments={
+            #'url':["127.0.0.1"],
+            #'binary':True,
+            #'behaviors':{"tcp_nodelay": True,"ketama":True},
+            #}
+        )
 
 def join_keys(*args):
     return '_'.join([str(arg) for arg in args])
