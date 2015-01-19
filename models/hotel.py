@@ -4,7 +4,6 @@ from models import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT, DOUBLE, TEXT
 from tornado.util import ObjectDict
-
 from tools.utils import exe_time
 
 class HotelModel(Base):

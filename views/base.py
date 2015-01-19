@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import traceback
+
+from tornado.escape import json_decode
 from tools.json import json_encode
 
 from views import BaseHandler
 from models.user import UserModel
+from exception.json_exception import JsonException, JsonDecodeError
+from tornado.util import ObjectDict
+
+
 
 class BtwBaseHandler(BaseHandler):
 
@@ -26,7 +33,11 @@ class BtwBaseHandler(BaseHandler):
         super(BtwBaseHandler, self).render(template_name, **kwargs)
 
     def _handle_request_exception(self, e):
-        super(BtwBaseHandler, self)._handle_request_exception(e)
+        if isinstance(e, JsonException):
+            print e.tojson()
+            self.finish_json(errcode=e.errcode, errmsg=e.errmsg)
+        else:
+            super(BtwBaseHandler, self)._handle_request_exception(e)
 
     def finish_json(self, errcode=0, errmsg=None, result=None):
         self.set_header("Content-Type", "application/json; charset=UTF-8")
@@ -35,3 +46,10 @@ class BtwBaseHandler(BaseHandler):
                     'result': result}))
 
 
+    def get_json_arguments(self, raise_error=True):
+        try:
+            return ObjectDict(json_decode(self.request.body))
+        except Exception, e:
+            print traceback.format_exc()
+            if raise_error:
+                raise JsonDecodeError()

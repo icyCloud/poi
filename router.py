@@ -12,8 +12,8 @@ from views.api.provider import ProviderAPIHandler, ProviderQueryAPIHandler
 from views.api.firstvalid import FirstValidAPIHandler, FirstValidStatusAPIHandelr, FirstValidRoomTypeAPIHandler
 from views.api.secondvalid import SecondValidAPIHandler, SecondValidHotelAPIHandler, SecondValidRoomTypeAPIHandler
 from views.api.hotel import HotelSearchAPIHandler, HotelAPIHandler
-from views.api.hotel_mapping import HotelMappingAPIHandler
-from views.api.room_type_mapping import RoomTypeMappingAPIHandler
+from views.api.hotel_mapping import HotelMappingAPIHandler, HotelMappingEbookingPushAPIHandler
+from views.api.room_type_mapping import RoomTypeMappingAPIHandler, RoomTypeMappingEbookingPushAPIHandler
 from views.api.polymer import PolymerAPIHandler, PolymerHotelAPIHandler, PolymerRoomTypeAPIHandler
 from views.api.roomtype import RoomTypeAPIHandler
 from views.api.city import CityAPIHandler
@@ -55,5 +55,6 @@ handlers = [
         (r"/api/district/?", DistrictAPIHandler),
 
         (r"/api/hotel/(?P<hotel_id>\d+)/?", HotelAPIHandler),
-
+        (r"/api/push/ebooking/hotel/?", HotelMappingEbookingPushAPIHandler),
+        (r"/api/push/ebooking/room/?", RoomTypeMappingEbookingPushAPIHandler),
         ]

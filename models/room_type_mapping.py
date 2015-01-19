@@ -3,6 +3,7 @@
 from models import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT
+from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
 
 class RoomTypeMappingModel(Base):
@@ -27,10 +28,25 @@ class RoomTypeMappingModel(Base):
     main_hotel_id = Column('mainHotelId', INTEGER(unsigned=True), nullable=False)
     main_roomtype_id = Column('mainRoomTypeId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False)
-    is_delete = Column('isDelete', BIT, nullable=False)
-    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False)
+    is_online = Column('isOnline', BIT, nullable=False, default=0)
+    is_delete = Column('isDelete', BIT, nullable=False, default=0)
+    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     info = Column(VARCHAR(100))
+
+    @classmethod
+    def new_roomtype_mapping_from_ebooking(cls, session, provider_hotel_id, provider_roomtype_id, provider_roomtype_name, main_hotel_id, main_roomtype_id):
+        mapping = RoomTypeMappingModel(provider_id=6, provider_hotel_id=provider_hotel_id, provider_roomtype_id=provider_roomtype_id, provider_roomtype_name=provider_roomtype_name, main_hotel_id=main_hotel_id, main_roomtype_id=main_roomtype_id, status=cls.STATUS.valid_complete)
+        session.add(mapping)
+        session.commit()
+        return mapping
+
+    @classmethod
+    def get_by_provider_and_main_roomtype(cls, session, provider_roomtype_id, main_roomtype_id):
+        return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id,
+                        RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
+                .filter(RoomTypeMappingModel.is_delete == 0)\
+                .first()
 
     @classmethod
     def get_by_id(cls, session, id):

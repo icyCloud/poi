@@ -32,8 +32,8 @@ class HotelMappingModel(Base):
     main_hotel_id = Column(
         'mainHotelId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False)
-    is_delete = Column('isDelete', BIT, nullable=False)
+    is_online = Column('isOnline', BIT, nullable=False, default=0)
+    is_delete = Column('isDelete', BIT, nullable=False, default=0)
     info = Column(VARCHAR(100))
     merchant_id = Column("merchantId", INTEGER, nullable=False, default=0)
     merchant_name = Column("merchantName", VARCHAR(50), nullable=False, default='')
@@ -45,6 +45,15 @@ class HotelMappingModel(Base):
         return session.query(HotelMappingModel)\
             .filter(HotelMappingModel.id == id, HotelMappingModel.is_delete == 0)\
             .first()
+
+    @classmethod
+    def get_by_provider_and_main_hotel(cls, session, provider_id, provider_hotel_id, main_hotel_id):
+        return session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==provider_id,
+                        HotelMappingModel.provider_hotel_id==provider_hotel_id,
+                        HotelMappingModel.main_hotel_id==main_hotel_id)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .first()
 
     @classmethod
     def gets_wait_firstvalid(cls, session, start=0, limit=20):
@@ -59,8 +68,9 @@ class HotelMappingModel(Base):
     def new_hotel_mapping_from_ebooking(cls, session, provider_hotel_id, provider_hotel_name, provider_hotel_address, city_id, main_hotel_id, merchant_id, merchant_name):
         mapping = HotelMappingModel(provider_id=6, provider_hotel_id=provider_hotel_id, provider_hotel_name=provider_hotel_name,
                 provider_hotel_address=provider_hotel_address, city_id=city_id, main_hotel_id=main_hotel_id,
-                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merge_facility)
+                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name)
         session.add(mapping)
+        session.commit()
         return mapping
 
 

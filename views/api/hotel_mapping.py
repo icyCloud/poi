@@ -4,11 +4,15 @@ from tornado.escape import json_encode, json_decode
 from tornado.util import ObjectDict
 
 from views.base import BtwBaseHandler
+from models.hotel import HotelModel
 from models.hotel_mapping import HotelMappingModel
 from models.room_type_mapping import RoomTypeMappingModel
 from models.room_type import RoomTypeModel
 
+from exception.json_exception import JsonException
+
 from tools.auth import auth_login, auth_permission
+from tools.request_tools import get_and_valid_arguments
 from constants import PERMISSIONS
 
 class HotelMappingAPIHandler(BtwBaseHandler):
@@ -32,6 +36,19 @@ class HotelMappingAPIHandler(BtwBaseHandler):
 class HotelMappingEbookingPushAPIHandler(BtwBaseHandler):
 
     def post(self):
-        pass
+        args = self.get_json_arguments()
+        chain_hotel_id, main_hotel_id, merchant_id, merchant_name = get_and_valid_arguments(args,
+                'chain_hotel_id', 'main_hotel_id', 'merchant_id', 'merchant_name')
+        hotel = HotelModel.get_by_id(self.db, main_hotel_id)
 
+        hotel_mapping = HotelMappingModel.get_by_provider_and_main_hotel(self.db, 6, chain_hotel_id, main_hotel_id)
+        if hotel_mapping:
+            raise JsonException(errcode=1000, errmsg="already exist")
+
+        hotel_mapping = HotelMappingModel.new_hotel_mapping_from_ebooking(self.db,
+                chain_hotel_id, hotel.name, hotel.address, hotel.city_id, main_hotel_id, merchant_id, merchant_name)
+
+        self.finish_json(result=dict(
+            hotel_mapping=hotel_mapping.todict(),
+            ))
 
