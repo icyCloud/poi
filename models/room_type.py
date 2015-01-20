@@ -81,7 +81,7 @@ class RoomTypeModel(Base):
         return q.all()
 
     @classmethod
-    def new(cls, session, hotel_id, name, area="",
+    def new(cls, session, hotel_id, name, area=0,
             floor="", comments="", description="",
             capacity=-1, facility="", bed_type=-1,
             broadnet_access=0, broadnet_fee=0, elong_id=0,
