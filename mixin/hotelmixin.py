@@ -18,11 +18,14 @@ class HotelMixin(object):
         return roomtypes
 
     def read_roomtypes(self, hotel_ids):
-        session = self.application.db_session_stock
+        session = self.application.DB_Session_stock()
+        roomtypes = []
         try:
             roomtypes = RoomTypeModel.gets_by_hotel_ids(session, hotel_ids)
         except:
             session.rollback()
+        finally:
+            session.close()
         return roomtypes if roomtypes else []
 
     def merge_provider_roomtypes(self, hotels, roomtypes):

@@ -15,8 +15,6 @@ from models.hotel_mapping import HotelMappingModel as HotelMapping
 from models.hotel import HotelModel as Hotel
 from models.room_type_mapping import RoomTypeMappingModel as RoomTypeMapping
 from models.room_type import RoomTypeModel as RoomType
-from models.city import CityModel
-from models.district import DistrictModel
 
 from tools.log import Log, log_request
 
@@ -38,15 +36,20 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
         hotel_mappings, total = HotelMapping.gets_show_in_firstvalid(self.db,
                                                                      provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
                                                                      start=start, limit=limit)
+        Log.info(">> get show in first valid")
         hotels = [hotel.todict() for hotel in hotel_mappings]
 
+        Log.info(">> merge hotel mapping")
         t1 = time.time()
         self.merge_main_hotel_info(hotels)
+        Log.info(">> merge main hotel info")
         t2 = time.time()
 
         self.merge_room_type_mapping(hotels)
+        Log.info(">> merge roomtype mapping")
         t4 = time.time()
         self.add_provider_roomtype(hotels)
+        Log.info(">> add provider roomtype mapping")
         t5 = time.time()
 
 

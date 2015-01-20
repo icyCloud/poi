@@ -11,7 +11,6 @@ import tornado.httpserver
 from tornado.options import define, options
 
 from mako.lookup import TemplateLookup
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -54,7 +53,6 @@ class Application(tornado.web.Application):
                 pool_size=20
                 )
         self.DB_Session = sessionmaker(bind=engine)
-        self.db_session = self.DB_Session()
 
         engine_stock = create_engine(
                 Config['db_stock'], encoding='utf-8', echo=False,
@@ -62,7 +60,6 @@ class Application(tornado.web.Application):
                 pool_size=20
                 )
         self.DB_Session_stock = sessionmaker(bind=engine_stock)
-        self.db_session_stock = self.DB_Session_stock()
 
 
 
