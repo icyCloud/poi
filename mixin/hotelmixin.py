@@ -15,7 +15,6 @@ class HotelMixin(object):
         hotel_ids = [hotel.provider_hotel_id for hotel in hotels]
         Log.info(str(hotel_ids))
         roomtypes = [roomtype.todict() for roomtype in self.read_roomtypes(hotel_ids)]
-        Log.info(">>>> roomtypes: {}".format(roomtypes))
         return roomtypes
 
     def read_roomtypes(self, hotel_ids):
@@ -24,6 +23,7 @@ class HotelMixin(object):
             roomtypes = RoomTypeModel.gets_by_hotel_ids(session, hotel_ids)
         except:
             session.rollback()
+        return roomtypes if roomtypes else []
 
     def merge_provider_roomtypes(self, hotels, roomtypes):
         for hotel in hotels:

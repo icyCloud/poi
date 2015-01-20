@@ -22,8 +22,8 @@ class RoomTypeMappingModel(Base):
 
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     provider_id = Column('chainId', INTEGER(unsigned=True), nullable=False)
-    provider_hotel_id = Column('chainHotelId', INTEGER(unsigned=True), nullable=False)
-    provider_roomtype_id = Column('chainRoomTypeId', INTEGER(unsigned=True), nullable=False)
+    provider_hotel_id = Column('chainHotelId', VARCHAR(50), nullable=False)
+    provider_roomtype_id = Column('chainRoomTypeId', VARCHAR(50), nullable=False)
     provider_roomtype_name = Column('chainRoomTypeName', VARCHAR(50), nullable=False)
     main_hotel_id = Column('mainHotelId', INTEGER(unsigned=True), nullable=False)
     main_roomtype_id = Column('mainRoomTypeId', INTEGER(unsigned=True), nullable=False)
@@ -35,7 +35,7 @@ class RoomTypeMappingModel(Base):
 
     @classmethod
     def new_roomtype_mapping_from_ebooking(cls, session, provider_hotel_id, provider_roomtype_id, provider_roomtype_name, main_hotel_id, main_roomtype_id):
-        mapping = RoomTypeMappingModel(provider_id=6, provider_hotel_id=provider_hotel_id, provider_roomtype_id=provider_roomtype_id, provider_roomtype_name=provider_roomtype_name, main_hotel_id=main_hotel_id, main_roomtype_id=main_roomtype_id, status=cls.STATUS.valid_complete)
+        mapping = RoomTypeMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_roomtype_id=provider_roomtype_id, provider_roomtype_name=provider_roomtype_name, main_hotel_id=main_hotel_id, main_roomtype_id=main_roomtype_id, status=cls.STATUS.valid_complete)
         session.add(mapping)
         session.commit()
         return mapping
@@ -64,7 +64,7 @@ class RoomTypeMappingModel(Base):
     @classmethod
     def gets_by_provider_hotel_id(cls, session, id):
         return session.query(RoomTypeMappingModel)\
-                .filter(RoomTypeMappingModel.provider_hotel_id == id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(id))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .all()
 

@@ -23,7 +23,7 @@ class HotelMappingModel(Base):
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     provider_id = Column('chainId', INTEGER(unsigned=True), nullable=False)
     provider_hotel_id = Column(
-        'chainHotelId', INTEGER(unsigned=True), nullable=False)
+        'chainHotelId', VARCHAR(50), nullable=False)
     provider_hotel_name = Column(
         'chainHotelName', VARCHAR(50), nullable=False)
     provider_hotel_address = Column(
@@ -50,7 +50,7 @@ class HotelMappingModel(Base):
     def get_by_provider_and_main_hotel(cls, session, provider_id, provider_hotel_id, main_hotel_id):
         return session.query(HotelMappingModel)\
                 .filter(HotelMappingModel.provider_id==provider_id,
-                        HotelMappingModel.provider_hotel_id==provider_hotel_id,
+                        HotelMappingModel.provider_hotel_id==str(provider_hotel_id),
                         HotelMappingModel.main_hotel_id==main_hotel_id)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .first()
@@ -66,7 +66,7 @@ class HotelMappingModel(Base):
 
     @classmethod
     def new_hotel_mapping_from_ebooking(cls, session, provider_hotel_id, provider_hotel_name, provider_hotel_address, city_id, main_hotel_id, merchant_id, merchant_name):
-        mapping = HotelMappingModel(provider_id=6, provider_hotel_id=provider_hotel_id, provider_hotel_name=provider_hotel_name,
+        mapping = HotelMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_hotel_name=provider_hotel_name,
                 provider_hotel_address=provider_hotel_address, city_id=city_id, main_hotel_id=main_hotel_id,
                 status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name)
         session.add(mapping)
