@@ -4,6 +4,7 @@ import traceback
 
 from tornado.escape import json_decode
 from tools.json import json_encode
+from tools.log import Log
 
 from views import BaseHandler
 from models.user import UserModel
@@ -35,9 +36,10 @@ class BtwBaseHandler(BaseHandler):
     def _handle_request_exception(self, e):
         self.db.rollback()
         if isinstance(e, JsonException):
-            print e.tojson()
+            Log.error(e.tojson)
             self.finish_json(errcode=e.errcode, errmsg=e.errmsg)
         else:
+            Log.error(traceback.format_exc())
             super(BtwBaseHandler, self)._handle_request_exception(e)
 
     def finish_json(self, errcode=0, errmsg=None, result=None):
