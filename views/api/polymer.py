@@ -8,6 +8,7 @@ from views.base import BtwBaseHandler
 from mixin.hotelmixin import HotelMixin
 
 from tools.auth import auth_login, auth_permission
+from tools.log import Log, log_request
 from constants import PERMISSIONS
 from models.hotel_mapping import HotelMappingModel as HotelMapping
 from models.hotel import HotelModel as Hotel
@@ -18,9 +19,9 @@ from models.district import DistrictModel
 
 class PolymerAPIHandler(BtwBaseHandler, HotelMixin):
 
-    @gen.coroutine
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
+    @log_request
     def get(self):
         start = self.get_query_argument('start', 0)
         limit = self.get_query_argument('limit', 20)

@@ -15,11 +15,13 @@ from models.room_type import RoomTypeModel as RoomType
 from models.city import CityModel
 from models.district import DistrictModel
 
+from tools.log import Log, log_request
+
 class SecondValidAPIHandler(BtwBaseHandler, HotelMixin):
 
-    @gen.coroutine
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
+    @log_request
     def get(self):
         start = self.get_query_argument('start', 0)
         limit = self.get_query_argument('limit', 20)

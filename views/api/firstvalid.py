@@ -21,7 +21,7 @@ from tools.log import Log, log_request
 
 class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
 
-    @gen.coroutine
+    @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     @log_request
     def get(self):
