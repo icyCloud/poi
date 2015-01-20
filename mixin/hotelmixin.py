@@ -12,14 +12,18 @@ class HotelMixin(object):
             self.merge_provider_roomtypes(hotels, roomtypes)
 
     def fetch_provider_hotel_room_types(self, hotels):
-        #session = self.application.DB_Session_stock()
-        session = self.application.db_session_stock
         hotel_ids = [hotel.provider_hotel_id for hotel in hotels]
-        roomtypes = RoomTypeModel.gets_by_hotel_ids(session, hotel_ids)
-        roomtypes = [roomtype.todict() for roomtype in roomtypes]
-        #session.close()
-        #Log.info(">>>> roomtypes: {}".format(roomtypes))
+        Log.info(str(hotel_ids))
+        roomtypes = [roomtype.todict() for roomtype in self.read_roomtypes(hotel_ids)]
+        Log.info(">>>> roomtypes: {}".format(roomtypes))
         return roomtypes
+
+    def read_roomtypes(self, hotel_ids):
+        session = self.application.db_session_stock
+        try:
+            roomtypes = RoomTypeModel.gets_by_hotel_ids(session, hotel_ids)
+        except:
+            session.rollback()
 
     def merge_provider_roomtypes(self, hotels, roomtypes):
         for hotel in hotels:
