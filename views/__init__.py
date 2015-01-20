@@ -11,10 +11,12 @@ from mako import exceptions
 class BaseHandler(RequestHandler):
 
     def initialize(self):
-        self.db = self.application.DB_Session()
+        #self.db = self.application.DB_Session()
+        self.db = self.application.db_session
 
     def on_finish(self):
-        self.db.close()
+        #self.db.close()
+        pass
 
     def render(self, template_name, **kwargs):
         lookup = self.application.template_lookup

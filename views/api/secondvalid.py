@@ -37,14 +37,9 @@ class SecondValidAPIHandler(BtwBaseHandler, HotelMixin):
         self.merge_room_type_mapping(hotels)
         self.add_provider_roomtype(hotels)
 
-        citys = [city.todict() for city in CityModel.get_all(self.db)]
-        districts = [district.todict() for district in DistrictModel.get_all(self.db)]
-
         self.finish_json(result=dict(
             hotel_mappings=hotels,
             roomtypes=self.roomtypes,
-            citys=citys,
-            districts=districts,
             start=start,
             limit=limit,
             total=total))

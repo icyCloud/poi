@@ -498,6 +498,19 @@ validapp.controller('validController',
         .error(function() {
         });
 
+    $http.get("/api/city")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.citys = resp.result.citys;
+            }
+        });
+    $http.get("/api/district")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                districts = resp.result.districts;
+            }
+        });
+
     function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
         var url = "/api/firstvalid?start=" + start + "&limit=" + limit;
         if (provider_id != undefined) {
@@ -517,9 +530,6 @@ validapp.controller('validController',
                     var result = data.result;
                     $scope.hotelMappings = result.hotel_mappings;
                     roomtypes = result.roomtypes;
-                    $scope.citys = result.citys;
-                    districts = result.districts;
-
 
                     $scope.totalItems = result.total;
                     $scope.currentPage = Math.floor(result.start / result.limit) + 1;

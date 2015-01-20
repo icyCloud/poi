@@ -50,21 +50,12 @@ class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
         t5 = time.time()
 
 
-
-        citys = [city.todict() for city in CityModel.get_all(self.db)]
-        t7 = time.time()
-        districts = [district.todict()
-                     for district in DistrictModel.get_all(self.db)]
-        t8 = time.time()
-
-        cost = t1-t0, t2-t1, t4-t2, t5-t4, t7-t5, t8-t7
+        cost = t1-t0, t2-t1, t4-t2, t5-t4 
         Log.info(cost)
 
         self.finish_json(result=dict(
             hotel_mappings=hotels,
             roomtypes=self.roomtypes,
-            citys=citys,
-            districts=districts,
             start=start,
             limit=limit,
             total=total))

@@ -287,11 +287,21 @@ validapp.controller('validController',
             if (resp.errcode == 0) {
                 $scope.providers = resp.result.providers;
             } else {
-                alert(resp.errmsg);
             }
         })
         .error(function() {
-            //alert("网络错误");
+        });
+    $http.get("/api/city")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.citys = resp.result.citys;
+            }
+        });
+    $http.get("/api/district")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.districts = resp.result.districts;
+            }
         });
 
     function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
@@ -314,8 +324,6 @@ validapp.controller('validController',
                     $scope.hotelMappings = result.hotel_mappings;
                     checkHotelMappingOnline($scope.hotelMappings);
                     roomtypes = result.roomtypes;
-                    $scope.citys = result.citys;
-                    $scope.districts = result.districts;
 
 
                     $scope.totalItems = result.total;
