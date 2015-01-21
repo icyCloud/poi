@@ -14,15 +14,26 @@ class HotelMixin(object):
             self.merge_provider_roomtypes(hotels, roomtypes)
 
     def fetch_provider_hotel_room_types(self, hotels):
-        hotel_ids = [hotel.provider_hotel_id for hotel in hotels]
-        Log.info(str(hotel_ids))
-        roomtypes = [roomtype.todict() for roomtype in self.read_roomtypes(hotel_ids)]
+        roomtypes = [roomtype.todict() for roomtype in self.read_roomtypes(hotels)]
         return roomtypes
 
-    def read_roomtypes(self, hotel_ids):
+
+    def read_roomtypes(self, hotels):
         t0 = time.time()
         Log.info(">> get provider hotel")
-        roomtypes = RoomTypeModel.gets_by_hotel_ids(self.db_stock, hotel_ids)
+        chains = {}
+        for hotel in hotels:
+            if hotel.provider_id in chains:
+                chains[hotel.provider_id].append(hotel)
+            else:
+                chains[hotel.provider_id] = [hotel]
+
+        roomtypes = []
+        for provider_id in chains:
+            hotel_ids = [hotel.id for hotel in chains[provider_id]]
+            print provider_id, hotel_ids
+            roomtypes.extend(RoomTypeModel.gets_by_chain_and_hotel_ids(self.db_stock, provider_id, hotel_ids))
+
         t1 = time.time()
         Log.info(">> get provider hotel cost {}".format(t1 - t0))
 

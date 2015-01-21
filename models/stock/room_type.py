@@ -44,6 +44,13 @@ class RoomTypeModel(Base):
                 .all()
 
     @classmethod
+    def gets_by_chain_and_hotel_ids(cls, session, chain_id, hotel_ids):
+        return session.query(RoomTypeModel)\
+                .filter(RoomTypeModel.chain_id == chain_id)\
+                .filter(RoomTypeModel.hotel_id.in_(hotel_ids))\
+                .all()
+
+    @classmethod
     def gets_by_hotel_ids(cls, session, hotel_ids):
         return session.query(RoomTypeModel)\
                 .filter(RoomTypeModel.hotel_id.in_(hotel_ids))\
