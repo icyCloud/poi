@@ -20,7 +20,7 @@ class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
         hotel = Hotel.get_by_id(self.db, hotel_id)
         if hotel:
             hotel = hotel.todict()
-            rooms = RoomType.gets_by_hotel_id(self.db, hotel_id)
+            rooms = RoomType.gets_by_hotel_id(self.db, hotel_id, need_valid=True)
             rooms = [room.todict() for room in rooms]
 
             return self.finish_json(result=dict(

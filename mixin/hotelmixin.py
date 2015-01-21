@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from tools.log import Log
 from models.stock.room_type import RoomTypeModel
 
@@ -18,7 +20,12 @@ class HotelMixin(object):
         return roomtypes
 
     def read_roomtypes(self, hotel_ids):
+        t0 = time.time()
+        Log.info(">> get provider hotel")
         roomtypes = RoomTypeModel.gets_by_hotel_ids(self.db_stock, hotel_ids)
+        t1 = time.time()
+        Log.info(">> get provider hotel cost {}".format(t1 - t0))
+
         return roomtypes
 
     def merge_provider_roomtypes(self, hotels, roomtypes):
