@@ -29,7 +29,7 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         within_ids = json_decode(within_ids) if within_ids else within_ids
 
         t0 = time.time()
-        hotels, total = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids)
+        hotels = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids, count_total=False)
         t1 = time.time()
         Log.info(">>HotelSearch query hotel cost {}".format(t1 - t0))
         hotels = [hotel.todict() for hotel in hotels]
@@ -39,7 +39,7 @@ class HotelSearchAPIHandler(BtwBaseHandler):
                 hotels=hotels,
                 start=start,
                 limit=limit,
-                total=total,
+                total=200000,
             ))
 
     def merge_business_zone(self, hotels):

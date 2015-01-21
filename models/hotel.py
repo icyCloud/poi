@@ -61,7 +61,7 @@ class HotelModel(Base):
         return query.all()
 
     @classmethod
-    def query(cls, session, name=None, star=None, city_id=None, district_id=None, start=0, limit=10, filter_ids=None, within_ids=None):
+    def query(cls, session, name=None, star=None, city_id=None, district_id=None, start=0, limit=10, filter_ids=None, within_ids=None, count_total=True):
         query = session.query(HotelModel)\
                 .filter(HotelModel.is_valid == 1)
         if within_ids:
@@ -81,10 +81,13 @@ class HotelModel(Base):
         t0 = time.time()
         r = query.offset(start).limit(limit).all()
         t1 = time.time()
-        total = query.count()
-        t2 = time.time()
-        Log.info(">>HotelSearch query cost:{} query total cost:{}".format(t1 - t0, t2-t1))
-        return r, total
+        if count_total:
+            total = query.count()
+            return r, total
+            t2 = time.time()
+            Log.info(">>HotelSearch query cost:{} query total cost:{}".format(t1 - t0, t2-t1))
+        else:
+            return r
 
     def todict(self):
         return dict(
