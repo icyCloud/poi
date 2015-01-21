@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from tornado.escape import json_decode
 
 from views.base import BtwBaseHandler
 
 from tools.auth import auth_login, auth_permission
+from tools.log import Log, log_request
+
 from constants import PERMISSIONS
 from models.hotel import HotelModel as Hotel
 from models.business_zone import BusinessZoneModel
 
 class HotelSearchAPIHandler(BtwBaseHandler):
 
+    @log_request
     def get(self):
         name = self.get_query_argument('name', None)
         star = self.get_query_argument('star', None)
@@ -23,8 +28,10 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         within_ids = self.get_query_argument('within_ids', None)
         within_ids = json_decode(within_ids) if within_ids else within_ids
 
-
+        t0 = time.time()
         hotels, total = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids)
+        t1 = time.time()
+        Log.info(">>HotelSearch query hotel cost {}".format(t1 - t0))
         hotels = [hotel.todict() for hotel in hotels]
 
         self.merge_business_zone(hotels)

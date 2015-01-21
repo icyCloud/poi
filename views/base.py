@@ -18,6 +18,10 @@ class BtwBaseHandler(BaseHandler):
     def initialize(self):
         super(BtwBaseHandler, self).initialize()
         self.current_user = None
+        self.db = self.application.DB_Session()
+
+    def on_finish(self):
+        self.db.close()
 
     def prepare(self):
         self.get_current_user()
@@ -56,3 +60,12 @@ class BtwBaseHandler(BaseHandler):
             print traceback.format_exc()
             if raise_error:
                 raise JsonDecodeError()
+
+class StockHandler(BtwBaseHandler):
+    def initialize(self):
+        super(StockHandler, self).initialize()
+        self.db_stock = self.application.DB_Session_stock()
+
+    def on_finish(self):
+        super(StockHandler, self).on_finish()
+        self.db_stock.close()

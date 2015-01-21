@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from models import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT, DOUBLE, TEXT
 from tornado.util import ObjectDict
 from tools.utils import exe_time
+from tools.log import Log
 
 class HotelModel(Base):
 
@@ -74,7 +77,14 @@ class HotelModel(Base):
         if district_id:
             query = query.filter(HotelModel.district_id == district_id)
 
-        return query.offset(start).limit(limit).all(), query.count()
+        Log.info("=" * 30)
+        t0 = time.time()
+        r = query.offset(start).limit(limit).all()
+        t1 = time.time()
+        total = query.count()
+        t2 = time.time()
+        Log.info(">>HotelSearch query cost:{} query total cost:{}".format(t1 - t0, t2-t1))
+        return r, total
 
     def todict(self):
         return dict(

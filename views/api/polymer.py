@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from tornado.util import ObjectDict
 from tornado import gen
 from tornado.escape import json_encode, json_decode
 
-from views.base import BtwBaseHandler
+from views.base import BtwBaseHandler, StockHandler
 from mixin.hotelmixin import HotelMixin
 
 from tools.auth import auth_login, auth_permission
@@ -17,7 +19,7 @@ from models.room_type import RoomTypeModel as RoomType
 from models.city import CityModel
 from models.district import DistrictModel
 
-class PolymerAPIHandler(BtwBaseHandler, HotelMixin):
+class PolymerAPIHandler(StockHandler, HotelMixin):
 
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
@@ -30,14 +32,29 @@ class PolymerAPIHandler(BtwBaseHandler, HotelMixin):
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
 
+        Log.info(">> get show in polymer")
+        t0 = time.time() 
         hotel_mappings, total = HotelMapping.gets_show_in_polymer(self.db,
                 provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
                 start=start, limit=limit)
+        t1 = time.time()
+        Log.info(">> show in polymer cost {}".format(t1 - t0))
 
         hotels = [hotel.todict() for hotel in hotel_mappings]
+        t2 = time.time()
         self.merge_main_hotel_info(hotels)
+        t3 = time.time()
+        Log.info(">> merge main hotel info cost {}".format(t3 - t2))
+
+        t4 = time.time()
         self.merge_room_type_mapping(hotels)
+        t5 = time.time()
+        Log.info(">> merge roomtype mapping cost {}".format(t5 - t4))
+
+        t6 = time.time()
         self.add_provider_roomtype(hotels)
+        t7 = time.time()
+        Log.info(">> add provider roomtype cost {}".format(t7 - t6))
 
         self.finish_json(result=dict(
             hotel_mappings=hotels,

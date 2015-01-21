@@ -62,7 +62,6 @@ class Application(tornado.web.Application):
         self.DB_Session_stock = sessionmaker(bind=engine_stock)
 
 
-
 def main():
     tornado.options.parse_command_line()
     http_server = tornado.httpserver.HTTPServer(Application())

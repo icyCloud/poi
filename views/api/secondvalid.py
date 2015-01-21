@@ -3,7 +3,7 @@
 from tornado.util import ObjectDict
 from tornado import gen
 
-from views.base import BtwBaseHandler
+from views.base import BtwBaseHandler, StockHandler
 from mixin.hotelmixin import HotelMixin
 
 from tools.auth import auth_login, auth_permission
@@ -18,7 +18,7 @@ from models.district import DistrictModel
 from tools.log import Log, log_request
 import time
 
-class SecondValidAPIHandler(BtwBaseHandler, HotelMixin):
+class SecondValidAPIHandler(StockHandler, HotelMixin):
 
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)

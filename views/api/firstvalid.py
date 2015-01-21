@@ -6,7 +6,7 @@ from tornado.util import ObjectDict
 from tornado import gen
 from tornado.escape import json_encode, json_decode, url_escape
 
-from views.base import BtwBaseHandler
+from views.base import BtwBaseHandler, StockHandler
 from mixin.hotelmixin import HotelMixin
 
 from tools.auth import auth_login, auth_permission
@@ -19,7 +19,7 @@ from models.room_type import RoomTypeModel as RoomType
 from tools.log import Log, log_request
 
 
-class FirstValidAPIHandler(BtwBaseHandler, HotelMixin):
+class FirstValidAPIHandler(StockHandler, HotelMixin):
 
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
