@@ -17,10 +17,12 @@ from mixin.roomtype_valid_mixin import RoomTypeValidMixin
 class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
 
     def get(self, hotel_id):
+        need_valid = self.get_query_argument('need_valid', 1)
+        need_valid = True if need_valid == 1 else False
         hotel = Hotel.get_by_id(self.db, hotel_id)
         if hotel:
             hotel = hotel.todict()
-            rooms = RoomType.gets_by_hotel_id(self.db, hotel_id, need_valid=True)
+            rooms = RoomType.gets_by_hotel_id(self.db, hotel_id, need_valid=need_valid)
             rooms = [room.todict() for room in rooms]
 
             return self.finish_json(result=dict(
