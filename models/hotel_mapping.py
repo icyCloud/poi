@@ -79,7 +79,8 @@ class HotelMappingModel(Base):
     def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
         stmt = exists(
-        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id, HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
                 RoomTypeMappingModel.is_delete == 0))
 
@@ -106,7 +107,8 @@ class HotelMappingModel(Base):
     def gets_show_in_secondvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
         stmt = exists(
-        ).where(and_(HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_second_valid,
                 RoomTypeMappingModel.is_delete == 0))
 
