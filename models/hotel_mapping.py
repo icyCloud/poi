@@ -150,6 +150,23 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
+    def gets_show_in_ebooking(cls, session, hotel_name=None, city_id=None, start=0, limit=20):
+        query = session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .filter(HotelMappingModel.provider_id == 6,
+                        HotelMappingModel.status == cls.STATUS.valid_complete)
+
+        if city_id:
+            query = query.filter(HotelMappingModel.city_id == city_id)
+        if hotel_name:
+            query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
+        
+        r = query.offset(start).limit(limit).all()
+        total = query.count()
+
+        return r, total
+
+    @classmethod
     def count_wait_firstvalid_count(cls, session):
         return session.query(HotelMappingModel)\
             .filter(HotelMappingModel.is_delete == 0)\

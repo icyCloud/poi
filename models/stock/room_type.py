@@ -14,8 +14,8 @@ class RoomTypeModel(Base):
 
     id = Column(INTEGER, primary_key=True, autoincrement=True)
     chain_id = Column("chainId", INTEGER, nullable=False)
-    hotel_id = Column('chainHotelId', VARCHAR(50), nullable=False)
-    roomtype_id = Column('chainRoomTypeId', INTEGER, nullable=False)
+    hotel_id = Column('chainHotelId', VARCHAR(60), nullable=False)
+    roomtype_id = Column('chainRoomTypeId', VARCHAR(60), nullable=False)
     name = Column('Name', VARCHAR(30), nullable=False)
     room_size = Column('RoomSize', VARCHAR(20), nullable=False)
     bed_type = Column('BedType', TINYINT(4), nullable=False)

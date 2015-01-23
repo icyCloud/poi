@@ -63,15 +63,6 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
             limit=limit,
             total=total))
 
-    def merge_main_hotel_info(self, hotels):
-        hotel_ids = [mapping.main_hotel_id for mapping in hotels]
-        main_hotels = Hotel.get_by_ids(self.db, hotel_ids)
-
-        for hotel in hotels:
-            for main_hotel in main_hotels:
-                if main_hotel.id == hotel.main_hotel_id:
-                    hotel['main_hotel'] = main_hotel.todict()
-                    break
     def merge_room_type_mapping(self, hotel_dicts):
 
         provider_hotel_ids = [hotel.provider_hotel_id for hotel in hotel_dicts]

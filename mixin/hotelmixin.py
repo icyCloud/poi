@@ -4,14 +4,15 @@ import time
 
 from tools.log import Log
 from models.stock.room_type import RoomTypeModel
+from models.hotel import HotelModel as Hotel
 
 
 class HotelMixin(object):
 
     def add_provider_roomtype(self, hotels):
-        roomtypes = self.fetch_provider_hotel_room_types(hotels)
-        if roomtypes:
-            self.merge_provider_roomtypes(hotels, roomtypes)
+        provider_roomtypes = self.fetch_provider_hotel_room_types(hotels)
+        if provider_roomtypes:
+            self.merge_provider_roomtypes(hotels, provider_roomtypes)
 
     def fetch_provider_hotel_room_types(self, hotels):
         roomtypes = [roomtype.todict() for roomtype in self.read_roomtypes(hotels)]
@@ -43,7 +44,8 @@ class HotelMixin(object):
         for hotel in hotels:
             for roomtype_mapping in hotel.roomtype_mappings:
                 for roomtype in roomtypes:
-                    if roomtype_mapping.provider_roomtype_id == roomtype['roomtype_id'] and roomtype_mapping.provider_id == roomtype['chain_id']:
+                    print roomtype.roomtype_id, roomtype_mapping.provider_roomtype_id
+                    if roomtype_mapping.provider_roomtype_id == roomtype.roomtype_id and roomtype_mapping.provider_id == roomtype.chain_id:
                         roomtype_mapping['provider_roomtype'] = roomtype
                         roomtype_mapping['provider_roomtype']['area'] = roomtype.get('room_size', 0)
                         roomtype_mapping['provider_roomtype']['description'] = roomtype.get('desc', '')
@@ -52,3 +54,12 @@ class HotelMixin(object):
                         break
 
 
+    def merge_main_hotel_info(self, hotel_dicts):
+        hotel_ids = [mapping.main_hotel_id for mapping in hotel_dicts]
+        main_hotels = Hotel.get_by_ids(self.db, hotel_ids)
+
+        for hotel in hotel_dicts:
+            for main_hotel in main_hotels:
+                if main_hotel.id == hotel.main_hotel_id:
+                    hotel['main_hotel'] = main_hotel.todict()
+                    break

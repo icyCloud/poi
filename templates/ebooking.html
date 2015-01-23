@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Ebooking</title>
+		<script src="${static_url('js/angular.js')}"></script>
+        <link rel="stylesheet" href="${static_url('css/bootstrap.min.css')}">
+        <link rel="stylesheet" href="${static_url('css/ebooking.css')}">
+    </head>
+
+    <body ng-app="EbookingApp" ng-controller="EbookingCtrl">
+
+        <nav class="nav navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="nav-header">
+                    <a class="navbar-brand" href="#"><b>Betterwood POI</b></a>
+                </div>
+                <div class="collapse navbar-collapse navbar-right">
+                    <!--<button type="button" class="btn btn-primary navbar-btn" ng-click="openMerchantModal()">添加</button>-->
+                </div>
+
+            </div>
+        </nav>
+        
+        <div class="container">
+            <div class="col-lg-2">
+                <select class="form-control" ng-model="merchantType" ng-options="m.name for m in merchantTypes">
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <select class="form-control" ng-model="merchantSelected" ng-options="m.name for m in merchantTypes">
+                </select>
+            </div>
+
+            <div class="col-lg-2">
+                <input type="text" class="form-control" placeholder="酒店名称">
+            </div>
+            <div class="col-lg-2">
+                <input type="text" class="form-control" placeholder="城市"
+                    data-ng-model="searchCityName"
+                    typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
+                >
+            </div>
+            <div class="col-lg-2">
+                <button class="btn btn-default">搜索</button>
+                <button class="btn btn-default">重置</button>
+            </div>
+
+        </div>
+
+        <div class="container">
+            <div class="hotel-item" ng-repeat="hotel in hotelMappings">
+                <div class="hotel-header row">
+                    <p class="pull-left hotel-grid"
+                        style="width: 3%"><b>{{hotel.merchant_id}}</b></p>
+                    <p class="pull-left hotel-grid"
+                        style="width: 10%"><b>{{hotel.merchant_name}}</b></p>
+                    <!--<p class="pull-left hotel-grid"-->
+                        <!--style="width: 5%"><b>{{hotel.provider_hotel_id}}</b></p>-->
+                    <p class="pull-left hotel-grid"
+                        style="width: 20%"><b>{{hotel.main_hotel.name}}</b></p>
+                    <p class="pull-left hotel-grid"
+                        style="width: 50%"><b>{{hotel.main_hotel.address}}</b></p>
+
+                    <button class="pull-right btn btn-default">上线</button>
+                </div>
+                <div class="hotel-body row">
+                    <div class="hotel-room row" ng-repeat="room in hotel.roomtype_mappings">
+                        <!--<p class="pull-left hotel-grid">{{room.provider_roomtype_id}}</p>-->
+                        <p class="pull-left hotel-grid">{{room.main_roomtype.name}}</p>
+                        <button class="pull-right btn btn-default">上线</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+	    <script src="${static_url('js/jquery.min.js')}"></script>
+	    <script src="${static_url('js/ui-bootstrap-tpls-0.11.2.min.js')}"></script>
+	    <script src="${static_url('js/ebooking.js')}"></script>
+    </body>
+</html>
+
