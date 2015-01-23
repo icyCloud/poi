@@ -31,7 +31,7 @@ class HotelMixin(object):
 
         roomtypes = []
         for provider_id in chains:
-            hotel_ids = [hotel.id for hotel in chains[provider_id]]
+            hotel_ids = [hotel.provider_hotel_id for hotel in chains[provider_id]]
             print provider_id, hotel_ids
             roomtypes.extend(RoomTypeModel.gets_by_chain_and_hotel_ids(self.db_stock, provider_id, hotel_ids))
 
@@ -44,7 +44,6 @@ class HotelMixin(object):
         for hotel in hotels:
             for roomtype_mapping in hotel.roomtype_mappings:
                 for roomtype in roomtypes:
-                    print roomtype.roomtype_id, roomtype_mapping.provider_roomtype_id
                     if roomtype_mapping.provider_roomtype_id == roomtype.roomtype_id and roomtype_mapping.provider_id == roomtype.chain_id:
                         roomtype_mapping['provider_roomtype'] = roomtype
                         roomtype_mapping['provider_roomtype']['area'] = roomtype.get('room_size', 0)
