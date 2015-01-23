@@ -25,16 +25,18 @@
         
         <div class="container">
             <div class="col-lg-2">
-                <select class="form-control" ng-model="merchantType" ng-options="m.name for m in merchantTypes">
+                <select class="form-control" ng-model="merchantTypeSelected" ng-options="m.name for m in merchantTypes">
+					<option value="" selected>任意商户类型</option>
                 </select>
             </div>
             <div class="col-lg-2">
-                <select class="form-control" ng-model="merchantSelected" ng-options="m.name for m in merchantTypes">
+				<select class="form-control" ng-model="merchantSelected" ng-options="m.name for m in merchants  | filter: {type: merchantTypeSelected.type}">
+					<option value="">任意商户</option>
                 </select>
             </div>
 
             <div class="col-lg-2">
-                <input type="text" class="form-control" placeholder="酒店名称">
+                <input type="text" class="form-control" placeholder="酒店名称" ng-model="hotelName">
             </div>
             <div class="col-lg-2">
                 <input type="text" class="form-control" placeholder="城市"
@@ -43,8 +45,8 @@
                 >
             </div>
             <div class="col-lg-2">
-                <button class="btn btn-default">搜索</button>
-                <button class="btn btn-default">重置</button>
+                <button class="btn btn-default" ng-click="search()">搜索</button>
+                <button class="btn btn-default" ng-click="resetSearch()">重置</button>
             </div>
 
         </div>
@@ -63,18 +65,25 @@
                     <p class="pull-left hotel-grid"
                         style="width: 50%"><b>{{hotel.main_hotel.address}}</b></p>
 
-                    <button class="pull-right btn btn-default">上线</button>
+						<button class="pull-right btn btn-default" ng-click="setHotelOnline(hotel)">{{getHotelOnlineStatus(hotel)}}</button>
                 </div>
                 <div class="hotel-body row">
                     <div class="hotel-room row" ng-repeat="room in hotel.roomtype_mappings">
                         <!--<p class="pull-left hotel-grid">{{room.provider_roomtype_id}}</p>-->
                         <p class="pull-left hotel-grid">{{room.main_roomtype.name}}</p>
-                        <button class="pull-right btn btn-default">上线</button>
+						<button class="pull-right btn btn-default" ng-disabled="hotel.is_online == 0"
+							ng-click="setRoomOnline(hotel, room)"
+							>{{getRoomOnlineStatus(room)}}</button>
                     </div>
                 </div>
             </div>
         </div>
 
+		<div class="row">
+			<nav style="text-align: center">
+				<pagination ng-hide="searchMode" total-items="totalItems" ng-model="currentPage" boundary-links="true" rotate="false" items-per-page="itemsPerPage" max-size="maxSize" ng-change="pageChanged()" ></pagination>
+			</nav>
+		</div>
 
 
 	    <script src="${static_url('js/jquery.min.js')}"></script>

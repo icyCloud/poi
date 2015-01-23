@@ -24,6 +24,7 @@ from config import API
 
 class EbookingAPIHandler(BtwBaseHandler):
 
+    @gen.coroutine
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
     @log_request
@@ -34,10 +35,25 @@ class EbookingAPIHandler(BtwBaseHandler):
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
 
+        merchant_id = self.get_query_argument('merchant_id', None)
+        merchant_type = self.get_query_argument('merchant_type', None)
+
+        merchant_ids = yield self.get_merchant_ids(merchant_type, merchant_id)
+        print locals()
+        if merchant_ids == []:
+            self.finish_json(result=dict(
+                hotel_mappings=[],
+                start=start,
+                limit=limit,
+                total=0))
+            return
+
+
+
         Log.info(">> get show in ebooking")
         t0 = time.time() 
         hotel_mappings, total = HotelMapping.gets_show_in_ebooking(self.db,
-                hotel_name=hotel_name, city_id=city_id,
+                hotel_name=hotel_name, city_id=city_id, merchant_ids=merchant_ids,
                 start=start, limit=limit)
         t1 = time.time()
         Log.info(">> show in ebooking cost {}".format(t1 - t0))
@@ -70,7 +86,6 @@ class EbookingAPIHandler(BtwBaseHandler):
                     break
 
     def merge_room_type_mapping(self, hotel_dicts):
-
         provider_hotel_ids = [hotel.provider_hotel_id for hotel in hotel_dicts]
         provider_hotel_ids = self.uniq_list(provider_hotel_ids)
         roomtype_mappings = RoomTypeMapping.get_polymer_provider_hotel_ids(self.db, provider_hotel_ids)
@@ -92,7 +107,6 @@ class EbookingAPIHandler(BtwBaseHandler):
                         and hotel.provider_hotel_id == roomtype_mapping.provider_hotel_id:
                     hotel['roomtype_mappings'].append(roomtype_mapping)
 
-
     def merge_roomtype_to_roomtype_mapping(self, roomtype_mappings, roomtypes):
         for roomtype_mapping in roomtype_mappings:
             for room in roomtypes:
@@ -100,11 +114,31 @@ class EbookingAPIHandler(BtwBaseHandler):
                     roomtype_mapping['main_roomtype'] = room
                     break
 
-
     def uniq_list(self, alist):
         _list = {}.fromkeys(alist).keys()
         _list.sort()
         return _list
+
+    @gen.coroutine
+    def get_merchant_ids(self, merchant_type, merchant_id):
+        merchant_ids = None
+        if merchant_id is not None:
+            merchant_ids = [int(merchant_id)]
+        elif merchant_type is not None:
+            merchants = yield self.fetch_merchants()
+            merchant_ids = [merchant['id'] for merchant in merchants if merchant['type'] == int(merchant_type)]
+        raise gen.Return(merchant_ids)
+
+    @gen.coroutine
+    def fetch_merchants(self):
+        url = API['EBOOKING'] + '/api/merchant/all/'
+        resp  = yield AsyncHTTPClient().fetch(url)
+        r = json_decode(resp.body)
+        if r['errcode'] == 0:
+            raise gen.Return(r['result']['merchants'])
+        else:
+            raise gen.Return([])
+
 
 class MerchantListHandler(BtwBaseHandler):
 
