@@ -10,3 +10,5 @@ LISTEN_IP = '0.0.0.0'
 API = {
         'EBOOKING': 'http://127.0.0.1:9501',
 }
+
+REDIS_HOST = 'localhost'

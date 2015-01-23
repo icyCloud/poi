@@ -6,12 +6,13 @@ from dogpile.cache import make_region
 from dogpile.cache.api import NO_VALUE
 
 from constants import MC_PREFIX
+from config import REDIS_HOST
 
 region = make_region().configure(
         'dogpile.cache.redis',
         expiration_time=3600,
         arguments = {
-        'host': 'localhost',
+        'host': REDIS_HOST,
         'port': 6379,
         'db': 0,
         'redis_expiration_time': 60*60*2,   # 2 hours
