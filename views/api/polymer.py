@@ -67,13 +67,12 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
 
         if not hotel_dicts:
             return
-        provider_id = hotel_dicts[0].provider_id
         provider_hotel_ids = [hotel.provider_hotel_id for hotel in hotel_dicts]
         provider_hotel_ids = {}.fromkeys(provider_hotel_ids).keys()
         provider_hotel_ids.sort()
 
-        roomtype_mappings = RoomTypeMapping.get_polymer_by_provider_hotels(self.db, provider_id, provider_hotel_ids)
-        roomtype_mapping = [mapping.todict() for mapping in roomtype_mappings]
+        roomtype_mappings = RoomTypeMapping.get_polymer_provider_hotel_ids(self.db, provider_hotel_ids)
+        roomtype_mappings = [mapping.todict() for mapping in roomtype_mappings]
 
         main_hotel_ids = [mapping.main_hotel_id for mapping in roomtype_mappings]
         main_hotel_ids = {}.fromkeys(main_hotel_ids).keys()
