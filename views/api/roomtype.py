@@ -13,9 +13,11 @@ from models.hotel import HotelModel as Hotel
 from models.facility import FacilityModel
 
 from mixin.roomtype_valid_mixin import RoomTypeValidMixin
+from tools.log import Log, log_request
 
 class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
 
+    @log_request
     def get(self, hotel_id):
         need_valid = self.get_query_argument('need_valid', 1)
         need_valid = True if need_valid == 1 else False
@@ -24,6 +26,8 @@ class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
             hotel = hotel.todict()
             rooms = RoomType.gets_by_hotel_id(self.db, hotel_id, need_valid=need_valid)
             rooms = [room.todict() for room in rooms]
+
+            Log.info(u"fetch rooms {}".format(rooms))
 
             return self.finish_json(result=dict(
                     roomtypes=rooms,
