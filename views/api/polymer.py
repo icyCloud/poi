@@ -65,11 +65,15 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
 
     def merge_room_type_mapping(self, hotel_dicts):
 
+        if not hotel_dicts:
+            return
+        provider_id = hotel_dicts[0].provider_id
         provider_hotel_ids = [hotel.provider_hotel_id for hotel in hotel_dicts]
         provider_hotel_ids = {}.fromkeys(provider_hotel_ids).keys()
         provider_hotel_ids.sort()
 
-        roomtype_mappings = RoomTypeMapping.get_polymer_provider_hotel_ids(self.db, provider_hotel_ids)
+        roomtype_mappings = RoomTypeMapping.get_polymer_by_provider_hotels(self.db, provider_id, provider_hotel_ids)
+        roomtype_mapping = [mapping.todict() for mapping in roomtype_mappings]
 
         main_hotel_ids = [mapping.main_hotel_id for mapping in roomtype_mappings]
         main_hotel_ids = {}.fromkeys(main_hotel_ids).keys()
@@ -78,14 +82,14 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
         self.roomtypes = RoomType.gets_by_hotel_ids(self.db, main_hotel_ids)
         self.roomtypes =[roomtype.todict() for roomtype in self.roomtypes]
 
+        self.merge_room_type(self.roomtypes, roomtype_mappings)
 
         for hotel in hotel_dicts:
             roomtype_mapping_dicts = [
-                roomtype_mapping.todict()
+                roomtype_mapping
                 for roomtype_mapping in roomtype_mappings
                 if hotel.provider_id == roomtype_mapping.provider_id\
                         and hotel.provider_hotel_id == roomtype_mapping.provider_hotel_id]
-            self.merge_room_type(self.roomtypes, roomtype_mapping_dicts)
             hotel['roomtype_mappings'] = roomtype_mapping_dicts
             
     def merge_room_type(self, roomtypes, room_type_mapping_dicts):

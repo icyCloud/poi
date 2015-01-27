@@ -100,6 +100,15 @@ class RoomTypeMappingModel(Base):
                 .all()
 
     @classmethod
+    def get_polymer_by_provider_hotels(cls, session, provider_id, ids):
+        return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id.in_(ids))\
+                .filter(RoomTypeMappingModel.is_delete == 0)\
+                .filter(RoomTypeMappingModel.status == cls.STATUS.valid_complete)\
+                .all()
+
+    @classmethod
     def gets_wait_firstvalid_by_provider(cls, session, provider_id):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
