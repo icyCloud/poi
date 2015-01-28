@@ -78,7 +78,7 @@ class RoomTypeMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
 
     def add_roomtype(self, roomtype):
         Log.info(">>> push ebooking room {}".format(roomtype))
-        roomtype_mapping = RoomTypeMappingModel.get_by_provider_and_main_roomtype(self.db, 6, roomtype['chain_roomtype_id'], roomtype['main_roomtype_id'])
+        roomtype_mapping = RoomTypeMappingModel.get_by_provider_roomtype(self.db, 6, roomtype['chain_roomtype_id'])
         
         main_roomtype = RoomTypeModel.get_by_id(self.db, roomtype['main_roomtype_id'])
 
@@ -87,6 +87,7 @@ class RoomTypeMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
             roomtype_mapping.provider_hotel_id = roomtype['chain_hotel_id'] 
             roomtype_mapping.provider_roomtype_name = main_roomtype.name
             roomtype_mapping.main_hotel_id = main_roomtype.hotel_id
+            roomtype_mapping.main_roomtype_id = main_roomtype.id
             roomtype_mapping.status = roomtype_mapping.STATUS.valid_complete
             self.db.commit()
         else:

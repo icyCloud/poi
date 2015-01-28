@@ -41,6 +41,14 @@ class RoomTypeMappingModel(Base):
         return mapping
 
     @classmethod
+    def get_by_provider_roomtype(cls, session, provider_id, provider_roomtype_id):
+        return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id)\
+                .filter(RoomTypeMappingModel.is_delete == 0)\
+                .first()
+
+    @classmethod
     def get_by_provider_and_main_roomtype(cls, session, provider_id, provider_roomtype_id, main_roomtype_id):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.provider_id == provider_id)\

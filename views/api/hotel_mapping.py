@@ -83,7 +83,7 @@ class HotelMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
 
     def add_hotel_mapping(self, hotel):
         Log.info(">>> push ebooking hotel {}".format(hotel))
-        hotel_mapping = HotelMappingModel.get_by_provider_and_main_hotel(self.db, 6, hotel['chain_hotel_id'], hotel['main_hotel_id'])
+        hotel_mapping = HotelMappingModel.get_by_provider_hotel(self.db, 6, hotel['chain_hotel_id'])
         main_hotel = HotelModel.get_by_id(self.db, hotel['main_hotel_id'])
 
         if hotel_mapping:
@@ -95,6 +95,7 @@ class HotelMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
             hotel_mapping.city_id = main_hotel.city_id
             hotel_mapping.provider_hotel_name = main_hotel.name
             hotel_mapping.provider_hotel_address = main_hotel.address
+            hotel_mapping.main_hotel_id = main_hotel.id
             self.db.commit()
         else:
             Log.info(">>> new exist ebooking hotel {}".format(hotel))

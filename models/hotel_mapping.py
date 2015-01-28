@@ -56,6 +56,14 @@ class HotelMappingModel(Base):
                 .first()
 
     @classmethod
+    def get_by_provider_hotel(cls, session, provider_id, provider_hotel_id):
+        return session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==provider_id,
+                        HotelMappingModel.provider_hotel_id==str(provider_hotel_id))\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .first()
+
+    @classmethod
     def gets_wait_firstvalid(cls, session, start=0, limit=20):
         return session.query(HotelMappingModel)\
             .filter(HotelMappingModel.is_delete == 0)\
