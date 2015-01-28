@@ -181,6 +181,10 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 		}
 	}
 
+	$scope.showMerchantOption = function(merchant) {
+		return merchant.id + " " + merchant.name;
+	}
+
 
 }])
 

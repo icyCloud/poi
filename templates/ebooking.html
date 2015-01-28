@@ -30,7 +30,7 @@
                 </select>
             </div>
             <div class="col-lg-2">
-				<select class="form-control" ng-model="merchantSelected" ng-options="m.name for m in merchants  | filter: {type: merchantTypeSelected.type}">
+				<select class="form-control" ng-model="merchantSelected" ng-options="showMerchantOption(m) for m in merchants  | filter: {type: merchantTypeSelected.type}">
 					<option value="">任意商户</option>
                 </select>
             </div>
@@ -55,13 +55,9 @@
             <div class="hotel-item" ng-repeat="hotel in hotelMappings">
                 <div class="hotel-header row">
                     <p class="pull-left hotel-grid"
-                        style="width: 3%"><b>{{hotel.merchant_id}}</b></p>
+					style="width: 8%"><b>{{hotel.merchant_id}}. {{hotel.merchant_name}}</b></p>
                     <p class="pull-left hotel-grid"
-                        style="width: 10%"><b>{{hotel.merchant_name}}</b></p>
-                    <!--<p class="pull-left hotel-grid"-->
-                        <!--style="width: 5%"><b>{{hotel.provider_hotel_id}}</b></p>-->
-                    <p class="pull-left hotel-grid"
-                        style="width: 20%"><b>{{hotel.main_hotel.name}}</b></p>
+					style="width: 20%"><b>{{hotel.main_hotel.name}}({{hotel.provider_hotel_id}})</b></p>
                     <p class="pull-left hotel-grid"
                         style="width: 50%"><b>{{hotel.main_hotel.address}}</b></p>
 
@@ -69,8 +65,7 @@
                 </div>
                 <div class="hotel-body row">
                     <div class="hotel-room row" ng-repeat="room in hotel.roomtype_mappings">
-                        <!--<p class="pull-left hotel-grid">{{room.provider_roomtype_id}}</p>-->
-                        <p class="pull-left hotel-grid">{{room.main_roomtype.name}}</p>
+                        <p class="pull-left hotel-grid">{{room.main_roomtype.name}}({{room.provider_roomtype_id}})</p>
 						<button class="pull-right btn btn-default" ng-disabled="hotel.is_online == 0"
 							ng-click="setRoomOnline(hotel, room)"
 							>{{getRoomOnlineStatus(room)}}</button>
