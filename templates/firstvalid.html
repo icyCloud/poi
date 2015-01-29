@@ -451,6 +451,7 @@ validapp.controller('validController',
         ['$scope', '$http', '$location',
         function($scope, $http, $location) {
 
+
     $scope.totalItems = 0;
     $scope.currentPage = 0;
     $scope.itemsPerPage = 0;
@@ -559,7 +560,11 @@ validapp.controller('validController',
 
         cloneRoomType(mapping.main_roomtype, $scope.dialogMainRoomType);
         cloneRoomType(mapping.provider_roomtype, $scope.dialogProviderRoomType);
+        console.log('1111111')
 
+        $('#modal-roomtype').modal({
+            keyboard: true
+        });
         $('#modal-roomtype').modal('show');
     }
 

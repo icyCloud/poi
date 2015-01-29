@@ -65,8 +65,6 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
 
     def merge_room_type_mapping(self, hotel_dicts):
 
-        if not hotel_dicts:
-            return
         provider_hotel_ids = [hotel.provider_hotel_id for hotel in hotel_dicts]
         provider_hotel_ids = {}.fromkeys(provider_hotel_ids).keys()
         provider_hotel_ids.sort()
