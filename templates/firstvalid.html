@@ -143,6 +143,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
             </div>
             <div class="modal-footer">
+                <a type="button" class="btn" href="/hotel/{{dialogHotel.id}}/roomtype/" target="blank" >房型</a>
                 <button type="button" class="btn btn-danger" data-ng-click="showChangeHotelDialog()" data-ng-show="dialogHotel.status <= ${HotelMappingModel.STATUS.wait_first_valid}" >修改</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>

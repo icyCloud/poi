@@ -4,3 +4,4 @@ sqlalchemy
 dogpile.cache
 MySQL-python
 redis
+simplejson

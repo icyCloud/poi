@@ -48,6 +48,6 @@ database: ebooking-admin
 ## 部署
 **For Ubuntu**  
 ``sudo pip install -r requirements.txt``  
-``sudo apt-get install memcached``  
-``sudo apt-get install libmemcached-dev zlib1g-dev libsasl2-dev``  
+``sudo apt-get install redis-server``  
+``sudo apt-get install libmysqld-dev``  
 ``sudo apt-get install python-mysqldb``  
