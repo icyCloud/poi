@@ -9,12 +9,12 @@ from tools.log import Log, log_request
 class StockMixin(object):
 
     @gen.coroutine
-    def notify_stock(self, chain_hotel, chain_hotel_id):
+    def notify_stock(self, chain_id, chain_hotel_id):
         if not IS_PUSH_TO_STOCK:
             raise gen.Return()
 
-        url = '{}/stock2/internal/hotel/update_time?chainId={}$chainHotelId={}'.format(API['STOCK'], chain_id, chain_hotel_id)
+        url = '{}/stock2/internal/hotel/update_time?chainId={}&chainHotelId={}'.format(API['STOCK'], chain_id, chain_hotel_id)
 
         resp = yield AsyncHTTPClient().fetch(url)
-        Log.log(resp.body)
+        Log.info(resp.body)
         raise gen.Return()
