@@ -2,13 +2,13 @@
 
 import time
 
-from tornado.util import ObjectDict
 from tornado import gen
-from tornado.escape import json_encode, json_decode
+from tornado.escape import json_decode
 from tornado.httpclient import AsyncHTTPClient
 
-from views.base import BtwBaseHandler, StockHandler
-from mixin.hotelmixin import HotelMixin
+from views.base import BtwBaseHandler
+
+from exception.json_exception import JsonException
 
 from tools.auth import auth_login, auth_permission
 from tools.log import Log, log_request
@@ -17,8 +17,6 @@ from models.hotel_mapping import HotelMappingModel as HotelMapping
 from models.hotel import HotelModel as Hotel
 from models.room_type_mapping import RoomTypeMappingModel as RoomTypeMapping
 from models.room_type import RoomTypeModel as RoomType
-from models.city import CityModel
-from models.district import DistrictModel
 
 from config import API
 

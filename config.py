@@ -9,6 +9,9 @@ LISTEN_IP = '0.0.0.0'
 
 API = {
         'EBOOKING': 'http://127.0.0.1:9501',
+        'STOCK': "http://114.215.87.61:8080",
 }
+
+IS_PUSH_TO_STOCK = False
 
 REDIS_HOST = 'localhost'

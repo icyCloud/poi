@@ -8,6 +8,7 @@ from tornado.escape import json_encode, json_decode
 
 from views.base import BtwBaseHandler, StockHandler
 from mixin.hotelmixin import HotelMixin
+from mixin.stockmixin import StockMixin
 
 from tools.auth import auth_login, auth_permission
 from tools.log import Log, log_request
@@ -18,6 +19,7 @@ from models.room_type_mapping import RoomTypeMappingModel as RoomTypeMapping
 from models.room_type import RoomTypeModel as RoomType
 from models.city import CityModel
 from models.district import DistrictModel
+
 
 class PolymerAPIHandler(StockHandler, HotelMixin):
 
@@ -96,8 +98,9 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
                     mapping['main_roomtype'] = roomtype
 
 
-class PolymerHotelAPIHandler(BtwBaseHandler):
+class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
 
+    @gen.coroutine
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
     def put(self):
@@ -111,6 +114,8 @@ class PolymerHotelAPIHandler(BtwBaseHandler):
             hotel_mapping = HotelMapping.set_online(self.db, hotel_mapping_id, is_online)
             if hotel_mapping.is_online == 0:
                 RoomTypeMapping.disable_by_provider_hotel_id(self.db, hotel_mapping.provider_hotel_id)
+
+            yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
             self.finish_json(result=ObjectDict(
                 hotel_mapping=hotel_mapping.todict(),
                 ))
@@ -131,8 +136,9 @@ class PolymerHotelAPIHandler(BtwBaseHandler):
             self.finish_json(errcode=401, errmsg="not in second valid")
 
 
-class PolymerRoomTypeAPIHandler(BtwBaseHandler):
+class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
 
+    @gen.coroutine
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
     def put(self):
@@ -149,6 +155,7 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler):
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.valid_complete:
             RoomTypeMapping.set_online(self.db, roomtype_mapping_id, is_online)
+            yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
             self.finish_json(result=ObjectDict(
                 roomtype_mapping=mapping.todict(),
                 ))
