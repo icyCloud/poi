@@ -607,7 +607,7 @@ validapp.controller('validController',
     $scope.getProvider = function(id) {
         for (var i = 0; i < $scope.providers.length; i++) {
             var p = $scope.providers[i];
-            if (id == p.id) {
+            if (id == p.chain_id) {
                 return p;
             }
         }
