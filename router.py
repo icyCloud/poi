@@ -24,6 +24,8 @@ from views.api.ebooking import EbookingAPIHandler, MerchantListHandler
 
 from views.hotels import HotelsHandler
 
+from views.api.business_zone import BusinessZoneByCityAPIHandler
+
 handlers = [
         (r"/?", IndexHandler),
         (r"/login/?", LoginHandler),
@@ -59,6 +61,7 @@ handlers = [
         (r"/api/city/?", CityAPIHandler),
         (r"/api/district/?", DistrictAPIHandler),
         (r"/api/city/(?P<city_id>\d+)/district/?", DistrictByCityAPIHandler),
+        (r"/api/city/(?P<city_id>\d+)/businesszone/?", BusinessZoneByCityAPIHandler),
 
         (r"/api/hotel/(?P<hotel_id>\d+)/?", HotelAPIHandler),
         (r"/api/push/ebooking/hotel/?", HotelMappingEbookingPushAPIHandler),
@@ -71,4 +74,6 @@ handlers = [
         (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
 
         (r"/hotels/?", HotelsHandler),
+
+
         ]
