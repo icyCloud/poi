@@ -41,6 +41,12 @@ class DistrictModel(Base):
                 .filter(DistrictModel.id.in_(ids))\
                 .all()
 
+    @classmethod
+    def get_by_city_id(cls, session, city_id):
+        return session.query(DistrictModel)\
+                .filter(DistrictModel.city_id == city_id)\
+                .all()
+
     def todict(self):
         return ObjectDict(
                 id=self.id,

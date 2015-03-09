@@ -24,6 +24,12 @@ class BusinessZoneModel(Base):
                 .filter(BusinessZoneModel.id.in_(ids))\
                 .all()
 
+    @classmethod
+    def get_by_city_id(self, session, city_id):
+        return session.query(BusinessZoneModel)\
+                .filter(BusinessZoneModel.city_id == city_id)\
+                .all()
+
     def todict(self):
         return ObjectDict(
                 id=self.id,
