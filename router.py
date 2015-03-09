@@ -22,6 +22,8 @@ from views.api.district import DistrictAPIHandler
 from views.ebooking import EbookingHandler
 from views.api.ebooking import EbookingAPIHandler, MerchantListHandler
 
+from views.hotels import HotelsHandler
+
 handlers = [
         (r"/?", IndexHandler),
         (r"/login/?", LoginHandler),
@@ -66,4 +68,6 @@ handlers = [
         (r"/polymer/ebooking/?", EbookingHandler),
         (r"/api/polymer/ebooking/?", EbookingAPIHandler),
         (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
+
+        (r"/hotels/?", HotelsHandler),
         ]
