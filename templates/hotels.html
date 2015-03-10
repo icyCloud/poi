@@ -54,16 +54,14 @@ from models.room_type_mapping import RoomTypeMappingModel
         <div class=" panel-body clearfix">
             
             <div class="col-md-4 ">
-                <p class="text-primary text-center" ><b>{{searchHotels.name}}</b></p>
+                <p class="text-primary text-center" ><b ng-bind="searchHotels.name"></b></p>
             </div>
             <div class="col-md-1 ">
                 <p class="text-center" data-ng-bind="searchHotels.star"></p>
             </div>
 
-            <!--data-ng-click="showRoomType(mapping)"-->
-
             <div class="col-md-1 " style="margin-top:0; margin-buttom: 0;">
-                <p class="text-center" ><b>{{getCity(searchHotels.city_id)}}</b></p>
+                <p class="text-center" ><b ng-bind="getCity(searchHotels.city_id)"></b></p>
             </div>
             <div class="col-md-4 ">
                 <p class="text-center" data-ng-bind="searchHotels.address"></p>
@@ -175,7 +173,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
                 <div class="row rowstyle">
                     <label class="col-lg-3">酒店设施:</label>
-                    <input class="col-lg-4" type="text" ng-model="currentHotel.facilities"/>
+                    <input class="col-lg-4" type="text" placeholder="用|分割" ng-model="currentHotel.facilities"/>
                 </div>
 
                 <div class="row rowstyle">
@@ -479,7 +477,7 @@ validapp.controller('validController',
         });
 
     function loadHotelMappings(start, limit, city_id, hotel_name) {
-        var url = "/api/hotel/search?start=" + start + "&limit=" + limit;
+        var url = "/api/hotel/search?count_total=1&start=" + start + "&limit=" + limit;
         
         if (city_id != undefined) {
             url += ("&city_id=" + city_id);
