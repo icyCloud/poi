@@ -69,11 +69,11 @@ from models.room_type_mapping import RoomTypeMappingModel
                 <p class="text-center" data-ng-bind="searchHotels.address"></p>
             </div>
             <div class="col-md-1 ">
-                <button class="btn btn-primary" style="margin: 0;" data-ng-click="">房型</button>
+                <button class="btn btn-primary" style="margin: 0;" data-ng-click="roomtypeHref(searchHotels.id)">房型</button>
             </div>
 
             <div class="col-md-1 ">
-                <button class="btn btn-primary" style="margin: 0;" data-ng-click="showRoomType(searchHotels)">修改</button>
+                <button class="btn btn-primary" style="margin: 0;" data-ng-click="showRoomType(searchHotels,$index)">修改</button>
             </div>
 
         </div>       
@@ -165,7 +165,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
                 <div class="row rowstyle">
                     <label class="col-lg-3">交通:</label>
-                    <input class="col-lg-4" type="text" ng-model="currentHotel.intro"/>
+                    <input class="col-lg-4" type="text" ng-model="currentHotel.traffic"/>
                 </div>
 
                 <div class="row rowstyle">
@@ -288,6 +288,7 @@ validapp.controller('validController',
     $scope.changeDistrictName;
     $scope.changeBusinessName;
     $scope.flag;//0 添加 1 修改
+    $scope.hotelIndex;
 
 
     var roomtypes = [];
@@ -295,32 +296,65 @@ validapp.controller('validController',
     var currentEditHotelMapping = {};
     var districts = [];
 
+    $scope.roomtypeHref=function(id){
+        
+        var url="/hotel/"+id+"/roomtype/";
+        
+        window.location.href=url;
 
+
+    }
+
+    function checkNull(params){
+        
+        if(params==null||params==undefined){
+            return "";
+        }else {
+            return parseFloat(params);
+        }
+    }
+
+    function checkStrNull(params){
+        
+        if(params==null||params==undefined||params==""){
+            return "";
+        }else {
+            return params;
+        }
+    }
 
     $scope.savetest=function(){
         console.log($scope.currentHotel);
+        if($scope.currentHotel['business_zone']==undefined){
+            console.log("uuu");
+            $scope.currentHotel['business_zone']={id:""};
+
+        }
         var params={
 
-             'name':$scope.currentHotel.name, 
-             'star':parseInt($scope.currentHotel.star), 
-             'facilities':"1", 
-             'blog':parseInt($scope.currentHotel.blog), 
-             'blat':parseInt($scope.currentHotel.blat), 
-             'glog':parseInt($scope.currentHotel.glog), 
-             'glat':parseInt($scope.currentHotel.glat), 
-             'city_id':parseInt($scope.getCityId($scope.changeHotelName)),
-             'district_id':parseInt($scope.currentHotel.district_id), 
-             'address':$scope.currentHotel.address,
-            'business_zone':parseInt($scope.currentHotel.business_zone.id), 
-            'phone':$scope.currentHotel.phone, 
-            'traffic':$scope.currentHotel.intro, 
-            'description':$scope.currentHotel.description, 
+            'name':$scope.currentHotel.name, 
+            'star':parseInt($scope.currentHotel.star), 
+            'facilities':$scope.currentHotel.facilities, 
+            'blog':parseFloat($scope.currentHotel.blog), 
+            'blat':parseFloat($scope.currentHotel.blat), 
+            'glog':checkNull($scope.currentHotel.glog), 
+            'glat':checkNull($scope.currentHotel.glat), 
+            'city_id':parseInt($scope.getCityId($scope.changeHotelName)),
+            'district_id':parseInt($scope.currentHotel.district_id), 
+            'address':$scope.currentHotel.address,
+            'business_zone':checkNull($scope.currentHotel['business_zone']['id']), 
+            'phone':checkStrNull($scope.currentHotel.phone), 
+            'traffic':checkStrNull($scope.currentHotel.traffic), 
+            'description':checkStrNull($scope.currentHotel.description), 
             'require_idcard':parseInt($scope.currentHotel.require_idcard), 
-            'is_online':parseInt($scope.currentHotel.is_online), 
+            'is_online':parseInt($scope.currentHotel.is_online)
 
 
         };
+
+        
         console.log(params);
+
 
         if($scope.flag==0){
 
@@ -328,6 +362,8 @@ validapp.controller('validController',
         .success(function(resp) {
             console.log(resp);
             if (resp.errcode == 0) {
+
+                $scope.searchHotels.push(resp.result.hotel);
                
                 
             } else {
@@ -344,6 +380,8 @@ validapp.controller('validController',
             .success(function(resp) {
             console.log(resp);
             if (resp.errcode == 0) {
+
+                $scope.searchHotels[$scope.hotelIndex]=resp.result.hotel;
                
                 
             } else {
@@ -363,6 +401,8 @@ validapp.controller('validController',
 
     $scope.cityBlur=function(){
         console.log("44");
+        $scope.changeDistrictName={};
+        $scope.changeBusinessName={};
         var city_id=$scope.getCityId($scope.changeHotelName);
         if(city_id==-1){
             return;
@@ -475,6 +515,7 @@ validapp.controller('validController',
 
     $scope.show=function(){
         $scope.currentHotel={};
+        $scope.changeHotelName="";
         $scope.flag="0";
 
         $('#modal-roomtype').modal({
@@ -484,10 +525,33 @@ validapp.controller('validController',
 
     }
 
-    $scope.showRoomType = function(searchHotels) {
+    $scope.showRoomType = function(searchHotels,index) {
+
+        $scope.hotelIndex=index;
 
         $scope.currentHotel={};
-        $scope.currentHotel=searchHotels;
+        //$scope.currentHotel=searchHotels;
+
+        $scope.currentHotel.address=searchHotels.address;
+        $scope.currentHotel.blat=searchHotels.blat;
+        $scope.currentHotel.blog=searchHotels.blog;
+        $scope.currentHotel.business_zone=searchHotels.business_zone;
+        $scope.currentHotel.city_id=searchHotels.city_id;
+        $scope.currentHotel.description=searchHotels.description;
+        $scope.currentHotel.district_id=searchHotels.district_id;
+        $scope.currentHotel.facilities=searchHotels.facilities;
+        $scope.currentHotel.glat=searchHotels.glat;
+        $scope.currentHotel.glog=searchHotels.glog;
+        $scope.currentHotel.is_online=searchHotels.is_online;
+        $scope.currentHotel.name=searchHotels.name;
+        $scope.currentHotel.phone=searchHotels.phone;
+        $scope.currentHotel.require_idcard=searchHotels.require_idcard;
+        $scope.currentHotel.star=searchHotels.star;
+        $scope.currentHotel.traffic=searchHotels.traffic;
+        $scope.currentHotel.id=searchHotels.id;
+
+
+
         $scope.changeHotelName=$scope.getCity($scope.currentHotel.city_id);
         $scope.cityBlur();
         $scope.flag="1";
