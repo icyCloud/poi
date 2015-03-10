@@ -39,8 +39,8 @@ class HotelModel(Base):
     intro = Column(TEXT)
     description = Column(TEXT)
     traffic = Column(TEXT)
-    is_valid = Column('isValid', BIT, nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False)
+    is_valid = Column('isValid', BIT, default=1, nullable=False)
+    is_online = Column('isOnline', BIT, default=0, nullable=False)
 
     @classmethod
     def get_by_id(cls, session, id, need_online=False):
@@ -92,15 +92,15 @@ class HotelModel(Base):
 
     @classmethod
     def new(cls, session,
-            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online):
-        hotel = HotelModel(name=name, star=star, facilities=facilities, blog=blog, blat=blat, glog=glog, glat=glat, city_id=city_id, district_id=district_id, address=address, business_zone=business_zone, phone=phone, traffic=traffic, description=description, require_idcard=require_idcard, is_online=isOnline)
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online):
+        hotel = HotelModel(name=name, star=star, facilities=facilities, blog=blog, blat=blat, glog=glog, glat=glat, city_id=city_id, district_id=district_id, address=address, business_zone=business_zone, phone=phone, traffic=traffic, description=description, require_idcard=require_idcard, is_online=is_online)
         session.add(hotel)
         session.commit()
         return hotel
 
     @classmethod
     def update(cls, session, hotel_id,
-            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online):
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online):
         hotel = cls.get_by_id(session, hotel_id)
         hotel.name = name
         hotel.star = star
@@ -112,7 +112,7 @@ class HotelModel(Base):
         hotel.city_id = city_id
         hotel.district_id= district_id
         hotel.address = address
-        hotel.bussiness_zone = business_zone
+        hotel.business_zone = business_zone
         hotel.phone = phone
         hotel.traffic = traffic
         hotel.description = description
