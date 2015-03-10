@@ -68,12 +68,12 @@ class HotelAPIHandler(BtwBaseHandler):
 
     def post(self):
         args = self.get_json_arguments()
-        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online = get_and_valid_arguments(
+        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin = get_and_valid_arguments(
                 args,
                 'name', 'star', 'facilities', 'blog', 'blat', 'glog', 'glat', 'city_id', 'district_id', 'address',
-                'business_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online')
+                'business_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online', 'foreigner_checkin')
         hotel = Hotel.new(self.db,
-            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online)
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
 
         self.finish_json(result=dict(
             hotel=hotel.todict(),
@@ -82,10 +82,10 @@ class HotelAPIHandler(BtwBaseHandler):
 
     def put(self, hotel_id):
         args = self.get_json_arguments()
-        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online = get_and_valid_arguments(
+        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin = get_and_valid_arguments(
                 args,
                 'name', 'star', 'facilities', 'blog', 'blat', 'glog', 'glat', 'city_id', 'district_id', 'address',
-                'business_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online')
+                'business_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online', 'foreigner_checkin')
 
         hotel = Hotel.get_by_id(self.db, hotel_id)
         if not hotel:
@@ -93,7 +93,7 @@ class HotelAPIHandler(BtwBaseHandler):
             return
 
         hotel = Hotel.update(self.db, hotel_id,
-            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online)
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
 
         self.finish_json(result=dict(
             hotel=hotel.todict(),
