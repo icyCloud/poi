@@ -74,6 +74,4 @@ handlers = [
         (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
 
         (r"/hotels/?", HotelsHandler),
-
-
         ]
