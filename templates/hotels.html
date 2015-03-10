@@ -34,7 +34,7 @@ from models.room_type_mapping import RoomTypeMappingModel
         </div>
 
         <div class="col-md-3" >
-            <button type="buttion" class="btn btn-primary  withripple" style="position:absolute;right:0px;" ng-click="">+增加酒店</button>
+            <button type="buttion" class="btn btn-primary  withripple" style="position:absolute;right:0px;" ng-click="show()">+增加酒店</button>
         </div>
 
     </div>
@@ -180,7 +180,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-ng-click="" data-dismiss="modal">保存</button>
+                <button type="button" class="btn btn-primary" data-ng-click="savetest()" data-dismiss="modal">保存</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
         </div>
@@ -260,7 +260,7 @@ validapp.controller('validController',
     $scope.searchCityName = undefined;
 
 
-    $scope.currentHotel;
+    $scope.currentHotel={};
     $scope.changeHotelName;
     $scope.changeDistrictName;
     $scope.changeBusinessName;
@@ -270,6 +270,48 @@ validapp.controller('validController',
     var currentEditRoomMapping = {};
     var currentEditHotelMapping = {};
     var districts = [];
+
+
+    $scope.savetest=function(){
+        console.log($scope.currentHotel);
+        var params={
+
+             'name':$scope.currentHotel.name, 
+             'star':$scope.currentHotel.star, 
+             'facilities':$scope.currentHotel.star, 
+             'blog':$scope.currentHotel.blog, 
+             'blat':$scope.currentHotel.blat, 
+             'glog':$scope.currentHotel.glog, 
+             'glat':$scope.currentHotel.glat, 
+             'city_id':$scope.getCityId($scope.changeHotelName),
+             'district_id':$scope.currentHotel.district_id, 
+             'address':$scope.currentHotel.address,
+            'bussiness_zone':$scope.currentHotel.business_zone.id, 
+            'phone':$scope.currentHotel.phone, 
+            'traffic':$scope.currentHotel.intro, 
+            'description':$scope.currentHotel.description, 
+            'require_idcard':"1", 
+            'is_online':"1"
+
+
+        };
+
+        $http.post('/api/hotel/',params)
+        .success(function(resp) {
+            console.log(resp);
+            if (resp.errcode == 0) {
+               
+                
+            } else {
+                alert(resp.errmsg);
+            }
+        })
+        .error(function() {
+        });
+
+
+
+    }
 
 
 
@@ -385,13 +427,23 @@ validapp.controller('validController',
 
     }
 
+    $scope.show=function(){
+        $scope.currentHotel={};
+
+        $('#modal-roomtype').modal({
+            keyboard: true
+        });
+        $('#modal-roomtype').modal('show');
+
+    }
+
     $scope.showRoomType = function(searchHotels) {
 
         $scope.currentHotel=searchHotels;
         $scope.changeHotelName=$scope.getCity($scope.currentHotel.city_id);
         $scope.cityBlur();
 
-        console.log('1111111')
+        console.log('1111111');
 
         $('#modal-roomtype').modal({
             keyboard: true
