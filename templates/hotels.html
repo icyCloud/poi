@@ -63,7 +63,7 @@ from models.room_type_mapping import RoomTypeMappingModel
             <!--data-ng-click="showRoomType(mapping)"-->
 
             <div class="col-md-1 " style="margin-top:0; margin-buttom: 0;">
-                <b>{{getCity(searchHotels.city_id)}}</b>
+                <p class="text-center" ><b>{{getCity(searchHotels.city_id)}}</b></p>
             </div>
             <div class="col-md-4 ">
                 <p class="text-center" data-ng-bind="searchHotels.address"></p>
@@ -174,9 +174,32 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
 
                 <div class="row rowstyle">
+                    <label class="col-lg-3">酒店设施:</label>
+                    <input class="col-lg-4" type="text" ng-model="currentHotel.facilities"/>
+                </div>
+
+                <div class="row rowstyle">
                     <label class="col-lg-3">预定要求:</label>
+
+                    <select class="col-lg-4" ng-model="currentHotel.require_idcard">
+                        <option value="0">不需要身份证</option>
+                        <option value="1">需要身份证</option>                                             
+                    </select>
                     
                 </div>
+
+                <div class="row rowstyle">
+                    <label class="col-lg-3">运营状态:</label>
+
+                    <select class="col-lg-4" ng-model="currentHotel.is_online">
+                        <option value="0">停止</option>
+                        <option value="1">正常</option>
+                                               
+                    </select>
+
+                    
+                </div>
+
 
             </div>
             <div class="modal-footer">
@@ -264,6 +287,7 @@ validapp.controller('validController',
     $scope.changeHotelName;
     $scope.changeDistrictName;
     $scope.changeBusinessName;
+    $scope.flag;//0 添加 1 修改
 
 
     var roomtypes = [];
@@ -272,29 +296,33 @@ validapp.controller('validController',
     var districts = [];
 
 
+
     $scope.savetest=function(){
         console.log($scope.currentHotel);
         var params={
 
              'name':$scope.currentHotel.name, 
-             'star':$scope.currentHotel.star, 
-             'facilities':$scope.currentHotel.star, 
-             'blog':$scope.currentHotel.blog, 
-             'blat':$scope.currentHotel.blat, 
-             'glog':$scope.currentHotel.glog, 
-             'glat':$scope.currentHotel.glat, 
-             'city_id':$scope.getCityId($scope.changeHotelName),
-             'district_id':$scope.currentHotel.district_id, 
+             'star':parseInt($scope.currentHotel.star), 
+             'facilities':"1", 
+             'blog':parseInt($scope.currentHotel.blog), 
+             'blat':parseInt($scope.currentHotel.blat), 
+             'glog':parseInt($scope.currentHotel.glog), 
+             'glat':parseInt($scope.currentHotel.glat), 
+             'city_id':parseInt($scope.getCityId($scope.changeHotelName)),
+             'district_id':parseInt($scope.currentHotel.district_id), 
              'address':$scope.currentHotel.address,
-            'bussiness_zone':$scope.currentHotel.business_zone.id, 
+            'business_zone':parseInt($scope.currentHotel.business_zone.id), 
             'phone':$scope.currentHotel.phone, 
             'traffic':$scope.currentHotel.intro, 
             'description':$scope.currentHotel.description, 
-            'require_idcard':"1", 
-            'is_online':"1"
+            'require_idcard':parseInt($scope.currentHotel.require_idcard), 
+            'is_online':parseInt($scope.currentHotel.is_online), 
 
 
         };
+        console.log(params);
+
+        if($scope.flag==0){
 
         $http.post('/api/hotel/',params)
         .success(function(resp) {
@@ -308,6 +336,24 @@ validapp.controller('validController',
         })
         .error(function() {
         });
+        }else if($scope.flag==1){
+
+            var url='/api/hotel/'+$scope.currentHotel.id;
+
+            $http.put(url,params)
+            .success(function(resp) {
+            console.log(resp);
+            if (resp.errcode == 0) {
+               
+                
+            } else {
+                alert(resp.errmsg);
+            }
+        })
+        .error(function() {
+        });
+
+        }
 
 
 
@@ -429,6 +475,7 @@ validapp.controller('validController',
 
     $scope.show=function(){
         $scope.currentHotel={};
+        $scope.flag="0";
 
         $('#modal-roomtype').modal({
             keyboard: true
@@ -439,9 +486,11 @@ validapp.controller('validController',
 
     $scope.showRoomType = function(searchHotels) {
 
+        $scope.currentHotel={};
         $scope.currentHotel=searchHotels;
         $scope.changeHotelName=$scope.getCity($scope.currentHotel.city_id);
         $scope.cityBlur();
+        $scope.flag="1";
 
         console.log('1111111');
 
