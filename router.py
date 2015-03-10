@@ -64,6 +64,7 @@ handlers = [
         (r"/api/city/(?P<city_id>\d+)/businesszone/?", BusinessZoneByCityAPIHandler),
 
         (r"/api/hotel/(?P<hotel_id>\d+)/?", HotelAPIHandler),
+        (r"/api/hotel/?", HotelAPIHandler),
         (r"/api/push/ebooking/hotel/?", HotelMappingEbookingPushAPIHandler),
         (r"/api/push/ebooking/hotels/?", HotelMappingEbookingBatchPushAPIHandler),
         (r"/api/push/ebooking/room/?", RoomTypeMappingEbookingPushAPIHandler),
@@ -74,6 +75,4 @@ handlers = [
         (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
 
         (r"/hotels/?", HotelsHandler),
-
-
         ]

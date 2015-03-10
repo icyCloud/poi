@@ -38,6 +38,7 @@ class HotelModel(Base):
     require_idcard = Column("requireIdCard", BIT(1), default=0, nullable=False)
     intro = Column(TEXT)
     description = Column(TEXT)
+    traffic = Column(TEXT)
     is_valid = Column('isValid', BIT, nullable=False)
     is_online = Column('isOnline', BIT, nullable=False)
 
@@ -89,6 +90,39 @@ class HotelModel(Base):
         else:
             return r
 
+    @classmethod
+    def new(cls, session,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online):
+        hotel = HotelModel(name=name, star=star, facilities=facilities, blog=blog, blat=blat, glog=glog, glat=glat, city_id=city_id, district_id=district_id, address=address, business_zone=business_zone, phone=phone, traffic=traffic, description=description, require_idcard=require_idcard, is_online=isOnline)
+        session.add(hotel)
+        session.commit()
+        return hotel
+
+    @classmethod
+    def update(cls, session, hotel_id,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online):
+        hotel = cls.get_by_id(session, hotel_id)
+        hotel.name = name
+        hotel.star = star
+        hotel.facilities = facilities
+        hotel.blog = blog
+        hotel.blat = blat
+        hotel.glog = glog
+        hotel.glat = glat
+        hotel.city_id = city_id
+        hotel.district_id= district_id
+        hotel.address = address
+        hotel.bussiness_zone = business_zone
+        hotel.phone = phone
+        hotel.traffic = traffic
+        hotel.description = description
+        hotel.require_idcard = require_idcard
+        hotel.is_online = is_online
+        session.commit()
+
+        return hotel
+
+
     def todict(self):
         return dict(
                 id=self.id,
@@ -115,5 +149,6 @@ class HotelModel(Base):
                 intro=self.intro,
                 description=self.description,
                 is_valid=self.is_valid,
-                is_online=self.is_online
+                is_online=self.is_online,
+                traffic=self.traffic,
                 )

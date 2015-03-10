@@ -8,6 +8,7 @@ from views.base import BtwBaseHandler
 
 from tools.auth import auth_login, auth_permission
 from tools.log import Log, log_request
+from tools.request_tools import get_and_valid_arguments
 
 from constants import PERMISSIONS
 from models.hotel import HotelModel as Hotel
@@ -65,3 +66,35 @@ class HotelAPIHandler(BtwBaseHandler):
         else:
             self.finish_json(errcode=404, errmsg="not found hotel " + hotel_id)
 
+    def post(self):
+        args = self.get_json_arguments()
+        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online = get_and_valid_arguments(
+                args,
+                'name', 'star', 'facilities', 'blog', 'blat', 'glog', 'glat', 'city_id', 'district_id', 'address',
+                'bussiness_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online')
+        hotel = Hotel.new(self.db,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online)
+
+        self.finish_json(result=dict(
+            hotel=hotel.todict(),
+            ))
+
+
+    def put(self, hotel_id):
+        args = self.get_json_arguments()
+        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online = get_and_valid_arguments(
+                args,
+                'name', 'star', 'facilities', 'blog', 'blat', 'glog', 'glat', 'city_id', 'district_id', 'address',
+                'bussiness_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online')
+
+        hotel = Hotel.get_by_id(self.db, hotel_id)
+        if not hotel:
+            self.finish_json(errcode=404, errmsg="not found hotel " + hotel_id)
+            return
+
+        hotel = Hotel.update(self.db, hotel_id,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online)
+
+        self.finish_json(result=dict(
+            hotel=hotel.todict(),
+            ))
