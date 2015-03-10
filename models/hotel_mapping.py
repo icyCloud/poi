@@ -34,6 +34,7 @@ class HotelMappingModel(Base):
     status = Column(TINYINT(4, unsigned=True), nullable=False)
     is_online = Column('isOnline', BIT, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
+    is_new =  Column('isNew', BIT, nullable=False, default=0)
     info = Column(VARCHAR(100))
     merchant_id = Column("merchantId", INTEGER, nullable=False, default=0)
     merchant_name = Column("merchantName", VARCHAR(50), nullable=False, default='')
@@ -76,7 +77,7 @@ class HotelMappingModel(Base):
     def new_hotel_mapping_from_ebooking(cls, session, provider_hotel_id, provider_hotel_name, provider_hotel_address, city_id, main_hotel_id, merchant_id, merchant_name):
         mapping = HotelMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_hotel_name=provider_hotel_name,
                 provider_hotel_address=provider_hotel_address, city_id=city_id, main_hotel_id=main_hotel_id,
-                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name)
+                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name, is_new=1)
         session.add(mapping)
         session.commit()
         return mapping
@@ -171,7 +172,7 @@ class HotelMappingModel(Base):
         if merchant_ids is not None:
             query = query.filter(HotelMappingModel.merchant_id.in_(merchant_ids))
 
-        r = query.offset(start).limit(limit).all()
+        r = query.order_by(HotelMappingModel.id.desc()).offset(start).limit(limit).all()
         total = query.count()
 
         return r, total
@@ -275,4 +276,5 @@ class HotelMappingModel(Base):
             info=self.info,
             merchant_id=self.merchant_id,
             merchant_name=self.merchant_name,
+            is_new=self.is_new,
             )
