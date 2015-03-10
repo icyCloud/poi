@@ -173,7 +173,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
                 <div class="row rowstyle">
                     <label class="col-lg-3">酒店设施:</label>
-                    <input class="col-lg-4" type="text" placeholder="用|分割" ng-model="currentHotel.facilities"/>
+                    <input class="col-lg-4" type="text" placeholder="用半角,分割" ng-model="currentHotel.facilities"/>
                 </div>
 
                 <div class="row rowstyle">
@@ -332,6 +332,8 @@ validapp.controller('validController',
         }
     }
 
+
+
     $scope.savetest=function(){
         console.log($scope.currentHotel);
         if($scope.currentHotel['business_zone']==undefined||$scope.currentHotel['business_zone']==0){
@@ -343,7 +345,7 @@ validapp.controller('validController',
 
             'name':$scope.currentHotel.name, 
             'star':parseInt($scope.currentHotel.star), 
-            'facilities':$scope.currentHotel.facilities, 
+            'facilities':($scope.currentHotel.facilities.replace(/，/g,',')), 
             'blog':parseFloat($scope.currentHotel.blog), 
             'blat':parseFloat($scope.currentHotel.blat), 
             'glog':checkNull($scope.currentHotel.glog), 
