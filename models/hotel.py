@@ -92,15 +92,15 @@ class HotelModel(Base):
 
     @classmethod
     def new(cls, session,
-            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online):
-        hotel = HotelModel(name=name, star=star, facilities=facilities, blog=blog, blat=blat, glog=glog, glat=glat, city_id=city_id, district_id=district_id, address=address, business_zone=business_zone, phone=phone, traffic=traffic, description=description, require_idcard=require_idcard, is_online=is_online)
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin):
+        hotel = HotelModel(name=name, star=star, facilities=facilities, blog=blog, blat=blat, glog=glog, glat=glat, city_id=city_id, district_id=district_id, address=address, business_zone=business_zone, phone=phone, traffic=traffic, description=description, require_idcard=require_idcard, is_online=is_online, foreigner_checkin=foreigner_checkin)
         session.add(hotel)
         session.commit()
         return hotel
 
     @classmethod
     def update(cls, session, hotel_id,
-            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online):
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin):
         hotel = cls.get_by_id(session, hotel_id)
         hotel.name = name
         hotel.star = star
@@ -118,6 +118,7 @@ class HotelModel(Base):
         hotel.description = description
         hotel.require_idcard = require_idcard
         hotel.is_online = is_online
+        hotel.foreigner_checkin = foreigner_checkin
         session.commit()
 
         return hotel
