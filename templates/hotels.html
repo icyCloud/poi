@@ -189,6 +189,17 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
 
                 <div class="row rowstyle">
+                    <label class="col-lg-3">外国人可否入住:</label>
+
+                    <select class="col-lg-4" ng-model="currentHotel.foreigner_checkin">
+                        <option value="1">可以入住</option>
+                        <option value="0">不能入住</option>
+                                                                     
+                    </select>
+                    
+                </div>
+
+                <div class="row rowstyle">
                     <label class="col-lg-3">运营状态:</label>
 
                     <select class="col-lg-4" ng-model="currentHotel.is_online">
@@ -297,7 +308,7 @@ validapp.controller('validController',
     var districts = [];
 
     $scope.roomtypeHref=function(id){
-        
+
         var url="/hotel/"+id+"/roomtype/";
         
         window.location.href=url;
@@ -325,7 +336,7 @@ validapp.controller('validController',
 
     $scope.savetest=function(){
         console.log($scope.currentHotel);
-        if($scope.currentHotel['business_zone']==undefined){
+        if($scope.currentHotel['business_zone']==undefined||$scope.currentHotel['business_zone']==0){
             console.log("uuu");
             $scope.currentHotel['business_zone']={id:""};
 
@@ -347,7 +358,8 @@ validapp.controller('validController',
             'traffic':checkStrNull($scope.currentHotel.traffic), 
             'description':checkStrNull($scope.currentHotel.description), 
             'require_idcard':parseInt($scope.currentHotel.require_idcard), 
-            'is_online':parseInt($scope.currentHotel.is_online)
+            'is_online':parseInt($scope.currentHotel.is_online),
+            'foreigner_checkin':parseInt($scope.currentHotel.foreigner_checkin)
 
 
         };
@@ -363,7 +375,10 @@ validapp.controller('validController',
             console.log(resp);
             if (resp.errcode == 0) {
 
-                $scope.searchHotels.push(resp.result.hotel);
+                var hotelResult=resp.result.hotel;
+                hotelResult['business_zone']={id:resp.result.hotel.business_zone};
+
+                $scope.searchHotels.push(hotelResult);
                
                 
             } else {
@@ -382,6 +397,8 @@ validapp.controller('validController',
             if (resp.errcode == 0) {
 
                 $scope.searchHotels[$scope.hotelIndex]=resp.result.hotel;
+
+                $scope.searchHotels[$scope.hotelIndex]['business_zone']={id:resp.result.hotel.business_zone};
                
                 
             } else {
@@ -446,16 +463,7 @@ validapp.controller('validController',
 
 
 
-    $http.get("/api/provider/")
-        .success(function(resp) {
-            if (resp.errcode == 0) {
-                $scope.providers = resp.result.providers;
-            } else {
-                alert(resp.errmsg);
-            }
-        })
-        .error(function() {
-        });
+    
 
     $http.get("/api/city")
         .success(function(resp) {
@@ -549,7 +557,9 @@ validapp.controller('validController',
         $scope.currentHotel.star=searchHotels.star;
         $scope.currentHotel.traffic=searchHotels.traffic;
         $scope.currentHotel.id=searchHotels.id;
+        $scope.currentHotel.foreigner_checkin=searchHotels.foreigner_checkin;
 
+        
 
 
         $scope.changeHotelName=$scope.getCity($scope.currentHotel.city_id);
@@ -599,14 +609,7 @@ validapp.controller('validController',
         return -1;
     }
 
-    $scope.getProvider = function(id) {
-        for (var i = 0; i < $scope.providers.length; i++) {
-            var p = $scope.providers[i];
-            if (id == p.chain_id) {
-                return p;
-            }
-        }
-    }
+    
 
     function getProviderId(provider_name) {
         for (var i = 0; i < $scope.providers.length; i++) {
@@ -638,112 +641,8 @@ validapp.controller('validController',
             });
     }
 
-    $scope.changeRoomType = function(roomMapping) {
-        currentEditRoomMapping = roomMapping;
-        $scope.changeDialogRoomTypes = getRoomTypesByHotelId(roomMapping.main_hotel_id);
-        cloneRoomType(roomMapping.main_roomtype, $scope.changeDialogRoomType);
-        cloneRoomType(roomMapping.provider_roomtype, $scope.providerDialogRoomType);
-        $("#modal-change-roomtype").modal("show");
-    }
+    
 
-    $scope.reloadChangeDialogRoomTypes = function() {
-        var url = '/api/hotel/' + currentEditRoomMapping.main_hotel_id + '/roomtype/';
-        $http.get(url)
-            .success(function(resp) {
-                if (resp.errcode == 0) {
-                    console.log(resp);
-                    mergeRoomTypes(resp.result.roomtypes);
-                    $scope.changeDialogRoomTypes = getRoomTypesByHotelId(currentEditRoomMapping.main_hotel_id);
-                } else {
-                    alert(resp.errmsg);
-                }
-
-            })
-            .error(function() {
-                alert('读取失败');
-            });
-    }
-
-    $scope.saveChangeRoomType = function() {
-        if ($scope.changeDialogRoomType.name == undefined) {
-            return;
-        }
-
-        var req = {'id': currentEditRoomMapping.id, 'main_roomtype_id': $scope.changeDialogRoomType.id};
-
-        $http.put('/api/room_type/mapping/', req)
-            .success(function(resp) {
-                if (resp.errcode == 0) {
-                    currentEditRoomMapping.main_roomtype = {};
-                    cloneRoomType($scope.changeDialogRoomType, currentEditRoomMapping.main_roomtype);
-                    currentEditRoomMapping.main_roomtype_id = currentEditRoomMapping.main_roomtype.id;
-                    $("#modal-change-roomtype").modal("hide");
-                } else {
-                    alert(resp.errmsg);
-                }
-            })
-            .error(function() {
-                alert('network error');
-            });
-    }
-
-    $scope.changeShowRoomType = function(roomType) {
-        $scope.changeDialogRoomType.id = roomType.id;
-        $scope.changeDialogRoomType.name = roomType.name;
-        $scope.changeDialogRoomType.area = roomType.area;
-        $scope.changeDialogRoomType.bed_type = roomType.bed_type;
-        $scope.changeDialogRoomType.comments = roomType.comments;
-        $scope.changeDialogRoomType.description = roomType.description;
-        $scope.changeDialogRoomType.floor = roomType.floor;
-        $scope.changeDialogRoomType.capacity = roomType.capacity;
-    }
-
-
-    function getRoomTypesByHotelId(hotel_id) {
-        var r = [];
-        for (var i = 0; i < roomtypes.length; i++) {
-            var roomtype = roomtypes[i];
-            if (roomtype.hotel_id == hotel_id) {
-                r.push(roomtype);
-            }
-        }
-
-        return r;
-    }
-
-    $scope.validRoomMapping = function(room_mapping) {
-        if (!confirm("Pass?")) {
-            return;
-        }
-
-        $http.put('/api/firstvalid/roomtype/' + room_mapping.id + '/valid/')
-            .success(function(resp) {
-                console.log(resp);
-                if (resp.errcode == 0) {
-                    room_mapping.status = resp.result.roomtype_mapping.status;
-                } else {
-                    alert(resp.errmsg);
-                }
-            })
-            .error(function() {
-                alert('network error');
-            });
-    }
-
-
-    // change hotel
-    $scope.showHotelInfo = function(hotelMapping) {
-        var hotel = hotelMapping.main_hotel;
-        currentEditHotelMapping = hotelMapping;
-
-        $.extend($scope.dialogHotel, hotel);
-        $scope.dialogHotel.status = hotelMapping.status;
-
-        console.log(hotel)
-
-
-        $('#modal-hotel').modal('show');
-    }
 
     $scope.$watch('changeHotel.cityName', function() {
         city_id = $scope.getCityId($scope.changeHotel.cityName);
@@ -814,63 +713,7 @@ validapp.controller('validController',
 
     }
 
-    $scope.showChangeHotelDialog = function() {
-        $scope.changeHotel = {};
-        $scope.searchHotels = [];
-        $scope.hotelTotalItems = 0;
-        $scope.hotelCurrentPage = 1;
-        $scope.hotelItemsPerPage = 10;
-        $('#modal-hotel').modal('hide');
-        $("#modal-change-hotel").modal('show');
-    }
-
-
-    $scope.saveChangeHotel = function() {
-        var hotel = $scope.selectedHotel;
-        console.log(hotel);
-        if (hotel == undefined) {
-            return;
-        }
-        req = {'hotel_mapping_id': currentEditHotelMapping.id, 'main_hotel_id': hotel.id}
-        $scope.hotelModalLoadingPromise = $http.put("/api/hotel/mapping", req)
-            .success(function(resp) {
-                console.log(resp);
-                if (resp.errcode == 0) {
-                    $("#modal-change-hotel").modal('hide');
-                    currentEditHotelMapping.main_hotel_id = hotel.id;
-                    currentEditHotelMapping.main_hotel = hotel;
-                    mergeRoomTypes(resp.result.room_types);
-                    for (var i = 0; i < currentEditHotelMapping.roomtype_mappings.length; i++) {
-                        var room_type_mapping = currentEditHotelMapping.roomtype_mappings[i];
-                        room_type_mapping.main_hotel_id = hotel.id;
-                        room_type_mapping.main_roomtype_id = 0;
-                        room_type_mapping.status = 0;
-                        room_type_mapping.main_roomtype = undefined;
-                    }
-                } else {
-                    alert(resp.errmsg);
-                }
-
-            })
-            .error(function() {
-                alert('network error');
-            });
-    }
-
-    function mergeRoomTypes(new_types) {
-        var len = roomtypes.length;
-        for (var i = 0; i < new_types.length; i++) {
-            for (var j = 0; j < len; j++) {
-                if (roomtypes[j].id == new_types[i].id) {
-                    angular.copy(new_types[i], roomtypes[j]);
-                    break;
-                }
-                if (j == len - 1) {
-                    roomtypes.push(new_types[i]);
-                }
-            }
-        }
-    }
+    
 
     $scope.pageChanged = function() {
         var params = $location.search();
@@ -947,21 +790,9 @@ validapp.controller('validController',
     $scope.getBedNameByType = getBedNameByType;
     $scope.getProviderBedNameByType = getProviderBedNameByType;
 
-    $scope.showMainHotelName = function(hotel_mapping) {
-        if (hotel_mapping.main_hotel == undefined) {
-            return 'None';
-        } else {
-            return hotel_mapping.main_hotel.name;
-        }
-    }
+    
 
-    $scope.showRoomTypeName = function(roomtype) {
-        if (roomtype.is_valid) {
-            return roomtype.name + "    " + roomtype.id;
-        } else {
-            return "INVALID " + roomtype.name+ "    " + roomtype.id;
-        }
-    }
+    
 }]);
 
 </%def>
