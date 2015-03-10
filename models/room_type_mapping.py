@@ -58,13 +58,6 @@ class RoomTypeMappingModel(Base):
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .first()
 
-    #@classmethod
-    #def get_by_provider_and_main_roomtype(cls, session, provider_roomtype_id, main_roomtype_id):
-        #return session.query(RoomTypeMappingModel)\
-                #.filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id,
-                        #RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
-                #.filter(RoomTypeMappingModel.is_delete == 0)\
-                #.first()
 
     @classmethod
     def get_by_id(cls, session, id):
@@ -227,6 +220,7 @@ class RoomTypeMappingModel(Base):
         r = cls.get_by_id(session, id)
         if r:
             r.is_online =  is_online
+            r.is_new = 0
             session.commit()
 
         return r

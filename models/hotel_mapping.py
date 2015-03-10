@@ -237,6 +237,7 @@ class HotelMappingModel(Base):
         r = cls.get_by_id(session, id)
         if r:
             r.is_online =  is_online
+            r.is_new = 0
             session.commit()
 
         return r
