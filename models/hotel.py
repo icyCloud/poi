@@ -98,6 +98,30 @@ class HotelModel(Base):
         session.commit()
         return hotel
 
+    @classmethod
+    def update(cls, session, hotel_id,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, bussiness_zone, phone, traffic, description, require_idcard, is_online):
+        hotel = cls.get_by_id(session, hotel_id)
+        hotel.name = name
+        hotel.star = star
+        hotel.facilities = facilities
+        hotel.blog = blog
+        hotel.blat = blat
+        hotel.glog = glog
+        hotel.glat = glat
+        hotel.city_id = city_id
+        hotel.district_id= district_id
+        hotel.address = address
+        hotel.bussiness_zone = business_zone
+        hotel.phone = phone
+        hotel.traffic = traffic
+        hotel.description = description
+        hotel.require_idcard = require_idcard
+        hotel.is_online = is_online
+        session.commit()
+
+        return hotel
+
 
     def todict(self):
         return dict(
