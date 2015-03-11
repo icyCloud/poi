@@ -7,7 +7,7 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 	$scope.citys = [];
 	$scope.distrits = [];
 	$scope.hotelMappings =[];
-	$scope.merchants = []
+	$scope.merchants = [];
 	$scope.merchantTypeSelected = null;
 	$scope.hotelName = null;
 
@@ -15,6 +15,8 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
     $scope.currentPage = 0;
     $scope.itemsPerPage = 0;
     $scope.maxSize = 10;
+
+    $scope.hotelIsNew=false;
 
 
     $http.get("/api/city")
