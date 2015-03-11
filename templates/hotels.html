@@ -209,10 +209,14 @@ from models.room_type_mapping import RoomTypeMappingModel
                     
                 </div>
 
+                <div class="row rowstyle"  ng-bind="hotelErrMsg" style="color:red">
+
+                </div>
+
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-ng-click="savetest()" data-dismiss="modal">保存</button>
+                <button type="button" class="btn btn-primary" data-ng-click="savetest()">保存</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
         </div>
@@ -299,6 +303,8 @@ validapp.controller('validController',
     $scope.flag;//0 添加 1 修改
     $scope.hotelIndex;
 
+    $scope.hotelErrMsg="";
+
 
     var roomtypes = [];
     var currentEditRoomMapping = {};
@@ -319,7 +325,7 @@ validapp.controller('validController',
         if(params==null||params==undefined){
             return "";
         }else {
-            return parseFloat(params);
+            return parseFloat($.trim(params));
         }
     }
 
@@ -328,6 +334,7 @@ validapp.controller('validController',
         if(params==null||params==undefined||params==""){
             return "";
         }else {
+            params=$.trim(params);
             return params;
         }
     }
@@ -336,30 +343,106 @@ validapp.controller('validController',
 
     $scope.savetest=function(){
         console.log($scope.currentHotel);
+
+        if($.trim($scope.currentHotel.name)==""||$scope.currentHotel.name==undefined||$scope.currentHotel.name==null){
+
+            $scope.hotelErrMsg="缺少名字";
+            return;
+
+        }
+
+        if($.trim($scope.currentHotel.blog)==""||$scope.currentHotel.blog==undefined||$scope.currentHotel.blog==null){
+
+            
+            $scope.hotelErrMsg="缺少百度经度";
+            return;
+
+        }
+
+        if($.trim($scope.currentHotel.blat)==""||$scope.currentHotel.blat==undefined||$scope.currentHotel.blat==null){
+
+            $scope.hotelErrMsg="缺少百度纬度";
+            return;
+
+        }
+
+        if($scope.getCityId($scope.changeHotelName)=="-1"||$scope.changeHotelName==undefined||$scope.changeHotelName==null){
+
+            $scope.hotelErrMsg="缺少城市";
+            return;
+
+        }
+
+        if($.trim($scope.currentHotel.district_id)==""||$scope.currentHotel.district_id==undefined||$scope.currentHotel.district_id==null){
+
+            $scope.hotelErrMsg="缺少区";
+            return;
+
+        }
+
+
+        if($.trim($scope.currentHotel.address)==""||$scope.currentHotel.address==undefined||$scope.currentHotel.address==null){
+
+            $scope.hotelErrMsg="缺少地址";
+            return;
+
+        }
+
+        if($.trim($scope.currentHotel.require_idcard)==""||$scope.currentHotel.require_idcard==undefined||$scope.currentHotel.require_idcard==null){
+
+            $scope.hotelErrMsg="缺少预定要求";
+            return;
+
+        }
+
+        if($.trim($scope.currentHotel.is_online)==""||$scope.currentHotel.is_online==undefined||$scope.currentHotel.is_online==null){
+
+            $scope.hotelErrMsg="缺少运营状态";
+            return;
+
+        }
+
+        if($.trim($scope.currentHotel.foreigner_checkin)==""||$scope.currentHotel.foreigner_checkin==undefined||$scope.currentHotel.foreigner_checkin==null){
+
+            $scope.hotelErrMsg="缺少是否允许外国人入住";
+            return;
+
+        }
+
+
         if($scope.currentHotel['business_zone']==undefined||$scope.currentHotel['business_zone']==0){
             console.log("uuu");
             $scope.currentHotel['business_zone']={id:""};
 
         }
+
+        if($.trim($scope.currentHotel.facilities)==""||$scope.currentHotel.facilities==undefined||$scope.currentHotel.facilities==null){
+
+            $scope.currentHotel.facilities="";
+
+        }
+
+        $scope.hotelErrMsg="";
+
         var params={
 
-            'name':$scope.currentHotel.name, 
-            'star':parseInt($scope.currentHotel.star), 
-            'facilities':($scope.currentHotel.facilities.replace(/，/g,',')), 
-            'blog':parseFloat($scope.currentHotel.blog), 
-            'blat':parseFloat($scope.currentHotel.blat), 
+            'name':$.trim($scope.currentHotel.name), 
+            'star':checkNull($scope.currentHotel.star), 
+            'facilities':($.trim($scope.currentHotel.facilities).replace(/，/g,',')), 
+            'blog':parseFloat($.trim($scope.currentHotel.blog)), 
+            'blat':parseFloat($.trim($scope.currentHotel.blat)), 
             'glog':checkNull($scope.currentHotel.glog), 
             'glat':checkNull($scope.currentHotel.glat), 
-            'city_id':parseInt($scope.getCityId($scope.changeHotelName)),
-            'district_id':parseInt($scope.currentHotel.district_id), 
-            'address':$scope.currentHotel.address,
+            'city_id':parseInt($scope.getCityId($.trim($scope.changeHotelName))),
+            'district_id':parseInt($.trim($scope.currentHotel.district_id)), 
+            'address':$.trim($scope.currentHotel.address),
             'business_zone':checkNull($scope.currentHotel['business_zone']['id']), 
             'phone':checkStrNull($scope.currentHotel.phone), 
             'traffic':checkStrNull($scope.currentHotel.traffic), 
             'description':checkStrNull($scope.currentHotel.description), 
-            'require_idcard':parseInt($scope.currentHotel.require_idcard), 
-            'is_online':parseInt($scope.currentHotel.is_online),
-            'foreigner_checkin':parseInt($scope.currentHotel.foreigner_checkin)
+            'require_idcard':parseInt($.trim($scope.currentHotel.require_idcard)), 
+            'is_online':parseInt($.trim($scope.currentHotel.is_online)),
+            'foreigner_checkin':parseInt($.trim($scope.currentHotel.foreigner_checkin))
 
 
         };
@@ -379,6 +462,8 @@ validapp.controller('validController',
                 hotelResult['business_zone']={id:resp.result.hotel.business_zone};
 
                 $scope.searchHotels.push(hotelResult);
+
+                 $('#modal-roomtype').modal('hide');
                
                 
             } else {
@@ -399,6 +484,9 @@ validapp.controller('validController',
                 $scope.searchHotels[$scope.hotelIndex]=resp.result.hotel;
 
                 $scope.searchHotels[$scope.hotelIndex]['business_zone']={id:resp.result.hotel.business_zone};
+
+
+                $('#modal-roomtype').modal('hide');
                
                 
             } else {
@@ -523,6 +611,7 @@ validapp.controller('validController',
 
     $scope.show=function(){
         $scope.currentHotel={};
+        $scope.currentHotel.is_online="1";
         $scope.changeHotelName="";
         $scope.flag="0";
 
