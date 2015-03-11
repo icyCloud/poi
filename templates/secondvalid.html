@@ -326,6 +326,7 @@ validapp.controller('validController',
     }
 
     $scope.showRoomType = function(mapping) {
+        $scope.dialogProviderRoomType = {};
         $.extend($scope.dialogMainRoomType, mapping.main_roomtype);
         $.extend($scope.dialogProviderRoomType, mapping.provider_roomtype);
         $('#modal-roomtype').modal('show');
