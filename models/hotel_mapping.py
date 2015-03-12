@@ -34,6 +34,7 @@ class HotelMappingModel(Base):
     status = Column(TINYINT(4, unsigned=True), nullable=False)
     is_online = Column('isOnline', BIT, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
+    is_new =  Column('isNew', BIT, nullable=False, default=0)
     info = Column(VARCHAR(100))
     merchant_id = Column("merchantId", INTEGER, nullable=False, default=0)
     merchant_name = Column("merchantName", VARCHAR(50), nullable=False, default='')
@@ -76,7 +77,7 @@ class HotelMappingModel(Base):
     def new_hotel_mapping_from_ebooking(cls, session, provider_hotel_id, provider_hotel_name, provider_hotel_address, city_id, main_hotel_id, merchant_id, merchant_name):
         mapping = HotelMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_hotel_name=provider_hotel_name,
                 provider_hotel_address=provider_hotel_address, city_id=city_id, main_hotel_id=main_hotel_id,
-                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name)
+                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name, is_new=1)
         session.add(mapping)
         session.commit()
         return mapping
@@ -158,7 +159,7 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
-    def gets_show_in_ebooking(cls, session, hotel_name=None, city_id=None, merchant_ids=None, start=0, limit=20):
+    def gets_show_in_ebooking(cls, session, hotel_name=None, city_id=None, merchant_ids=None, is_new=None, start=0, limit=20):
         query = session.query(HotelMappingModel)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.provider_id == 6,
@@ -170,8 +171,10 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         if merchant_ids is not None:
             query = query.filter(HotelMappingModel.merchant_id.in_(merchant_ids))
+        if is_new is not None:
+            query = query.filter(HotelMappingModel.is_new == is_new)
 
-        r = query.offset(start).limit(limit).all()
+        r = query.order_by(HotelMappingModel.id.desc()).offset(start).limit(limit).all()
         total = query.count()
 
         return r, total
@@ -236,6 +239,7 @@ class HotelMappingModel(Base):
         r = cls.get_by_id(session, id)
         if r:
             r.is_online =  is_online
+            r.is_new = 0
             session.commit()
 
         return r
@@ -275,4 +279,5 @@ class HotelMappingModel(Base):
             info=self.info,
             merchant_id=self.merchant_id,
             merchant_name=self.merchant_name,
+            is_new=self.is_new,
             )

@@ -3,6 +3,11 @@
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+
         <title>Ebooking</title>
 		<script src="${static_url('js/angular.js')}"></script>
         <link rel="stylesheet" href="${static_url('css/bootstrap.min.css')}">
@@ -44,6 +49,11 @@
                     typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
                 >
             </div>
+
+           <div class="col-lg-2" style="padding-top:5px;">
+                <input type="checkbox" ng-model="hotelIsNew" ng-checked="hotelIsNew" />&nbsp;&nbsp;是否为新
+            </div>
+
             <div class="col-lg-2">
                 <button class="btn btn-default" ng-click="search()">搜索</button>
                 <button class="btn btn-default" ng-click="resetSearch()">重置</button>
@@ -55,9 +65,11 @@
             <div class="hotel-item" ng-repeat="hotel in hotelMappings">
                 <div class="hotel-header row">
                     <p class="pull-left hotel-grid"
-					style="width: 8%"><b>{{hotel.merchant_id}}. {{hotel.merchant_name}}</b></p>
+					style="width: 10%;padding-right:10px"><b>{{hotel.merchant_id}}. {{hotel.merchant_name}}</b></p>
                     <p class="pull-left hotel-grid"
-					style="width: 20%"><b>{{hotel.main_hotel.name}}({{hotel.provider_hotel_id}})</b></p>
+					style="width: 20%;padding-right:10px"><b>{{hotel.main_hotel.name}}({{hotel.provider_hotel_id}})</b>
+                    <b ng-if="hotel.is_new" style="color:red">(新)</b>
+                    </p>
                     <p class="pull-left hotel-grid"
                         style="width: 50%"><b>{{hotel.main_hotel.address}}</b></p>
 
@@ -66,6 +78,7 @@
                 <div class="hotel-body row">
                     <div class="hotel-room row" ng-repeat="room in hotel.roomtype_mappings">
                         <p class="pull-left hotel-grid">{{room.main_roomtype.name}}({{room.provider_roomtype_id}})</p>
+                        <span ng-if="room.is_new" style="color:red">(新)</span>
 						<button class="pull-right btn btn-default" ng-disabled="hotel.is_online == 0"
 							ng-click="setRoomOnline(hotel, room)"
 							>{{getRoomOnlineStatus(room)}}</button>

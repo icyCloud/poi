@@ -7,7 +7,7 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 	$scope.citys = [];
 	$scope.distrits = [];
 	$scope.hotelMappings =[];
-	$scope.merchants = []
+	$scope.merchants = [];
 	$scope.merchantTypeSelected = null;
 	$scope.hotelName = null;
 
@@ -15,6 +15,9 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
     $scope.currentPage = 0;
     $scope.itemsPerPage = 0;
     $scope.maxSize = 10;
+
+    $scope.hotelIsNew=false;
+
 
 
     $http.get("/api/city")
@@ -38,6 +41,7 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 		})
 
 	$scope.search = function() {
+		//console.log($scope.hotelIsNew);
 		var urlParams = {};
 		if ($scope.merchantTypeSelected) {
 			console.log($scope.merchantTypeSelected);
@@ -56,6 +60,12 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 			urlParams.city_id = getCityIdByName($scope.searchCityName);
 		}
 
+		if($scope.hotelIsNew){
+
+			urlParams.is_new = 1;
+
+		}
+
 		$location.search(urlParams);
 
 	}
@@ -68,7 +78,8 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
         var hotel_name = params.hotel_name;
 		var merchantId = params.merchant_id;
 		var merchantType = params.merchant_type;
-        loadHotels(start, limit, merchantType, merchantId, city_id, hotel_name);
+		var isNew = params.is_new;
+        loadHotels(start, limit, merchantType, merchantId, city_id, hotel_name,isNew);
 	}
 
 	$scope.resetSearch = function() {
@@ -76,6 +87,8 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 		$scope.hotelName = null;
 		$scope.merchantTypeSelected = null;
 		$scope.merchantSelected = null;
+
+		$scope.hotelIsNew=false;
 
 		$location.search({});
 	}
@@ -94,7 +107,7 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 		flushData();
     });
 
-	function loadHotels(start, limit, merchantType, merchantId, city_id, hotel_name) {
+	function loadHotels(start, limit, merchantType, merchantId, city_id, hotel_name,isNew) {
         var url = "/api/polymer/ebooking?start=" + start + "&limit=" + limit;
         if (city_id != undefined) {
             url += ("&city_id=" + city_id);
@@ -108,6 +121,12 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 		}
 		if (merchantId != undefined) {
 			url += ("&merchant_id=" + merchantId);
+		}
+
+		if(isNew != undefined){
+
+			url += ("&is_new=1");
+
 		}
 
 		console.log(url);
