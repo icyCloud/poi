@@ -30,12 +30,13 @@ class RoomTypeMappingModel(Base):
     status = Column(TINYINT(4, unsigned=True), nullable=False)
     is_online = Column('isOnline', BIT, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
+    is_new =  Column('isNew', BIT, nullable=False, default=0)
     ts_update = Column('tsUpdate', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     info = Column(VARCHAR(100))
 
     @classmethod
     def new_roomtype_mapping_from_ebooking(cls, session, provider_hotel_id, provider_roomtype_id, provider_roomtype_name, main_hotel_id, main_roomtype_id):
-        mapping = RoomTypeMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_roomtype_id=provider_roomtype_id, provider_roomtype_name=provider_roomtype_name, main_hotel_id=main_hotel_id, main_roomtype_id=main_roomtype_id, status=cls.STATUS.valid_complete)
+        mapping = RoomTypeMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_roomtype_id=provider_roomtype_id, provider_roomtype_name=provider_roomtype_name, main_hotel_id=main_hotel_id, main_roomtype_id=main_roomtype_id, status=cls.STATUS.valid_complete, is_new=1)
         session.add(mapping)
         session.commit()
         return mapping
@@ -57,13 +58,6 @@ class RoomTypeMappingModel(Base):
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .first()
 
-    #@classmethod
-    #def get_by_provider_and_main_roomtype(cls, session, provider_roomtype_id, main_roomtype_id):
-        #return session.query(RoomTypeMappingModel)\
-                #.filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id,
-                        #RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
-                #.filter(RoomTypeMappingModel.is_delete == 0)\
-                #.first()
 
     @classmethod
     def get_by_id(cls, session, id):
@@ -226,6 +220,7 @@ class RoomTypeMappingModel(Base):
         r = cls.get_by_id(session, id)
         if r:
             r.is_online =  is_online
+            r.is_new = 0
             session.commit()
 
         return r
@@ -243,4 +238,5 @@ class RoomTypeMappingModel(Base):
                 is_online=self.is_online,
                 is_delete=self.is_delete,
                 info=self.info,
+                is_new=self.is_new,
                 )
