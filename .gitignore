@@ -9,3 +9,10 @@
 .DS_Store
 ._.DS_Store
 ._README.md
+
+/config.py
+<<<<<<< HEAD
+config.py
+=======
+.config
+>>>>>>> main/master

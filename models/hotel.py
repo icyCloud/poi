@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from models import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT, DOUBLE, TEXT
 from tornado.util import ObjectDict
+from tools.utils import exe_time
+from tools.log import Log
 
 class HotelModel(Base):
 
@@ -34,8 +38,9 @@ class HotelModel(Base):
     require_idcard = Column("requireIdCard", BIT(1), default=0, nullable=False)
     intro = Column(TEXT)
     description = Column(TEXT)
-    is_valid = Column('isValid', BIT, nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False)
+    traffic = Column(TEXT)
+    is_valid = Column('isValid', BIT, default=1, nullable=False)
+    is_online = Column('isOnline', BIT, default=0, nullable=False)
 
     @classmethod
     def get_by_id(cls, session, id, need_online=False):
@@ -57,7 +62,7 @@ class HotelModel(Base):
         return query.all()
 
     @classmethod
-    def query(cls, session, name=None, star=None, city_id=None, district_id=None, start=0, limit=10, filter_ids=None, within_ids=None):
+    def query(cls, session, name=None, star=None, city_id=None, district_id=None, start=0, limit=10, filter_ids=None, within_ids=None, count_total=True):
         query = session.query(HotelModel)\
                 .filter(HotelModel.is_valid == 1)
         if within_ids:
@@ -73,7 +78,51 @@ class HotelModel(Base):
         if district_id:
             query = query.filter(HotelModel.district_id == district_id)
 
-        return query.offset(start).limit(limit).all(), query.count()
+        Log.info("=" * 30)
+        t0 = time.time()
+        r = query.offset(start).limit(limit).all()
+        t1 = time.time()
+        if count_total:
+            total = query.count()
+            return r, total
+            t2 = time.time()
+            Log.info(">>HotelSearch query cost:{} query total cost:{}".format(t1 - t0, t2-t1))
+        else:
+            return r
+
+    @classmethod
+    def new(cls, session,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin):
+        hotel = HotelModel(name=name, star=star, facilities=facilities, blog=blog, blat=blat, glog=glog, glat=glat, city_id=city_id, district_id=district_id, address=address, business_zone=business_zone, phone=phone, traffic=traffic, description=description, require_idcard=require_idcard, is_online=is_online, foreigner_checkin=foreigner_checkin)
+        session.add(hotel)
+        session.commit()
+        return hotel
+
+    @classmethod
+    def update(cls, session, hotel_id,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin):
+        hotel = cls.get_by_id(session, hotel_id)
+        hotel.name = name
+        hotel.star = star
+        hotel.facilities = facilities
+        hotel.blog = blog
+        hotel.blat = blat
+        hotel.glog = glog
+        hotel.glat = glat
+        hotel.city_id = city_id
+        hotel.district_id= district_id
+        hotel.address = address
+        hotel.business_zone = business_zone
+        hotel.phone = phone
+        hotel.traffic = traffic
+        hotel.description = description
+        hotel.require_idcard = require_idcard
+        hotel.is_online = is_online
+        hotel.foreigner_checkin = foreigner_checkin
+        session.commit()
+
+        return hotel
+
 
     def todict(self):
         return dict(
@@ -101,5 +150,6 @@ class HotelModel(Base):
                 intro=self.intro,
                 description=self.description,
                 is_valid=self.is_valid,
-                is_online=self.is_online
+                is_online=self.is_online,
+                traffic=self.traffic,
                 )

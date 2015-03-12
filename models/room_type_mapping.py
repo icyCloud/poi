@@ -3,6 +3,7 @@
 from models import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT
+from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
 
 class RoomTypeMappingModel(Base):
@@ -21,16 +22,48 @@ class RoomTypeMappingModel(Base):
 
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     provider_id = Column('chainId', INTEGER(unsigned=True), nullable=False)
-    provider_hotel_id = Column('chainHotelId', INTEGER(unsigned=True), nullable=False)
-    provider_roomtype_id = Column('chainRoomTypeId', INTEGER(unsigned=True), nullable=False)
+    provider_hotel_id = Column('chainHotelId', VARCHAR(50), nullable=False)
+    provider_roomtype_id = Column('chainRoomTypeId', VARCHAR(50), nullable=False)
     provider_roomtype_name = Column('chainRoomTypeName', VARCHAR(50), nullable=False)
     main_hotel_id = Column('mainHotelId', INTEGER(unsigned=True), nullable=False)
     main_roomtype_id = Column('mainRoomTypeId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False)
-    is_delete = Column('isDelete', BIT, nullable=False)
-    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False)
+    is_online = Column('isOnline', BIT, nullable=False, default=0)
+    is_delete = Column('isDelete', BIT, nullable=False, default=0)
+    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     info = Column(VARCHAR(100))
+
+    @classmethod
+    def new_roomtype_mapping_from_ebooking(cls, session, provider_hotel_id, provider_roomtype_id, provider_roomtype_name, main_hotel_id, main_roomtype_id):
+        mapping = RoomTypeMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_roomtype_id=provider_roomtype_id, provider_roomtype_name=provider_roomtype_name, main_hotel_id=main_hotel_id, main_roomtype_id=main_roomtype_id, status=cls.STATUS.valid_complete)
+        session.add(mapping)
+        session.commit()
+        return mapping
+
+    @classmethod
+    def get_by_provider_roomtype(cls, session, provider_id, provider_roomtype_id):
+        return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id)\
+                .filter(RoomTypeMappingModel.is_delete == 0)\
+                .first()
+
+    @classmethod
+    def get_by_provider_and_main_roomtype(cls, session, provider_id, provider_roomtype_id, main_roomtype_id):
+        return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id,
+                        RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
+                .filter(RoomTypeMappingModel.is_delete == 0)\
+                .first()
+
+    #@classmethod
+    #def get_by_provider_and_main_roomtype(cls, session, provider_roomtype_id, main_roomtype_id):
+        #return session.query(RoomTypeMappingModel)\
+                #.filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id,
+                        #RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
+                #.filter(RoomTypeMappingModel.is_delete == 0)\
+                #.first()
 
     @classmethod
     def get_by_id(cls, session, id):
@@ -48,7 +81,7 @@ class RoomTypeMappingModel(Base):
     @classmethod
     def gets_by_provider_hotel_id(cls, session, id):
         return session.query(RoomTypeMappingModel)\
-                .filter(RoomTypeMappingModel.provider_hotel_id == id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(id))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .all()
 
@@ -78,6 +111,15 @@ class RoomTypeMappingModel(Base):
     @classmethod
     def get_polymer_provider_hotel_ids(cls, session, ids):
         return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_hotel_id.in_(ids))\
+                .filter(RoomTypeMappingModel.is_delete == 0)\
+                .filter(RoomTypeMappingModel.status == cls.STATUS.valid_complete)\
+                .all()
+
+    @classmethod
+    def get_polymer_by_provider_hotels(cls, session, provider_id, ids):
+        return session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
                 .filter(RoomTypeMappingModel.provider_hotel_id.in_(ids))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .filter(RoomTypeMappingModel.status == cls.STATUS.valid_complete)\

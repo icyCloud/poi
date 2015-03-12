@@ -3,7 +3,7 @@
 from models import Base
 from sqlalchemy import Column, or_, and_
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT
-from sqlalchemy.sql import exists
+from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
 
 
@@ -23,7 +23,7 @@ class HotelMappingModel(Base):
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     provider_id = Column('chainId', INTEGER(unsigned=True), nullable=False)
     provider_hotel_id = Column(
-        'chainHotelId', INTEGER(unsigned=True), nullable=False)
+        'chainHotelId', VARCHAR(50), nullable=False)
     provider_hotel_name = Column(
         'chainHotelName', VARCHAR(50), nullable=False)
     provider_hotel_address = Column(
@@ -32,16 +32,36 @@ class HotelMappingModel(Base):
     main_hotel_id = Column(
         'mainHotelId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False)
-    is_delete = Column('isDelete', BIT, nullable=False)
+    is_online = Column('isOnline', BIT, nullable=False, default=0)
+    is_delete = Column('isDelete', BIT, nullable=False, default=0)
     info = Column(VARCHAR(100))
-    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False)
+    merchant_id = Column("merchantId", INTEGER, nullable=False, default=0)
+    merchant_name = Column("merchantName", VARCHAR(50), nullable=False, default='')
+    ts_update = Column('tsUpdate', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
 
     @classmethod
     def get_by_id(cls, session, id):
         return session.query(HotelMappingModel)\
             .filter(HotelMappingModel.id == id, HotelMappingModel.is_delete == 0)\
             .first()
+
+    @classmethod
+    def get_by_provider_and_main_hotel(cls, session, provider_id, provider_hotel_id, main_hotel_id):
+        return session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==provider_id,
+                        HotelMappingModel.provider_hotel_id==str(provider_hotel_id),
+                        HotelMappingModel.main_hotel_id==main_hotel_id)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .first()
+
+    @classmethod
+    def get_by_provider_hotel(cls, session, provider_id, provider_hotel_id):
+        return session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==provider_id,
+                        HotelMappingModel.provider_hotel_id==str(provider_hotel_id))\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .first()
 
     @classmethod
     def gets_wait_firstvalid(cls, session, start=0, limit=20):
@@ -52,12 +72,23 @@ class HotelMappingModel(Base):
             .limit(limit)\
             .all()
 
+    @classmethod
+    def new_hotel_mapping_from_ebooking(cls, session, provider_hotel_id, provider_hotel_name, provider_hotel_address, city_id, main_hotel_id, merchant_id, merchant_name):
+        mapping = HotelMappingModel(provider_id=6, provider_hotel_id=str(provider_hotel_id), provider_hotel_name=provider_hotel_name,
+                provider_hotel_address=provider_hotel_address, city_id=city_id, main_hotel_id=main_hotel_id,
+                status=cls.STATUS.valid_complete, is_online=0, merchant_id=merchant_id, merchant_name=merchant_name)
+        session.add(mapping)
+        session.commit()
+        return mapping
+
+
 
     @classmethod
     def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
         stmt = exists(
-        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id, HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
                 RoomTypeMappingModel.is_delete == 0))
 
@@ -84,7 +115,8 @@ class HotelMappingModel(Base):
     def gets_show_in_secondvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
         stmt = exists(
-        ).where(and_(HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_second_valid,
                 RoomTypeMappingModel.is_delete == 0))
 
@@ -120,6 +152,25 @@ class HotelMappingModel(Base):
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         
+        r = query.offset(start).limit(limit).all()
+        total = query.count()
+
+        return r, total
+
+    @classmethod
+    def gets_show_in_ebooking(cls, session, hotel_name=None, city_id=None, merchant_ids=None, start=0, limit=20):
+        query = session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .filter(HotelMappingModel.provider_id == 6,
+                        HotelMappingModel.status == cls.STATUS.valid_complete)
+
+        if city_id:
+            query = query.filter(HotelMappingModel.city_id == city_id)
+        if hotel_name:
+            query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
+        if merchant_ids is not None:
+            query = query.filter(HotelMappingModel.merchant_id.in_(merchant_ids))
+
         r = query.offset(start).limit(limit).all()
         total = query.count()
 
@@ -221,4 +272,7 @@ class HotelMappingModel(Base):
             status=self.status,
             is_online=self.is_online,
             is_delete=self.is_delete,
-            info=self.info)
+            info=self.info,
+            merchant_id=self.merchant_id,
+            merchant_name=self.merchant_name,
+            )

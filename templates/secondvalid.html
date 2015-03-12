@@ -273,11 +273,22 @@ validapp.controller('validController',
             if (resp.errcode == 0) {
                 $scope.providers = resp.result.providers;
             } else {
-                alert(resp.errmsg);
             }
         })
         .error(function() {
-            alert("网络错误");
+        });
+
+    $http.get("/api/city")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.citys = resp.result.citys;
+            }
+        });
+    $http.get("/api/district")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.districts = resp.result.districts;
+            }
         });
 
     function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
@@ -299,9 +310,6 @@ validapp.controller('validController',
                     var result = data.result;
                     $scope.hotelMappings = result.hotel_mappings;
                     roomtypes = result.roomtypes;
-                    $scope.citys = result.citys;
-                    $scope.districts = result.districts;
-
 
                     $scope.totalItems = result.total;
                     $scope.currentPage = Math.floor(result.start / result.limit) + 1;
@@ -318,6 +326,7 @@ validapp.controller('validController',
     }
 
     $scope.showRoomType = function(mapping) {
+        $scope.dialogProviderRoomType = {};
         $.extend($scope.dialogMainRoomType, mapping.main_roomtype);
         $.extend($scope.dialogProviderRoomType, mapping.provider_roomtype);
         $('#modal-roomtype').modal('show');
@@ -361,7 +370,7 @@ validapp.controller('validController',
     $scope.getProvider = function(id) {
         for (var i = 0; i < $scope.providers.length; i++) {
             var p = $scope.providers[i];
-            if (id == p.id) {
+            if (id == p.chain_id) {
                 return p;
             }
         }
@@ -371,7 +380,7 @@ validapp.controller('validController',
         for (var i = 0; i < $scope.providers.length; i++) {
             var provider = $scope.providers[i];
             if (provider.name == provider_name) {
-                return provider.id;
+                return provider.chain_id;
             }
         }
 

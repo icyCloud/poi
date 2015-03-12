@@ -143,6 +143,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
             </div>
             <div class="modal-footer">
+                <a type="button" class="btn" href="/hotel/{{dialogHotel.id}}/roomtype/" target="blank" >房型</a>
                 <button type="button" class="btn btn-danger" data-ng-click="showChangeHotelDialog()" data-ng-show="dialogHotel.status <= ${HotelMappingModel.STATUS.wait_first_valid}" >修改</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
@@ -451,6 +452,7 @@ validapp.controller('validController',
         ['$scope', '$http', '$location',
         function($scope, $http, $location) {
 
+
     $scope.totalItems = 0;
     $scope.currentPage = 0;
     $scope.itemsPerPage = 0;
@@ -496,7 +498,19 @@ validapp.controller('validController',
             }
         })
         .error(function() {
-            alert("网络错误");
+        });
+
+    $http.get("/api/city")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.citys = resp.result.citys;
+            }
+        });
+    $http.get("/api/district")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                districts = resp.result.districts;
+            }
         });
 
     function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
@@ -518,9 +532,6 @@ validapp.controller('validController',
                     var result = data.result;
                     $scope.hotelMappings = result.hotel_mappings;
                     roomtypes = result.roomtypes;
-                    $scope.citys = result.citys;
-                    districts = result.districts;
-
 
                     $scope.totalItems = result.total;
                     $scope.currentPage = Math.floor(result.start / result.limit) + 1;
@@ -550,7 +561,11 @@ validapp.controller('validController',
 
         cloneRoomType(mapping.main_roomtype, $scope.dialogMainRoomType);
         cloneRoomType(mapping.provider_roomtype, $scope.dialogProviderRoomType);
+        console.log('1111111')
 
+        $('#modal-roomtype').modal({
+            keyboard: true
+        });
         $('#modal-roomtype').modal('show');
     }
 
@@ -592,7 +607,7 @@ validapp.controller('validController',
     $scope.getProvider = function(id) {
         for (var i = 0; i < $scope.providers.length; i++) {
             var p = $scope.providers[i];
-            if (id == p.id) {
+            if (id == p.chain_id) {
                 return p;
             }
         }
@@ -602,7 +617,7 @@ validapp.controller('validController',
         for (var i = 0; i < $scope.providers.length; i++) {
             var provider = $scope.providers[i];
             if (provider.name == provider_name) {
-                return provider.id;
+                return provider.chain_id;
             }
         }
 

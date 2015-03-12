@@ -2,5 +2,6 @@ tornado
 mako
 sqlalchemy
 dogpile.cache
-pylibmc
 MySQL-python
+redis
+simplejson

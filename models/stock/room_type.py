@@ -14,8 +14,8 @@ class RoomTypeModel(Base):
 
     id = Column(INTEGER, primary_key=True, autoincrement=True)
     chain_id = Column("chainId", INTEGER, nullable=False)
-    hotel_id = Column('chainHotelId', INTEGER, nullable=False)
-    roomtype_id = Column('chainRoomTypeId', INTEGER, nullable=False)
+    hotel_id = Column('chainHotelId', VARCHAR(60), nullable=False)
+    roomtype_id = Column('chainRoomTypeId', VARCHAR(60), nullable=False)
     name = Column('Name', VARCHAR(30), nullable=False)
     room_size = Column('RoomSize', VARCHAR(20), nullable=False)
     bed_type = Column('BedType', TINYINT(4), nullable=False)
@@ -41,6 +41,13 @@ class RoomTypeModel(Base):
     def gets_by_hotel_id(cls, session, hotel_id):
         return session.query(RoomTypeModel)\
                 .filter(RoomTypeModel.hotel_id == hotel_id)\
+                .all()
+
+    @classmethod
+    def gets_by_chain_and_hotel_ids(cls, session, chain_id, hotel_ids):
+        return session.query(RoomTypeModel)\
+                .filter(RoomTypeModel.chain_id == chain_id)\
+                .filter(RoomTypeModel.hotel_id.in_(hotel_ids))\
                 .all()
 
     @classmethod

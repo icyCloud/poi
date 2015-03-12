@@ -21,14 +21,22 @@ class CityModel(Base):
     prov_id = Column('provId', INTEGER(unsigned=True), nullable=False)
 
     MC_ALL_CITY = __tablename__ + "mc_all_city"
+    MC_ALL_CITY_DICT = __tablename__ + "mc_all_city_dict"
 
     @classmethod
     @cache.mc(MC_ALL_CITY)
-    def get_all(self,session):
+    def get_all(cls, session):
         return session.query(CityModel).all()
+
+    @classmethod
+    @cache.mc(MC_ALL_CITY_DICT)
+    def get_all_dicts(cls, session):
+        citys = cls.get_all(session)
+        return [city.todict() for city in citys]
 
     def todict(self):
         return ObjectDict(
                 id=self.id,
                 name=self.name,
                 )
+

@@ -12,12 +12,19 @@ from views.api.provider import ProviderAPIHandler, ProviderQueryAPIHandler
 from views.api.firstvalid import FirstValidAPIHandler, FirstValidStatusAPIHandelr, FirstValidRoomTypeAPIHandler
 from views.api.secondvalid import SecondValidAPIHandler, SecondValidHotelAPIHandler, SecondValidRoomTypeAPIHandler
 from views.api.hotel import HotelSearchAPIHandler, HotelAPIHandler
-from views.api.hotel_mapping import HotelMappingAPIHandler
-from views.api.room_type_mapping import RoomTypeMappingAPIHandler
+from views.api.hotel_mapping import HotelMappingAPIHandler, HotelMappingEbookingPushAPIHandler, HotelMappingEbookingBatchPushAPIHandler
+from views.api.room_type_mapping import RoomTypeMappingAPIHandler, RoomTypeMappingEbookingPushAPIHandler, RoomTypeMappingEbookingBatchPushAPIHandler
 from views.api.polymer import PolymerAPIHandler, PolymerHotelAPIHandler, PolymerRoomTypeAPIHandler
 from views.api.roomtype import RoomTypeAPIHandler
 from views.api.city import CityAPIHandler
-from views.api.district import DistrictAPIHandler
+from views.api.district import DistrictAPIHandler, DistrictByCityAPIHandler
+
+from views.ebooking import EbookingHandler
+from views.api.ebooking import EbookingAPIHandler, MerchantListHandler
+
+from views.hotels import HotelsHandler
+
+from views.api.business_zone import BusinessZoneByCityAPIHandler
 
 handlers = [
         (r"/?", IndexHandler),
@@ -53,7 +60,19 @@ handlers = [
         (r"/api/hotel/(?P<hotel_id>\d+)/roomtype/?", RoomTypeAPIHandler),
         (r"/api/city/?", CityAPIHandler),
         (r"/api/district/?", DistrictAPIHandler),
+        (r"/api/city/(?P<city_id>\d+)/district/?", DistrictByCityAPIHandler),
+        (r"/api/city/(?P<city_id>\d+)/businesszone/?", BusinessZoneByCityAPIHandler),
 
         (r"/api/hotel/(?P<hotel_id>\d+)/?", HotelAPIHandler),
+        (r"/api/hotel/?", HotelAPIHandler),
+        (r"/api/push/ebooking/hotel/?", HotelMappingEbookingPushAPIHandler),
+        (r"/api/push/ebooking/hotels/?", HotelMappingEbookingBatchPushAPIHandler),
+        (r"/api/push/ebooking/room/?", RoomTypeMappingEbookingPushAPIHandler),
+        (r"/api/push/ebooking/rooms/?", RoomTypeMappingEbookingBatchPushAPIHandler),
 
+        (r"/polymer/ebooking/?", EbookingHandler),
+        (r"/api/polymer/ebooking/?", EbookingAPIHandler),
+        (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
+
+        (r"/hotels/?", HotelsHandler),
         ]

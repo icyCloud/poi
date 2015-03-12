@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from tornado.escape import json_decode
 
 from views.base import BtwBaseHandler
 
 from tools.auth import auth_login, auth_permission
+from tools.log import Log, log_request
+from tools.request_tools import get_and_valid_arguments
+
 from constants import PERMISSIONS
 from models.hotel import HotelModel as Hotel
 from models.business_zone import BusinessZoneModel
 
 class HotelSearchAPIHandler(BtwBaseHandler):
 
+    @log_request
     def get(self):
         name = self.get_query_argument('name', None)
         star = self.get_query_argument('star', None)
@@ -22,9 +28,17 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         filter_ids = json_decode(filter_ids) if filter_ids else filter_ids
         within_ids = self.get_query_argument('within_ids', None)
         within_ids = json_decode(within_ids) if within_ids else within_ids
+        count_total = True if int(self.get_query_argument('count_total', 0)) == 1 else False
 
+        t0 = time.time()
+        if count_total:
+            hotels, total = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids, count_total=count_total)
+        else:
+            hotels = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids, count_total=count_total)
+            total = 20000
 
-        hotels, total = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids)
+        t1 = time.time()
+        Log.info(">>HotelSearch query hotel cost {}".format(t1 - t0))
         hotels = [hotel.todict() for hotel in hotels]
 
         self.merge_business_zone(hotels)
@@ -58,3 +72,35 @@ class HotelAPIHandler(BtwBaseHandler):
         else:
             self.finish_json(errcode=404, errmsg="not found hotel " + hotel_id)
 
+    def post(self):
+        args = self.get_json_arguments()
+        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin = get_and_valid_arguments(
+                args,
+                'name', 'star', 'facilities', 'blog', 'blat', 'glog', 'glat', 'city_id', 'district_id', 'address',
+                'business_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online', 'foreigner_checkin')
+        hotel = Hotel.new(self.db,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
+
+        self.finish_json(result=dict(
+            hotel=hotel.todict(),
+            ))
+
+
+    def put(self, hotel_id):
+        args = self.get_json_arguments()
+        name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin = get_and_valid_arguments(
+                args,
+                'name', 'star', 'facilities', 'blog', 'blat', 'glog', 'glat', 'city_id', 'district_id', 'address',
+                'business_zone', 'phone', 'traffic', 'description', 'require_idcard', 'is_online', 'foreigner_checkin')
+
+        hotel = Hotel.get_by_id(self.db, hotel_id)
+        if not hotel:
+            self.finish_json(errcode=404, errmsg="not found hotel " + hotel_id)
+            return
+
+        hotel = Hotel.update(self.db, hotel_id,
+            name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
+
+        self.finish_json(result=dict(
+            hotel=hotel.todict(),
+            ))

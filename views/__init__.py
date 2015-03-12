@@ -10,12 +10,6 @@ from mako import exceptions
 
 class BaseHandler(RequestHandler):
 
-    def initialize(self):
-        self.db = self.application.DB_Session()
-
-    def on_finish(self):
-        self.db.close()
-
     def render(self, template_name, **kwargs):
         lookup = self.application.template_lookup
 
@@ -35,11 +29,3 @@ class BaseHandler(RequestHandler):
             self.finish(template.render(**env_kwargs))
         except:
             self.finish(exceptions.html_error_template().render())
-
-    #def _handle_request_exception(self, e):
-        #self.db.rollback()
-        #self.log_exception(sys.exc_info())
-        #if self._finished:
-            #return
-        #logging(e)
-        #self.finish()

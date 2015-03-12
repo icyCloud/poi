@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 from tornado.escape import json_decode
@@ -15,12 +14,20 @@ class DistrictAPIHandler(BtwBaseHandler):
 
         if district_ids:
             districts = District.get_by_ids(self.db, district_ids)
+            districts = [district.todict() for district in districts]
         else:
-            districts = District.get_all(self.db)
-
-        districts = [district.todict() for district in districts]
-        print districts
+            districts = District.get_all_dicts(self.db)
 
         self.finish_json(result=dict(
             districts=districts
             ))
+
+class DistrictByCityAPIHandler(BtwBaseHandler):
+
+    def get(self, city_id):
+        districts = District.get_by_city_id(self.db, city_id)
+
+        self.finish_json(result=dict(
+            districts = [district.todict() for district in districts],
+            ))
+

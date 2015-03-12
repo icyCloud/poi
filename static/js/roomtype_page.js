@@ -74,7 +74,7 @@ roomtypeapp.controller('roomtypeController', ['$scope', '$rootScope', '$modal', 
     }
 
     function fetch_hotel(hotel_id) {
-        var url = "/api/hotel/" + hotel_id + "/roomtype/";
+        var url = "/api/hotel/" + hotel_id + "/roomtype/?need_valid=0";
         $http.get(url)
             .success(function(data) {
                 console.log(data);
