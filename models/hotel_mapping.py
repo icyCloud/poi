@@ -159,7 +159,7 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
-    def gets_show_in_ebooking(cls, session, hotel_name=None, city_id=None, merchant_ids=None, start=0, limit=20):
+    def gets_show_in_ebooking(cls, session, hotel_name=None, city_id=None, merchant_ids=None, is_new=None, start=0, limit=20):
         query = session.query(HotelMappingModel)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.provider_id == 6,
@@ -171,6 +171,8 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         if merchant_ids is not None:
             query = query.filter(HotelMappingModel.merchant_id.in_(merchant_ids))
+        if is_new is not None:
+            query = query.filter(HotelMappingModel.is_new == is_new)
 
         r = query.order_by(HotelMappingModel.id.desc()).offset(start).limit(limit).all()
         total = query.count()

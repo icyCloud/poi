@@ -36,8 +36,9 @@ class EbookingAPIHandler(BtwBaseHandler):
         merchant_id = self.get_query_argument('merchant_id', None)
         merchant_type = self.get_query_argument('merchant_type', None)
 
+        is_new = self.get_query_argument('is_new', None)
+
         merchant_ids = yield self.get_merchant_ids(merchant_type, merchant_id)
-        print locals()
         if merchant_ids == []:
             self.finish_json(result=dict(
                 hotel_mappings=[],
@@ -51,7 +52,7 @@ class EbookingAPIHandler(BtwBaseHandler):
         Log.info(">> get show in ebooking")
         t0 = time.time() 
         hotel_mappings, total = HotelMapping.gets_show_in_ebooking(self.db,
-                hotel_name=hotel_name, city_id=city_id, merchant_ids=merchant_ids,
+                hotel_name=hotel_name, city_id=city_id, merchant_ids=merchant_ids, is_new=is_new,
                 start=start, limit=limit)
         t1 = time.time()
         Log.info(">> show in ebooking cost {}".format(t1 - t0))
