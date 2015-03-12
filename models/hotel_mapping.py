@@ -165,14 +165,20 @@ class HotelMappingModel(Base):
                 .filter(HotelMappingModel.provider_id == 6,
                         HotelMappingModel.status == cls.STATUS.valid_complete)
 
+        if is_new is not None:
+            from models.room_type_mapping import RoomTypeMappingModel
+            stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                        HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+                        RoomTypeMappingModel.is_new == 1,
+                        RoomTypeMappingModel.is_delete == 0))
+            query = query.filter(or_(stmt, HotelMappingModel.is_new == is_new))
+
         if city_id:
             query = query.filter(HotelMappingModel.city_id == city_id)
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         if merchant_ids is not None:
             query = query.filter(HotelMappingModel.merchant_id.in_(merchant_ids))
-        if is_new is not None:
-            query = query.filter(HotelMappingModel.is_new == is_new)
 
         r = query.order_by(HotelMappingModel.id.desc()).offset(start).limit(limit).all()
         total = query.count()
