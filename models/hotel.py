@@ -6,7 +6,6 @@ from models import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT, DOUBLE, TEXT
 from tornado.util import ObjectDict
-from tools.utils import exe_time
 from tools.log import Log
 
 class HotelModel(Base):
@@ -125,7 +124,7 @@ class HotelModel(Base):
 
 
     def todict(self):
-        return dict(
+        return ObjectDict(
                 id=self.id,
                 name=self.name,
                 address=self.address,
