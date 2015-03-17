@@ -10,8 +10,8 @@ from tools.auth import auth_login, auth_permission
 from tools.log import Log, log_request
 from tools.request_tools import get_and_valid_arguments
 
-from constants import PERMISSIONS
 from models.hotel import HotelModel as Hotel
+from models.room_type import RoomTypeModel
 from models.business_zone import BusinessZoneModel
 
 class HotelSearchAPIHandler(BtwBaseHandler):
@@ -29,6 +29,7 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         within_ids = self.get_query_argument('within_ids', None)
         within_ids = json_decode(within_ids) if within_ids else within_ids
         count_total = True if int(self.get_query_argument('count_total', 0)) == 1 else False
+        with_roomtype = int(self.get_query_argument('with_roomtype', 0))
 
         t0 = time.time()
         if count_total:
@@ -42,6 +43,9 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         hotels = [hotel.todict() for hotel in hotels]
 
         self.merge_business_zone(hotels)
+        if with_roomtype == 1:
+            self.merge_roomtype(hotels)
+
         self.finish_json(result=dict(
                 hotels=hotels,
                 start=start,
@@ -58,6 +62,14 @@ class HotelSearchAPIHandler(BtwBaseHandler):
                     hotel['business_zone'] = business_zone.todict()
                     break
         return hotels
+
+    def merge_roomtype(self, hotels):
+        hotel_ids = [h.id for h in hotels]
+        rooms = RoomTypeModel.gets_by_hotel_ids(self.db, hotel_ids)
+        for hotel in hotels:
+            hotel['roomtypes'] = [room.todict() for room in rooms if room.hotel_id == hotel.id]
+        return hotels
+
 
 
 
