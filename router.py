@@ -25,6 +25,7 @@ from views.api.ebooking import EbookingAPIHandler, MerchantListHandler
 from views.hotels import HotelsHandler
 
 from views.api.business_zone import BusinessZoneByCityAPIHandler
+from views.api.elong import ElongAPIHandler
 
 handlers = [
         (r"/?", IndexHandler),
@@ -75,4 +76,5 @@ handlers = [
         (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
 
         (r"/hotels/?", HotelsHandler),
+        (r"/api/elong/hotel/(?P<hotel_id>\d+)/?", ElongAPIHandler),
         ]
