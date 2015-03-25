@@ -35,6 +35,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
         <div class="col-md-3" >
             <button type="buttion" class="btn btn-primary  withripple" style="position:absolute;right:0px;" ng-click="show()">+增加酒店</button>
+
         </div>
 
     </div>
@@ -45,7 +46,8 @@ from models.room_type_mapping import RoomTypeMappingModel
         <h4 class="col-md-4 title">酒店名称</h3>
         <h4 class="col-md-1 title">星级</h3>
         <h4 class="col-md-1 title">城市</h3>
-        <h4 class="col-md-4 title">地址</h3>
+        <h4 class="col-md-3 title">地址</h3>
+        <h4 class="col-md-1 title"></h3>
         <h4 class="col-md-1 title">维护</h3>
         <h4 class="col-md-1 title">操作</h3>
     </div>
@@ -63,8 +65,12 @@ from models.room_type_mapping import RoomTypeMappingModel
             <div class="col-md-1 " style="margin-top:0; margin-buttom: 0;">
                 <p class="text-center" ><b ng-bind="getCity(searchHotels.city_id)"></b></p>
             </div>
-            <div class="col-md-4 ">
+            <div class="col-md-3 ">
                 <p class="text-center" data-ng-bind="searchHotels.address"></p>
+            </div>
+
+            <div class="col-md-1 ">
+                <button  class="btn btn-primary" style="margin: 0;" data-ng-click="yiLong(searchHotels.id)">艺龙</button>
             </div>
             <div class="col-md-1 ">
                 <button class="btn btn-primary" style="margin: 0;" data-ng-click="roomtypeHref(searchHotels.id)">房型</button>
@@ -606,6 +612,28 @@ validapp.controller('validController',
         } else {
             return "javascript: void(0)"
         }
+
+    }
+
+
+    $scope.yiLong=function(id){
+        
+        $http.get("/api/elong/hotel/" + id )
+            .success(function(resp) {
+                console.log(resp);
+                if (resp.errcode == 0) {
+                                      
+                } else {
+                    alert(resp.errmsg);
+                }
+
+            })
+            .error(function(data,status) {
+                if(status!=0)
+                {                    
+                    alert("network error");
+                }
+            });
 
     }
 
