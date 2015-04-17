@@ -102,6 +102,7 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
 
         query = query\
+                .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.status != cls.STATUS.init)\
                 .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_first_valid))
@@ -130,6 +131,7 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
 
         query = query\
+                .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.status != cls.STATUS.init)\
                 .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_second_valid))
@@ -143,6 +145,7 @@ class HotelMappingModel(Base):
     @classmethod
     def gets_show_in_polymer(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         query = session.query(HotelMappingModel)\
+            .filter(HotelMappingModel.provider_id != 6)\
             .filter(HotelMappingModel.is_delete == 0)\
             .filter(HotelMappingModel.status == cls.STATUS.valid_complete)
 
