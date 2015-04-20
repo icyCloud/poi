@@ -26,3 +26,5 @@ NAVIGATION = ObjectDict(
 
 #Memcached
 MC_PREFIX = "poi_mc"
+
+EBOOKING_CHAIN_ID = 6

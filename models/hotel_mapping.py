@@ -178,10 +178,10 @@ class HotelMappingModel(Base):
 
         if city_id:
             query = query.filter(HotelMappingModel.city_id == city_id)
-        if hotel_name:
-            query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         if merchant_ids is not None:
             query = query.filter(HotelMappingModel.merchant_id.in_(merchant_ids))
+        if hotel_name:
+            query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
 
         r = query.order_by(HotelMappingModel.id.desc()).offset(start).limit(limit).all()
         total = query.count()
