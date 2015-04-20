@@ -14,6 +14,8 @@ from models.hotel import HotelModel as Hotel
 from models.room_type import RoomTypeModel
 from models.business_zone import BusinessZoneModel
 
+from constants import EBOOKING_CHAIN_ID
+
 class HotelSearchAPIHandler(BtwBaseHandler):
 
     @log_request

@@ -8,6 +8,8 @@ from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP
 from tornado.util import ObjectDict
 from tools.log import Log
 
+from constants import EBOOKING_CHAIN_ID
+
 class HotelModel(Base):
 
     __tablename__ = 'hotel'
@@ -100,25 +102,42 @@ class HotelModel(Base):
     @classmethod
     def update(cls, session, hotel_id,
             name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin):
-        hotel = cls.get_by_id(session, hotel_id)
-        hotel.name = name
-        hotel.star = star
-        hotel.facilities = facilities
-        hotel.blog = blog
-        hotel.blat = blat
-        hotel.glog = glog
-        hotel.glat = glat
-        hotel.city_id = city_id
-        hotel.district_id= district_id
-        hotel.address = address
-        hotel.business_zone = business_zone
-        hotel.phone = phone
-        hotel.traffic = traffic
-        hotel.description = description
-        hotel.require_idcard = require_idcard
-        hotel.is_online = is_online
-        hotel.foreigner_checkin = foreigner_checkin
-        session.commit()
+        
+        try:
+
+            hotel = cls.get_by_id(session, hotel_id)
+            hotel.star = star
+            hotel.facilities = facilities
+            hotel.blog = blog
+            hotel.blat = blat
+            hotel.glog = glog
+            hotel.glat = glat
+            hotel.city_id = city_id
+            hotel.district_id= district_id
+            hotel.address = address
+            hotel.business_zone = business_zone
+            hotel.phone = phone
+            hotel.traffic = traffic
+            hotel.description = description
+            hotel.require_idcard = require_idcard
+            hotel.is_online = is_online
+            hotel.foreigner_checkin = foreigner_checkin
+
+            tmp_name = hotel.name
+            hotel.name = name
+
+            if tmp_name != name:
+                from models.hotel_mapping import HotelMappingModel
+                session.query(HotelMappingModel)\
+                        .filter(HotelMappingModel.provider_id == EBOOKING_CHAIN_ID,\
+                                HotelMappingModel.main_hotel_id == hotel.id)\
+                        .update({HotelMappingModel.provider_hotel_name: name})
+
+            session.commit()
+
+        except:
+            session.rollback()
+            raise
 
         return hotel
 
