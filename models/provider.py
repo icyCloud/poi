@@ -74,7 +74,7 @@ class ProviderModel(Base):
 
 
     @classmethod
-    @cache.mc(MC_ALL_PROVIDERS)
+    #@cache.mc(MC_ALL_PROVIDERS)
     def get_all(cls, session, start=None, limit=None):
         #query = session.query(ProviderModel)\
                 #.filter(ProviderModel.is_delete == 0)
