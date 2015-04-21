@@ -100,11 +100,13 @@ from models.room_type_mapping import RoomTypeMappingModel
             <div class="modal-body">
                 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">酒店名字:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>酒店名字:
+                    </label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.name"/>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">星级:</label>
+                    <label class="col-lg-4" style="padding-left:26px">星级:</label>
                     <select class="col-lg-4" ng-model="currentHotel.star">
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -115,24 +117,30 @@ from models.room_type_mapping import RoomTypeMappingModel
                     </select>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">百度经度:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>百度经度:
+                    </label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.blog"/>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">百度纬度:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>百度纬度:
+                    </label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.blat"/>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">Google经度:</label>
+                    <label class="col-lg-4" style="padding-left:26px">Google经度:</label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.glog"/>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">Google纬度:</label>
+                    <label class="col-lg-4" style="padding-left:26px">Google纬度:</label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.glat"/>
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">市:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>市:
+                    </label>
                     
                     <div class="col-lg-4">
                         <input class="form-control floating-label" type="text"
@@ -143,7 +151,9 @@ from models.room_type_mapping import RoomTypeMappingModel
 
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">区:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>区:
+                    </label>
                     <select class="col-lg-4" ng-model="currentHotel.district_id" ng-options="c.id as c.name for c in changeDistrictName">
                        <!-- <option ng-repeat="district in changeDistrictName" value="district.id" ng-bind="district.name"></option>-->
                         
@@ -151,39 +161,43 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">详细地址:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>详细地址:
+                    </label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.address"/>
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">商圈:</label>
+                    <label class="col-lg-4" style="padding-left:26px">商圈:</label>
                     <select class="col-lg-4" ng-model="currentHotel.business_zone.id" ng-options="c.id as c.name for c in changeBusinessName">
                         <!--<option ng-repeat="businesszone in changeBusinessName" value="businesszone.id" ng-bind="businesszone.name"></option>-->
                         
                     </select>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-3">电话:</label>
+                    <label class="col-lg-4" style="padding-left:26px">电话:</label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.phone"/>
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">交通:</label>
+                    <label class="col-lg-4" style="padding-left:26px">交通:</label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.traffic"/>
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">描述:</label>
+                    <label class="col-lg-4" style="padding-left:26px">描述:</label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.description"/>
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">酒店设施:</label>
+                    <label class="col-lg-4" style="padding-left:26px">酒店设施:</label>
                     <input class="col-lg-4" type="text" placeholder="用半角,分割" ng-model="currentHotel.facilities"/>
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">预定要求:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>预定要求:
+                    </label>
 
                     <select class="col-lg-4" ng-model="currentHotel.require_idcard">
                         <option value="0">不需要身份证</option>
@@ -193,7 +207,9 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">外国人可否入住:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>外国人可否入住:
+                    </label>
 
                     <select class="col-lg-4" ng-model="currentHotel.foreigner_checkin">
                         <option value="1">可以入住</option>
@@ -204,7 +220,9 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
 
                 <div class="row rowstyle">
-                    <label class="col-lg-3">运营状态:</label>
+                    <label class="col-lg-4">
+                        <font size="4" color="red">*&nbsp;</font>运营状态:
+                    </label>
 
                     <select class="col-lg-4" ng-model="currentHotel.is_online">
                         <option value="0">停止</option>
