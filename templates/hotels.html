@@ -151,8 +151,8 @@ from models.room_type_mapping import RoomTypeMappingModel
 
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-4">
-                        <font size="4" color="red">*&nbsp;</font>区:
+                    <label class="col-lg-4" style="padding-left:26px">
+                        区:
                     </label>
                     <select class="col-lg-4" ng-model="currentHotel.district_id" ng-options="c.id as c.name for c in changeDistrictName">
                        <!-- <option ng-repeat="district in changeDistrictName" value="district.id" ng-bind="district.name"></option>-->
@@ -383,13 +383,7 @@ validapp.controller('validController',
 
         }
 
-        if($.trim($scope.currentHotel.district_id)==""||$scope.currentHotel.district_id==undefined||$scope.currentHotel.district_id==null){
-
-            $scope.hotelErrMsg="缺少区";
-            return;
-
-        }
-
+        
 
         if($.trim($scope.currentHotel.address)==""||$scope.currentHotel.address==undefined||$scope.currentHotel.address==null){
 
@@ -444,7 +438,7 @@ validapp.controller('validController',
             'glog':checkNull($scope.currentHotel.glog), 
             'glat':checkNull($scope.currentHotel.glat), 
             'city_id':parseInt($scope.getCityId($.trim($scope.changeHotelName))),
-            'district_id':parseInt($.trim($scope.currentHotel.district_id)), 
+            'district_id':checkNull($scope.currentHotel.district_id), 
             'address':$.trim($scope.currentHotel.address),
             'business_zone':checkNull($scope.currentHotel['business_zone']['id']), 
             'phone':checkStrNull($scope.currentHotel.phone), 
@@ -532,6 +526,8 @@ validapp.controller('validController',
             console.log(resp);
             if (resp.errcode == 0) {
                 $scope.changeDistrictName=resp.result.districts;
+                $scope.changeDistrictName.unshift({id:"",name:""});
+
                 
             } else {
                 alert(resp.errmsg);
