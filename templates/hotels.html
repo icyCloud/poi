@@ -117,14 +117,14 @@ from models.room_type_mapping import RoomTypeMappingModel
                     </select>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-4">
-                        <font size="4" color="red">*&nbsp;</font>百度经度:
+                    <label class="col-lg-4" style="padding-left:26px">
+                        百度经度:
                     </label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.blog"/>
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-4">
-                        <font size="4" color="red">*&nbsp;</font>百度纬度:
+                    <label class="col-lg-4" style="padding-left:26px">
+                        百度纬度:
                     </label>
                     <input class="col-lg-4" type="text" ng-model="currentHotel.blat"/>
                 </div>
@@ -151,8 +151,8 @@ from models.room_type_mapping import RoomTypeMappingModel
 
                 </div>
                 <div class="row rowstyle">
-                    <label class="col-lg-4">
-                        <font size="4" color="red">*&nbsp;</font>区:
+                    <label class="col-lg-4" style="padding-left:26px">
+                        区:
                     </label>
                     <select class="col-lg-4" ng-model="currentHotel.district_id" ng-options="c.id as c.name for c in changeDistrictName">
                        <!-- <option ng-repeat="district in changeDistrictName" value="district.id" ng-bind="district.name"></option>-->
@@ -346,7 +346,7 @@ validapp.controller('validController',
 
     function checkNull(params){
         
-        if(params==null||params==undefined){
+        if(params == null || params == undefined || $.trim(params) == "") {
             return "";
         }else {
             return parseFloat($.trim(params));
@@ -375,21 +375,7 @@ validapp.controller('validController',
 
         }
 
-        if($.trim($scope.currentHotel.blog)==""||$scope.currentHotel.blog==undefined||$scope.currentHotel.blog==null){
-
-            
-            $scope.hotelErrMsg="缺少百度经度";
-            return;
-
-        }
-
-        if($.trim($scope.currentHotel.blat)==""||$scope.currentHotel.blat==undefined||$scope.currentHotel.blat==null){
-
-            $scope.hotelErrMsg="缺少百度纬度";
-            return;
-
-        }
-
+               
         if($scope.getCityId($scope.changeHotelName)=="-1"||$scope.changeHotelName==undefined||$scope.changeHotelName==null){
 
             $scope.hotelErrMsg="缺少城市";
@@ -397,13 +383,7 @@ validapp.controller('validController',
 
         }
 
-        if($.trim($scope.currentHotel.district_id)==""||$scope.currentHotel.district_id==undefined||$scope.currentHotel.district_id==null){
-
-            $scope.hotelErrMsg="缺少区";
-            return;
-
-        }
-
+        
 
         if($.trim($scope.currentHotel.address)==""||$scope.currentHotel.address==undefined||$scope.currentHotel.address==null){
 
@@ -453,12 +433,12 @@ validapp.controller('validController',
             'name':$.trim($scope.currentHotel.name), 
             'star':checkNull($scope.currentHotel.star), 
             'facilities':($.trim($scope.currentHotel.facilities).replace(/，/g,',')), 
-            'blog':parseFloat($.trim($scope.currentHotel.blog)), 
-            'blat':parseFloat($.trim($scope.currentHotel.blat)), 
+            'blog':checkNull($scope.currentHotel.blog), 
+            'blat':checkNull($scope.currentHotel.blat), 
             'glog':checkNull($scope.currentHotel.glog), 
             'glat':checkNull($scope.currentHotel.glat), 
             'city_id':parseInt($scope.getCityId($.trim($scope.changeHotelName))),
-            'district_id':parseInt($.trim($scope.currentHotel.district_id)), 
+            'district_id':checkNull($scope.currentHotel.district_id), 
             'address':$.trim($scope.currentHotel.address),
             'business_zone':checkNull($scope.currentHotel['business_zone']['id']), 
             'phone':checkStrNull($scope.currentHotel.phone), 
@@ -546,6 +526,8 @@ validapp.controller('validController',
             console.log(resp);
             if (resp.errcode == 0) {
                 $scope.changeDistrictName=resp.result.districts;
+                $scope.changeDistrictName.unshift({id:"",name:""});
+
                 
             } else {
                 alert(resp.errmsg);
