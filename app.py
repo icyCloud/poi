@@ -16,6 +16,7 @@ from sqlalchemy.orm import sessionmaker
 
 from router import handlers
 from config import Config, LISTEN_IP
+from constants import Login
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -30,10 +31,10 @@ class Application(tornado.web.Application):
             cookie_secret='you never know me',
             autoreload=True,
             gzip=True,
-            login_url="/login/",
+            login_url=Login.LOGIN_URL,
             static_path=os.path.join(os.path.dirname(__file__), "static"),
         )
-                
+
         tornado.web.Application.__init__(self, handlers, **setting)
 
         # templates

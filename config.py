@@ -16,3 +16,5 @@ API = {
 IS_PUSH_TO_STOCK = False
 
 REDIS_HOST = 'localhost'
+
+BACKSTAGE_HOST = 'http://121.42.8.247:8080'
