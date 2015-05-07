@@ -15,7 +15,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from router import handlers
-from config import Config, LISTEN_IP
+from config import Config, LISTEN_IP, COOKIE_SALT
 from constants import Login
 
 reload(sys)
@@ -28,10 +28,10 @@ class Application(tornado.web.Application):
     def __init__(self):
 
         setting = dict(
-            cookie_secret='you never know me',
+            cookie_secret=COOKIE_SALT,
             autoreload=True,
             gzip=True,
-            login_url=Login.LOGIN_URL,
+            login_url='/',
             static_path=os.path.join(os.path.dirname(__file__), "static"),
         )
 

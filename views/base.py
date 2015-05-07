@@ -14,6 +14,9 @@ from models.user import UserModel
 from exception.json_exception import JsonException, JsonDecodeError
 from tornado.util import ObjectDict
 from constants import Login
+from tools.auth import mapping_permission
+from config import DEBUG, BACKSTAGE_USERNAME_KEY
+from tools.log import Log
 
 
 class BtwBaseHandler(BaseHandler):
@@ -33,18 +36,27 @@ class BtwBaseHandler(BaseHandler):
 
     @gen.coroutine
     def get_current_user(self):
-        username = self.get_secure_cookie('username')
-        username = 'admin'
+        username = self.get_secure_cookie(BACKSTAGE_USERNAME_KEY)
+        if DEBUG:
+            username = 'admin'
+
         if username:
             self.current_user = username
-        return self.current_user
+            self.current_user_permission = yield self.get_user_permission(username)
+        raise gen.Return(self.current_user)
 
     @gen.coroutine
     def get_user_permission(self, username):
         url = Login.PERMISSION_URL.format(username)
         resp = yield AsyncHTTPClient().fetch(url)
         r = json.loads(resp.body)
-        permissions = r['result']['resources']
+        print r
+        resources = r['result']['resources']
+        permissions = [p['id'] for p in resources]
+        print '=' * 10
+        print permissions
+        raise gen.Return(mapping_permission(permissions))
+
 
 
     def render(self, template_name, **kwargs):
@@ -83,3 +95,4 @@ class StockHandler(BtwBaseHandler):
     def on_finish(self):
         super(StockHandler, self).on_finish()
         self.db_stock.close()
+        username = self.get_secure_cookie('username')
