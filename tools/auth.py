@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from constants import PERMISSIONS, BACKSTAGE_PERMISSION
+from constants import PERMISSIONS
+from config import BACKSTAGE_PERMISSION
 
 
 def auth_login(json=False):
