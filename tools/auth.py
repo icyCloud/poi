@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from constants import PERMISSIONS
+from constants import PERMISSIONS, BACKSTAGE_PERMISSION
 
 
 def auth_login(json=False):
@@ -35,18 +35,18 @@ def auth_permission(permissions, json=False):
 def mapping_permission(permissions):
 
     permission = 0
-    if 55 in permissions:
+    if BACKSTAGE_PERMISSION['admin'] in permissions:
         permission = permission | PERMISSIONS.admin
-    if 56 in permissions:
+    if BACKSTAGE_PERMISSION['polymer'] in permissions:
         permission = permission | PERMISSIONS.polymer
-    if 57 in permissions:
+    if BACKSTAGE_PERMISSION['provider'] in permissions:
         permission = permission | PERMISSIONS.provider_list
-    if 58 in permissions:
+    if BACKSTAGE_PERMISSION['first_valid'] in permissions:
         permission = permission | PERMISSIONS.first_valid
-    if 60 in permissions:
+    if BACKSTAGE_PERMISSION['second_valid'] in permissions:
         permission = permission | PERMISSIONS.second_valid
-    if 61 in permissions:
+    if BACKSTAGE_PERMISSION['price_rule'] in permissions:
         permission = permission | PERMISSIONS.price_rule
-    if 62 in permissions:
+    if BACKSTAGE_PERMISSION['poi'] in permissions:
         permission = permission | PERMISSIONS.POI
     return permission
