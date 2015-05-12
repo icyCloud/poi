@@ -48,9 +48,10 @@ class BtwBaseHandler(BaseHandler):
     @gen.coroutine
     def get_user_permission(self, username):
         url = Login.PERMISSION_URL.format(username)
+        Log.info(url)
         resp = yield AsyncHTTPClient().fetch(url)
+        Log.info(resp.body)
         r = json.loads(resp.body)
-        print r
         resources = r['result']['resources']
         permissions = [p['id'] for p in resources]
         print '=' * 10
