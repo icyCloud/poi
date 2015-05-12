@@ -31,5 +31,5 @@ EBOOKING_CHAIN_ID = 6
 
 class Login(object):
     from config import BACKSTAGE_HOST
-    LOGIN_URL = BACKSTAGE_HOST + '/backstage/login'
-    PERMISSION_URL = BACKSTAGE_HOST + '/backstage/app/poi_admin/list?username={}'
+    LOGIN_URL = BACKSTAGE_HOST + '/login'
+    PERMISSION_URL = BACKSTAGE_HOST + '/app/poi_admin/list?username={}'
