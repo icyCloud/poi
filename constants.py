@@ -28,3 +28,8 @@ NAVIGATION = ObjectDict(
 MC_PREFIX = "poi_mc"
 
 EBOOKING_CHAIN_ID = 6
+
+class Login(object):
+    from config import BACKSTAGE_HOST
+    LOGIN_URL = BACKSTAGE_HOST + '/login'
+    PERMISSION_URL = BACKSTAGE_HOST + '/app/poi_manage/list?username={}'

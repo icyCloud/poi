@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import traceback
+import json
 
+from tornado import gen
 from tornado.escape import json_decode
+from tornado.httpclient import AsyncHTTPClient
 from tools.json import json_encode
 from tools.log import Log
 
@@ -10,7 +13,10 @@ from views import BaseHandler
 from models.user import UserModel
 from exception.json_exception import JsonException, JsonDecodeError
 from tornado.util import ObjectDict
-
+from constants import Login
+from tools.auth import mapping_permission
+from config import DEBUG, BACKSTAGE_USERNAME_KEY
+from tools.log import Log
 
 
 class BtwBaseHandler(BaseHandler):
@@ -18,20 +24,41 @@ class BtwBaseHandler(BaseHandler):
     def initialize(self):
         super(BtwBaseHandler, self).initialize()
         self.current_user = None
+        self.user_permission = 0
         self.db = self.application.DB_Session()
 
     def on_finish(self):
         self.db.close()
 
+    @gen.coroutine
     def prepare(self):
-        self.get_current_user()
+        yield self.get_current_user()
 
+    @gen.coroutine
     def get_current_user(self):
-        username = self.get_secure_cookie('username')
+        username = self.get_secure_cookie(BACKSTAGE_USERNAME_KEY)
+        if DEBUG:
+            username = 'admin'
+
         if username:
-            self.set_secure_cookie('username', username, expires_days=0.02)
-        self.current_user = UserModel.get_user_by_username(self.db, username)
-        return self.current_user
+            self.current_user = username
+            self.current_user_permission = yield self.get_user_permission(username)
+        raise gen.Return(self.current_user)
+
+    @gen.coroutine
+    def get_user_permission(self, username):
+        url = Login.PERMISSION_URL.format(username)
+        Log.info(url)
+        resp = yield AsyncHTTPClient().fetch(url)
+        Log.info(resp.body)
+        r = json.loads(resp.body)
+        resources = r['result']['resources']
+        permissions = [p['id'] for p in resources]
+        print '=' * 10
+        print permissions
+        raise gen.Return(mapping_permission(permissions))
+
+
 
     def render(self, template_name, **kwargs):
         kwargs['current_user'] = self.current_user
@@ -69,3 +96,4 @@ class StockHandler(BtwBaseHandler):
     def on_finish(self):
         super(StockHandler, self).on_finish()
         self.db_stock.close()
+        username = self.get_secure_cookie('username')

@@ -75,7 +75,7 @@ from models.room_type_mapping import RoomTypeMappingModel
         </div>
 
         <div class="panel-footer" collapse="mapping.isCollapsed || mapping.roomtype_mappings.length == 0">
-            <div class="row" style="margin: 10px;" ng-repeat="room_mapping in mapping.roomtype_mappings">
+            <div class="row" style="margin: 10px;" ng-repeat="room_mapping in mapping.roomtype_mappings" ng-if="room_mapping.provider_roomtype.bed_type >= 0 && room_mapping.provider_roomtype.bed_type <= 12">
                 <div class="col-sm-1">
                     <p ng-cloak>{{ room_mapping.provider_roomtype_id }}</p>
                 </div>

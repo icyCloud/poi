@@ -47,8 +47,8 @@ class ProviderModel(Base):
 
         session.add(provider)
         session.commit()
-        cache.delete(cls.MC_ALL_PROVIDERS_COUNT)
-        cache.delete(cls.MC_ALL_PROVIDERS)
+        #cache.delete(cls.MC_ALL_PROVIDERS_COUNT)
+        #cache.delete(cls.MC_ALL_PROVIDERS)
         return provider
 
     @classmethod
@@ -57,8 +57,8 @@ class ProviderModel(Base):
         if provider:
             provider.is_delete = 1
             session.commit()
-            cache.delete(cls.MC_ALL_PROVIDERS_COUNT)
-            cache.delete(cls.MC_ALL_PROVIDERS)
+            #cache.delete(cls.MC_ALL_PROVIDERS_COUNT)
+            #cache.delete(cls.MC_ALL_PROVIDERS)
 
     @classmethod
     def update(cls, session, id, name, contact, phone, email):
@@ -69,29 +69,36 @@ class ProviderModel(Base):
             provider.phone = phone
             provider.email = email
             session.commit()
-            cache.delete(cls.MC_ALL_PROVIDERS)
+            #cache.delete(cls.MC_ALL_PROVIDERS)
             return provider
 
 
     @classmethod
-    @cache.mc(MC_ALL_PROVIDERS)
+    #@cache.mc(MC_ALL_PROVIDERS)
     def get_all(cls, session, start=None, limit=None):
+        #query = session.query(ProviderModel)\
+                #.filter(ProviderModel.is_delete == 0)
+
+        #if start is None and limit is None:
+            #def creator():
+                #return query.all()
+            #return cache.get_or_create(cls.MC_ALL_PROVIDERS, creator)
+
+        #else:
+            #if start:
+                #query = query.offset(start)
+            #if limit:
+                #query = query.limit(limit)
+
+            #return query.all()
+
         query = session.query(ProviderModel)\
                 .filter(ProviderModel.is_delete == 0)
-
-        if start is None and limit is None:
-            def creator():
-                return query.all()
-            return cache.get_or_create(cls.MC_ALL_PROVIDERS, creator)
-
-        else:
-            if start:
-                query = query.offset(start)
-            if limit:
-                query = query.limit(limit)
-
-            return query.all()
-
+        if start:
+            query = query.offset(start)
+        if limit:
+            query = query.limit(limit)
+        return query.all()
 
     def tojson(self):
         return dict(
@@ -103,7 +110,7 @@ class ProviderModel(Base):
                 email=self.email)
 
     @classmethod
-    @cache.mc(MC_ALL_PROVIDERS_COUNT)
+    #@cache.mc(MC_ALL_PROVIDERS_COUNT)
     def get_count(cls, session):
         return session.query(ProviderModel)\
                 .filter(ProviderModel.is_delete == 0).count()

@@ -16,3 +16,20 @@ API = {
 IS_PUSH_TO_STOCK = False
 
 REDIS_HOST = 'localhost'
+
+BACKSTAGE_HOST = 'http://121.42.8.247:8080'
+BACKSTAGE_USERNAME_KEY = "test_op_username"
+
+DEBUG = True
+
+COOKIE_SALT = 'TY30Rbs0k83ZAOSjApGlsNBlJ33kmNik'
+
+BACKSTAGE_PERMISSION = {
+        'admin': 55,
+        'polymer': 56,
+        'provider': 57,
+        'first_valid': 58,
+        'second_valid': 60,
+        'price_rule': 61,
+        'poi': 62,
+        }
