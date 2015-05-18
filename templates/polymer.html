@@ -89,12 +89,14 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
                 <div class="col-sm-2">
                     <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.provider_roomtype_name }}</b></a>
+                    <p>{{getBedNameByType(room_mapping.provider_roomtype.bed_type)}}</p>
                 </div>
                 <div class="col-sm-1">
                     <span class="span-center glyphicon glyphicon-arrow-right"></span>
                 </div>
                 <div class="col-sm-2">
                     <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.main_roomtype.name }}</b></a>
+                    <p>{{getBedNameByType(room_mapping.provider_roomtype.bed_type)}}</p>
                 </div>
                 <div class="col-sm-1">
                 </div>
