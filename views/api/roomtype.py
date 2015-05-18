@@ -27,7 +27,6 @@ class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
             rooms = RoomType.gets_by_hotel_id(self.db, hotel_id, need_valid=need_valid)
             rooms = [room.todict() for room in rooms]
 
-            Log.info(u"fetch rooms {}".format(rooms))
 
             return self.finish_json(result=dict(
                     roomtypes=rooms,
