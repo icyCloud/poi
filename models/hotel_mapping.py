@@ -87,11 +87,13 @@ class HotelMappingModel(Base):
     @classmethod
     def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
-        stmt = exists(
-        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+        stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
                 RoomTypeMappingModel.is_delete == 0))
+        condition = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                                        HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+                                        RoomTypeMapping.is_delete == 0))
 
         query = session.query(HotelMappingModel)
         if provider_id:
@@ -105,6 +107,7 @@ class HotelMappingModel(Base):
                 .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.status != cls.STATUS.init)\
+                .filter(condition)\
                 .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_first_valid))
 
 
