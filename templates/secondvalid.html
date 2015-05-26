@@ -54,6 +54,7 @@ from models.room_type_mapping import RoomTypeMappingModel
             </div>
             <div class="col-md-2 ">
                 <b><p class="text-primary text-center" data-ng-bind="mapping.provider_hotel_name"></p></b>
+                {{mapping.provider_hotel_id}}
             </div>
             <div class="col-md-2 ">
                 <p class="text-center" data-ng-bind="mapping.provider_hotel_address"></p>
@@ -65,6 +66,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
             <div class="col-md-2 " style="margin-top:0; margin-buttom: 0;">
                 <b><a class="text-center text-primary" ng-bind="mapping.main_hotel.name" data-ng-click="showHotelInfo(mapping)"></a></b>
+                <br/>{{mapping.main_hotel_id}}
             </div>
             <div class="col-md-2 ">
                 <p class="text-center" data-ng-bind="mapping.main_hotel.address"></p>
@@ -91,6 +93,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                     <a class="text-center text-primary"
                     data-ng-click="showRoomType(room_mapping)"
                     ng-cloak><b>{{ room_mapping.provider_roomtype_name }}</b></a>
+                    <br/>{{room_mapping.provider_roomtype_id}}
                     <p>{{getBedNameByType(room_mapping.provider_roomtype.bed_type)}}</p>
                 </div>
                 <div class="col-sm-1">
@@ -98,6 +101,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
                 <div class="col-sm-2">
                     <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.main_roomtype.name }}</b></a>
+                    <br/>{{room_mapping.main_roomtype_id}}
                     <p>{{getBedNameByType(room_mapping.main_roomtype.bed_type)}}</p>
                 </div>
                 <div class="col-sm-1">
