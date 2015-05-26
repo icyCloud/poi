@@ -146,7 +146,7 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
-    def gets_show_in_polymer(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
+    def gets_show_in_polymer(cls, session, provider_id=None, hotel_name=None, city_id=None, is_only_show_online=None, start=0, limit=20):
         query = session.query(HotelMappingModel)\
             .filter(HotelMappingModel.provider_id != 6)\
             .filter(HotelMappingModel.is_delete == 0)\
@@ -156,6 +156,9 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.provider_id == provider_id)
         if city_id:
             query = query.filter(HotelMappingModel.city_id == city_id)
+        if is_only_show_online:
+            query = query.filter(HotelMappingModel.is_online == 1)
+
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         

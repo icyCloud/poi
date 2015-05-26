@@ -34,6 +34,10 @@ from models.room_type_mapping import RoomTypeMappingModel
                 data-ng-model="searchCityName"
                 typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
                 placeholder="城市">
+            <label class="">
+                <input  type="checkbox" ng-model="isOnlyShowOnline">
+                只显示已上线酒店
+            </label>
         </div>
         <div class="col-lg-3">
             <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
@@ -277,6 +281,7 @@ validapp.controller('validController',
     $scope.changeHotel = {};
     $scope.citys = [];
     $scope.districts = [];
+    $scope.isOnlyShowOnline = false;
 
     $scope.searchProvider = undefined;
     $scope.searchHotelName = undefined;
@@ -306,7 +311,7 @@ validapp.controller('validController',
             }
         });
 
-    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
+    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name, is_only_show_online) {
         var url = "/api/polymer?start=" + start + "&limit=" + limit;
         if (provider_id != undefined) {
             url += ("&provider_id=" + provider_id);
@@ -316,6 +321,9 @@ validapp.controller('validController',
         }
         if (hotel_name != undefined) {
             url += ("&hotel_name=" + hotel_name);
+        }
+        if (is_only_show_online) {
+            url += ("&is_only_show_online=1");
         }
 
         $http.get(url)
@@ -495,7 +503,8 @@ validapp.controller('validController',
         var provider_id = params.provider_id;
         var city_id = params.city_id;
         var hotel_name = params.hotel_name;
-        loadHotelMappings(start, limit, provider_id, city_id, hotel_name);
+        var is_only_show_online = params.is_only_show_online;
+        loadHotelMappings(start, limit, provider_id, city_id, hotel_name, is_only_show_online);
 
     });
 
@@ -525,6 +534,9 @@ validapp.controller('validController',
         }
         if ($scope.searchHotelName != undefined) {
             urlParams.hotel_name = $scope.searchHotelName;
+        }
+        if ($scope.isOnlyShowOnline) {
+            urlParams.is_only_show_online = 1
         }
 
         console.log(urlParams);
