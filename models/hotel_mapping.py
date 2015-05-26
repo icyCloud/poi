@@ -93,7 +93,7 @@ class HotelMappingModel(Base):
                 RoomTypeMappingModel.is_delete == 0))
         condition = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                                         HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
-                                        RoomTypeMapping.is_delete == 0))
+                                        RoomTypeMappingModel.is_delete == 0))
 
         query = session.query(HotelMappingModel)
         if provider_id:
