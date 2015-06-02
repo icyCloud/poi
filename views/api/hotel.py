@@ -13,6 +13,7 @@ from tools.request_tools import get_and_valid_arguments
 from models.hotel import HotelModel as Hotel
 from models.room_type import RoomTypeModel
 from models.business_zone import BusinessZoneModel
+from models.city import CityModel
 
 from constants import EBOOKING_CHAIN_ID
 
@@ -33,18 +34,16 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         count_total = True if int(self.get_query_argument('count_total', 0)) == 1 else False
         with_roomtype = int(self.get_query_argument('with_roomtype', 0))
 
-        t0 = time.time()
         if count_total:
             hotels, total = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids, count_total=count_total)
         else:
             hotels = Hotel.query(self.db, name, star, city_id, district_id, start, limit, filter_ids, within_ids, count_total=count_total)
             total = 20000
 
-        t1 = time.time()
-        Log.info(">>HotelSearch query hotel cost {}".format(t1 - t0))
         hotels = [hotel.todict() for hotel in hotels]
 
         self.merge_business_zone(hotels)
+        self.merge_city(hotels)
         if with_roomtype == 1:
             self.merge_roomtype(hotels)
 
@@ -70,6 +69,16 @@ class HotelSearchAPIHandler(BtwBaseHandler):
         rooms = RoomTypeModel.gets_by_hotel_ids(self.db, hotel_ids)
         for hotel in hotels:
             hotel['roomtypes'] = [room.todict() for room in rooms if room.hotel_id == hotel.id]
+        return hotels
+
+    def merge_city(self, hotels):
+        city_ids = [h['city_id'] for h in hotels]
+        citys = [city.todict() for city in CityModel.get_by_ids(self.db, city_ids)]
+        for hotel in hotels:
+            for city in citys:
+                if hotel['city_id'] == city['id']:
+                    hotel['city'] = city
+                    break
         return hotels
 
 

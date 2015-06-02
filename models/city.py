@@ -34,6 +34,12 @@ class CityModel(Base):
         citys = cls.get_all(session)
         return [city.todict() for city in citys]
 
+    @classmethod
+    def get_by_ids(cls, session, ids):
+        return session.query(CityModel)\
+                .filter(CityModel.id.in_(ids))\
+                .all()
+
     def todict(self):
         return ObjectDict(
                 id=self.id,
