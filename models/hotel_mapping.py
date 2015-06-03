@@ -57,6 +57,14 @@ class HotelMappingModel(Base):
                 .first()
 
     @classmethod
+    def get_by_chain_id_and_main_hotel_id(cls, session, provider_id, main_hotel_id):
+        return session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==provider_id,
+                        HotelMappingModel.main_hotel_id==main_hotel_id)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .all()
+
+    @classmethod
     def get_by_provider_hotel(cls, session, provider_id, provider_hotel_id):
         return session.query(HotelMappingModel)\
                 .filter(HotelMappingModel.provider_id==provider_id,

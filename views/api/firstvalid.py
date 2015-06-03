@@ -110,6 +110,13 @@ class FirstValidStatusAPIHandelr(BtwBaseHandler):
                 (hotel_mapping.status == hotel_mapping.STATUS.wait_first_valid
                  or hotel_mapping.status == hotel_mapping.STATUS.init)\
                 and hotel_mapping.main_hotel_id != 0:
+
+            hotels = HotelMapping.get_by_chain_id_and_main_hotel_id(self.db, hotel_mapping.provider_id, hotel_mapping.main_hotel_id)
+            for hotel in hotels:
+                if hotel.id != hotel_mapping.id and hotel.status > hotel_mapping.status:
+                    self.finish_json(errcode=402, errmsg=u"已有Hotel{}绑定相同基础酒店".format(hotel.provider_hotel_name))
+                    return
+
             r = HotelMapping.set_firstvalid_complete(self.db, hotel_mapping_id)
             self.finish_json(result=dict(
                 hotel_mapping=r.todict(),
