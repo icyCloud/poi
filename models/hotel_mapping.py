@@ -99,9 +99,6 @@ class HotelMappingModel(Base):
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
                 RoomTypeMappingModel.is_delete == 0))
-        condition = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
-                                        HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
-                                        RoomTypeMappingModel.is_delete == 0))
 
         query = session.query(HotelMappingModel)
         if provider_id:
@@ -115,7 +112,6 @@ class HotelMappingModel(Base):
                 .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.status != cls.STATUS.init)\
-                .filter(condition)\
                 .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_first_valid))
 
 
