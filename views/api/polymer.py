@@ -33,12 +33,13 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
         provider_id = self.get_query_argument('provider_id', None)
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
-        is_only_show_online = self.get_query_argument('is_only_show_online', None)
+        show_online_type = self.get_query_argument('show_online_type', 0)
+        show_online_type = int(show_online_type)
 
         Log.info(">> get show in polymer")
         t0 = time.time() 
         hotel_mappings, total = HotelMapping.gets_show_in_polymer(self.db,
-                provider_id=provider_id, hotel_name=hotel_name, city_id=city_id, is_only_show_online=is_only_show_online,
+                provider_id=provider_id, hotel_name=hotel_name, city_id=city_id, show_online_type=show_online_type,
                 start=start, limit=limit)
         t1 = time.time()
         Log.info(">> show in polymer cost {}".format(t1 - t0))

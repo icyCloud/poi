@@ -34,10 +34,11 @@ from models.room_type_mapping import RoomTypeMappingModel
                 data-ng-model="searchCityName"
                 typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
                 placeholder="城市">
-            <label class="">
-                <input  type="checkbox" ng-model="isOnlyShowOnline">
-                只显示已上线酒店
-            </label>
+            <select ng-model="showOnlineType" convert-to-number>
+              <option value=0>全部</option>
+              <option value=1>上线</option>
+              <option value=2>下线</option>
+            </select>
         </div>
         <div class="col-lg-3">
             <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
@@ -285,11 +286,12 @@ validapp.controller('validController',
     $scope.changeHotel = {};
     $scope.citys = [];
     $scope.districts = [];
-    $scope.isOnlyShowOnline = false;
 
     $scope.searchProvider = undefined;
     $scope.searchHotelName = undefined;
     $scope.searchCityName = undefined;
+
+    $scope.showOnlineType = 0;
 
     var roomtypes = [];
 
@@ -315,7 +317,7 @@ validapp.controller('validController',
             }
         });
 
-    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name, is_only_show_online) {
+    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name, show_online_type) {
         var url = "/api/polymer?start=" + start + "&limit=" + limit;
         if (provider_id != undefined) {
             url += ("&provider_id=" + provider_id);
@@ -326,8 +328,8 @@ validapp.controller('validController',
         if (hotel_name != undefined) {
             url += ("&hotel_name=" + hotel_name);
         }
-        if (is_only_show_online) {
-            url += ("&is_only_show_online=1");
+        if (show_online_type != undefined) {
+            url += ("&show_online_type=" + show_online_type);
         }
 
         $http.get(url)
@@ -507,8 +509,10 @@ validapp.controller('validController',
         var provider_id = params.provider_id;
         var city_id = params.city_id;
         var hotel_name = params.hotel_name;
-        var is_only_show_online = params.is_only_show_online;
-        loadHotelMappings(start, limit, provider_id, city_id, hotel_name, is_only_show_online);
+        var is_show_online = params.is_show_online;
+        var is_show_offline = params.is_show_offline;
+        var show_online_type = params.show_online_type;
+        loadHotelMappings(start, limit, provider_id, city_id, hotel_name, show_online_type);
 
     });
 
@@ -539,8 +543,8 @@ validapp.controller('validController',
         if ($scope.searchHotelName != undefined) {
             urlParams.hotel_name = $scope.searchHotelName;
         }
-        if ($scope.isOnlyShowOnline) {
-            urlParams.is_only_show_online = 1
+        if ($scope.showOnlineType != undefined) {
+            urlParams.show_online_type = $scope.showOnlineType;
         }
 
         console.log(urlParams);
