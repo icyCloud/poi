@@ -34,7 +34,7 @@ class ProviderAPIHandler(BtwBaseHandler):
     def post(self):
         provider = ObjectDict(json_decode(self.request.body))
 
-        _provider = ProviderModel.add(self.db, provider.name, provider.contact,
+        _provider = ProviderModel.add(self.db, provider.chain_id, provider.name, provider.contact,
                 provider.phone, provider.email)
         self.finish_json(result=_provider.tojson())
 
@@ -47,7 +47,7 @@ class ProviderAPIHandler(BtwBaseHandler):
         _provider = ProviderModel.get_by_id(self.db, provider.id)
         if _provider:
             try:
-                _provider = ProviderModel.update(self.db, provider.id, provider.name,
+                _provider = ProviderModel.update(self.db, provider.id, provider.chain_id, provider.name,
                         provider.contact, provider.phone, provider.email)
                 self.finish_json(result=_provider.tojson())
             except Exception, e:
