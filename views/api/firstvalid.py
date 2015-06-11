@@ -104,7 +104,7 @@ class FirstValidStatusAPIHandelr(BtwBaseHandler):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     def put(self, hotel_mapping_id):
-
+        Log.info("First>>Hotel {}>>Valid>> user:{}".format(hotel_mapping_id, self.current_user))
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
         if hotel_mapping and\
                 (hotel_mapping.status == hotel_mapping.STATUS.wait_first_valid
@@ -130,6 +130,7 @@ class FirstValidRoomTypeAPIHandler(BtwBaseHandler):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     def put(self, roomtype_mapping_id):
+        Log.info("First>>RoomType {}>>Valid>> user:{}".format(roomtype_mapping_id, self.current_user))
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
 
         if mapping and mapping.status in [mapping.STATUS.wait_first_valid, mapping.STATUS.init]\

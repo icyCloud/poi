@@ -151,7 +151,7 @@ class RoomTypeMappingModel(Base):
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .update({RoomTypeMappingModel.main_hotel_id: main_hotel_id,
                          RoomTypeMappingModel.main_roomtype_id: 0,
-                         RoomTypeMappingModel.status: cls.STATUS.wait_first_valid})
+                         RoomTypeMappingModel.status: cls.STATUS.init})
         session.commit()
 
     @classmethod

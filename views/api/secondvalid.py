@@ -102,6 +102,7 @@ class SecondValidHotelAPIHandler(BtwBaseHandler):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
     def put(self, hotel_mapping_id):
+        Log.info("Second>>Hotel {}>>Valid>> user:{}".format(hotel_mapping_id, self.current_user))
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
         if hotel_mapping and hotel_mapping.status == hotel_mapping.STATUS.wait_second_valid\
                 and hotel_mapping.main_hotel_id != 0:
@@ -122,6 +123,7 @@ class SecondValidHotelAPIHandler(BtwBaseHandler):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
     def delete(self, hotel_mapping_id):
+        Log.info("Second>>Hotel {}>>Delete>> user:{}".format(hotel_mapping_id, self.current_user))
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
         if hotel_mapping and hotel_mapping.status == hotel_mapping.STATUS.wait_second_valid:
             hotel_mapping = HotelMapping.revert_to_firstvalid(self.db, hotel_mapping_id)
@@ -138,6 +140,7 @@ class SecondValidRoomTypeAPIHandler(BtwBaseHandler):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
     def put(self, roomtype_mapping_id):
+        Log.info("Second>>RoomType {}>>Valid>> user:{}".format(roomtype_mapping_id, self.current_user))
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.wait_second_valid\
                 and mapping.main_hotel_id != 0:
@@ -153,6 +156,7 @@ class SecondValidRoomTypeAPIHandler(BtwBaseHandler):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
     def delete(self, roomtype_mapping_id):
+        Log.info("Second>>RoomType {}>>Delete>> user:{}".format(roomtype_mapping_id, self.current_user))
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.wait_second_valid:
             mapping = RoomTypeMapping.revert_to_firstvalid(self.db, roomtype_mapping_id)
