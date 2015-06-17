@@ -37,8 +37,9 @@ class ProviderModel(Base):
         return [r for r in rs if r]
 
     @classmethod
-    def add(cls, session, name, contact, phone, email):
+    def add(cls, session, chain_id, name, contact, phone, email):
         provider = ProviderModel(
+                chain_id=chain_id,
                 name=name,
                 contact=contact,
                 phone=phone,
@@ -61,9 +62,10 @@ class ProviderModel(Base):
             #cache.delete(cls.MC_ALL_PROVIDERS)
 
     @classmethod
-    def update(cls, session, id, name, contact, phone, email):
+    def update(cls, session, id, chain_id, name, contact, phone, email):
         provider = cls.get_by_id(session, id)
         if provider:
+            provider.chain_id = chain_id
             provider.name = name
             provider.contact = contact
             provider.phone = phone

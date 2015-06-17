@@ -33,11 +33,13 @@ class PolymerAPIHandler(StockHandler, HotelMixin):
         provider_id = self.get_query_argument('provider_id', None)
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
+        show_online_type = self.get_query_argument('show_online_type', 0)
+        show_online_type = int(show_online_type)
 
         Log.info(">> get show in polymer")
         t0 = time.time() 
         hotel_mappings, total = HotelMapping.gets_show_in_polymer(self.db,
-                provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
+                provider_id=provider_id, hotel_name=hotel_name, city_id=city_id, show_online_type=show_online_type,
                 start=start, limit=limit)
         t1 = time.time()
         Log.info(">> show in polymer cost {}".format(t1 - t0))
@@ -105,6 +107,7 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
     def put(self):
         req = ObjectDict(json_decode(self.request.body))
+        Log.info("Polymer>>Hotel>>Online>> user:{} req:{}".format(self.current_user, req))
         hotel_mapping_id = req.hotel_mapping_id
         is_online = req.is_online
 
@@ -125,6 +128,7 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
     def delete(self, hotel_mapping_id):
+        Log.info("Polymer>>Hotel {}>>Delete>> user:{}".format(hotel_mapping_id, self.current_user))
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
         if hotel_mapping and hotel_mapping.status == hotel_mapping.STATUS.valid_complete:
             hotel_mapping = HotelMapping.revert_to_firstvalid(self.db, hotel_mapping_id)
@@ -143,6 +147,7 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.second_valid, json=True)
     def put(self):
         req = ObjectDict(json_decode(self.request.body))
+        Log.info("Polymer>>RoomTypeModel>>Online>> user:{} req:{}".format(self.current_user, req))
         roomtype_mapping_id = req.roomtype_mapping_id
         hotel_mapping_id = req.hotel_mapping_id
         is_online = req.is_online
@@ -167,6 +172,7 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
     def delete(self, roomtype_mapping_id):
+        Log.info("Polymer>>RoomType {}>>Delete>> user:{}".format(roomtype_mapping_id, self.current_user))
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.valid_complete:
             mapping = RoomTypeMapping.revert_to_firstvalid(self.db, roomtype_mapping_id)

@@ -21,6 +21,7 @@ class RoomTypeMappingAPIHandler(BtwBaseHandler):
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     def put(self):
         req = ObjectDict(json_decode(self.request.body))
+        Log.info("RoomTypeMapping>> user:{}, req:{}".format(self.current_user, req))
 
         r = RoomTypeMappingModel.update_main_hotel_id(self.db, req.id, req.main_roomtype_id)
 

@@ -34,6 +34,11 @@ from models.room_type_mapping import RoomTypeMappingModel
                 data-ng-model="searchCityName"
                 typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
                 placeholder="城市">
+            <select ng-model="showOnlineType" convert-to-number>
+              <option value=0>全部</option>
+              <option value=1>上线</option>
+              <option value=2>下线</option>
+            </select>
         </div>
         <div class="col-lg-3">
             <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
@@ -54,6 +59,7 @@ from models.room_type_mapping import RoomTypeMappingModel
             </div>
             <div class="col-md-2 ">
                 <b><p class="text-primary text-center" data-ng-bind="mapping.provider_hotel_name"></p></b>
+                {{mapping.provider_hotel_id}}
             </div>
             <div class="col-md-2 ">
                 <p class="text-center" data-ng-bind="mapping.provider_hotel_address"></p>
@@ -65,6 +71,7 @@ from models.room_type_mapping import RoomTypeMappingModel
 
             <div class="col-md-2 " style="margin-top:0; margin-buttom: 0;">
                 <b><a class="text-center text-primary" ng-bind="mapping.main_hotel.name" data-ng-click="showHotelInfo(mapping)"></a></b>
+                <br/>{{mapping.main_hotel_id}}
             </div>
             <div class="col-md-2 ">
                 <p class="text-center" data-ng-bind="mapping.main_hotel.address"></p>
@@ -89,6 +96,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
                 <div class="col-sm-2">
                     <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.provider_roomtype_name }}</b></a>
+                    <br/>{{room_mapping.provider_roomtype_id}}
                     <p>{{getBedNameByType(room_mapping.provider_roomtype.bed_type)}}</p>
                 </div>
                 <div class="col-sm-1">
@@ -96,6 +104,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                 </div>
                 <div class="col-sm-2">
                     <a class="text-center text-primary" data-ng-click="showRoomType(room_mapping)" ng-cloak><b>{{ room_mapping.main_roomtype.name }}</b></a>
+                    <br/>{{room_mapping.main_roomtype_id}}
                     <p>{{getBedNameByType(room_mapping.provider_roomtype.bed_type)}}</p>
                 </div>
                 <div class="col-sm-1">
@@ -282,6 +291,8 @@ validapp.controller('validController',
     $scope.searchHotelName = undefined;
     $scope.searchCityName = undefined;
 
+    $scope.showOnlineType = 0;
+
     var roomtypes = [];
 
     $http.get("/api/provider/")
@@ -306,7 +317,7 @@ validapp.controller('validController',
             }
         });
 
-    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
+    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name, show_online_type) {
         var url = "/api/polymer?start=" + start + "&limit=" + limit;
         if (provider_id != undefined) {
             url += ("&provider_id=" + provider_id);
@@ -316,6 +327,9 @@ validapp.controller('validController',
         }
         if (hotel_name != undefined) {
             url += ("&hotel_name=" + hotel_name);
+        }
+        if (show_online_type != undefined) {
+            url += ("&show_online_type=" + show_online_type);
         }
 
         $http.get(url)
@@ -495,7 +509,10 @@ validapp.controller('validController',
         var provider_id = params.provider_id;
         var city_id = params.city_id;
         var hotel_name = params.hotel_name;
-        loadHotelMappings(start, limit, provider_id, city_id, hotel_name);
+        var is_show_online = params.is_show_online;
+        var is_show_offline = params.is_show_offline;
+        var show_online_type = params.show_online_type;
+        loadHotelMappings(start, limit, provider_id, city_id, hotel_name, show_online_type);
 
     });
 
@@ -525,6 +542,9 @@ validapp.controller('validController',
         }
         if ($scope.searchHotelName != undefined) {
             urlParams.hotel_name = $scope.searchHotelName;
+        }
+        if ($scope.showOnlineType != undefined) {
+            urlParams.show_online_type = $scope.showOnlineType;
         }
 
         console.log(urlParams);
@@ -586,6 +606,20 @@ validapp.controller('validController',
         if (hotelMapping.is_online == 0) {
             return;
         }
+
+        if (roomMapping.is_online == 0) {
+            if (roomMapping.main_roomtype == undefined || roomMapping.main_roomtype.bed_type != roomMapping.provider_roomtype.bed_type) {
+                alert('床型不同');
+                return;
+            }
+            if (roomMapping.provider_id == 10 || roomMapping.provider_id == 17 || roomMapping.provider_id == 19) {
+                if (roomMapping.provider_roomtype_name != roomMapping.main_roomtype.name) {
+                    alert('七天房型不同');
+                    return;
+                }
+            }
+        }
+
         if (!confirm("Change ?")) {
             roomMapping.toggle = roomMapping.is_online == 1;
             return;

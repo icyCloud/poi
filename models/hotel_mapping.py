@@ -57,6 +57,14 @@ class HotelMappingModel(Base):
                 .first()
 
     @classmethod
+    def get_by_chain_id_and_main_hotel_id(cls, session, provider_id, main_hotel_id):
+        return session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==provider_id,
+                        HotelMappingModel.main_hotel_id==main_hotel_id)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .all()
+
+    @classmethod
     def get_by_provider_hotel(cls, session, provider_id, provider_hotel_id):
         return session.query(HotelMappingModel)\
                 .filter(HotelMappingModel.provider_id==provider_id,
@@ -87,8 +95,7 @@ class HotelMappingModel(Base):
     @classmethod
     def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
-        stmt = exists(
-        ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+        stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
                 RoomTypeMappingModel.is_delete == 0))
@@ -143,7 +150,7 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
-    def gets_show_in_polymer(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
+    def gets_show_in_polymer(cls, session, provider_id=None, hotel_name=None, city_id=None, show_online_type=0, start=0, limit=20):
         query = session.query(HotelMappingModel)\
             .filter(HotelMappingModel.provider_id != 6)\
             .filter(HotelMappingModel.is_delete == 0)\
@@ -153,6 +160,12 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.provider_id == provider_id)
         if city_id:
             query = query.filter(HotelMappingModel.city_id == city_id)
+
+        if show_online_type == 1:
+            query = query.filter(HotelMappingModel.is_online == 1)
+        elif show_online_type == 2:
+            query = query.filter(HotelMappingModel.is_online == 0)
+
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         

@@ -40,7 +40,7 @@
                 </tr>
                 <tr ng-repeat="provider in providers" ng-if="!provider.is_delete">
 
-                    <td class="vertical-center" ng-bind="provider.id"></td>
+                    <td class="vertical-center" ng-bind="provider.chain_id"></td>
                     <td ng-bind="provider.name"></td>
                     <td ng-bind="provider.contact"></td>
                     <td ng-bind="provider.phone"></td>
@@ -84,6 +84,12 @@
                 <div class="row">
                     <div class="col-sm-11 col-sm-offset-1">
                         <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="input01">供应商编码</label>
+                                <div class="col-sm-10">
+                                    <input type="text" placeholder="供应商编码" class="form-control" ng-model="editingProvider.chain_id">
+                                </div>
+                            </div>
 
                             <div class="form-group">
                                 <label class="control-label col-sm-2" for="input01">供应商名称</label>
@@ -182,6 +188,7 @@ providerapp.controller('providerController', ['$scope', '$http', '$location', fu
     $scope.editProvider = function(id) {
         if (id == 'new') {
             $scope.editingProvider.id = 0;
+            $scope.editingProvider.chain_id = '';
             $scope.editingProvider.name = '';
             $scope.editingProvider.contact = '';
             $scope.editingProvider.phone = '';
@@ -190,6 +197,7 @@ providerapp.controller('providerController', ['$scope', '$http', '$location', fu
             var provider = getProvider(id);
             console.log(provider);
             $scope.editingProvider.id = provider.id;
+            $scope.editingProvider.chain_id = provider.chain_id;
             $scope.editingProvider.name = provider.name;
             $scope.editingProvider.contact = provider.contact;
             $scope.editingProvider.phone = provider.phone;
@@ -223,6 +231,7 @@ providerapp.controller('providerController', ['$scope', '$http', '$location', fu
                .success(function(data) {
                     if (data.errcode == 0) {
                         var p = getProvider(provider.id);
+                        p.chain_id = data.result.chain_id;
                         p.name = data.result.name;
                         p.contact = data.result.contact;
                         p.phone = data.result.phone;
@@ -235,8 +244,7 @@ providerapp.controller('providerController', ['$scope', '$http', '$location', fu
                     }
 
                })
-               .error(function(data) {
-                    alert('network error');
+               .error(function(data) { alert('network error');
                }); 
 
         }
