@@ -724,7 +724,15 @@ validapp.controller('validController',
 
     $scope.validRoomMapping = function(room_mapping) {
         if (room_mapping.main_roomtype == undefined || room_mapping.main_roomtype.bed_type != room_mapping.provider_roomtype.bed_type) {
+            alert('床型不同');
             return;
+        }
+
+        if (room_mapping.provider_id == 10 || room_mapping.provider_id == 17 || room_mapping.provider_id == 19) {
+            if (room_mapping.provider_roomtype_name != room_mapping.main_roomtype.name) {
+                alert('七天房型不同');
+                return;
+            }
         }
 
 

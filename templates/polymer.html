@@ -606,6 +606,20 @@ validapp.controller('validController',
         if (hotelMapping.is_online == 0) {
             return;
         }
+
+        if (roomMapping.is_online == 0) {
+            if (roomMapping.main_roomtype == undefined || roomMapping.main_roomtype.bed_type != roomMapping.provider_roomtype.bed_type) {
+                alert('床型不同');
+                return;
+            }
+            if (roomMapping.provider_id == 10 || roomMapping.provider_id == 17 || roomMapping.provider_id == 19) {
+                if (roomMapping.provider_roomtype_name != roomMapping.main_roomtype.name) {
+                    alert('七天房型不同');
+                    return;
+                }
+            }
+        }
+
         if (!confirm("Change ?")) {
             roomMapping.toggle = roomMapping.is_online == 1;
             return;
