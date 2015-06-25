@@ -44,12 +44,21 @@ class HotelMappingEbookingPushAPIHandler(BtwBaseHandler):
                 'chain_hotel_id', 'main_hotel_id', 'merchant_id', 'merchant_name')
         hotel = HotelModel.get_by_id(self.db, main_hotel_id)
 
-        hotel_mapping = HotelMappingModel.get_by_provider_and_main_hotel(self.db, 6, chain_hotel_id, main_hotel_id)
+        hotel_mapping = HotelMappingModel.get_by_provider_hotel(self.db, 6, chain_hotel_id)
         if hotel_mapping:
-            raise JsonException(errcode=1000, errmsg="already exist")
-
-        hotel_mapping = HotelMappingModel.new_hotel_mapping_from_ebooking(self.db,
-                chain_hotel_id, hotel.name, hotel.address, hotel.city_id, main_hotel_id, merchant_id, merchant_name)
+            Log.info(">>> modify exist ebooking hotel {}".format(hotel_mapping.todict()))
+            hotel_mapping.merchant_id = merchant_id
+            hotel_mapping.merchant_name = merchant_name
+            hotel_mapping.info = 'update by ebooking'
+            hotel_mapping.status = hotel_mapping.STATUS.valid_complete
+            hotel_mapping.city_id = hotel.city_id
+            hotel_mapping.provider_hotel_name = hotel.name
+            hotel_mapping.provider_hotel_address = hotel.address
+            hotel_mapping.main_hotel_id = hotel.id
+            self.db.commit()
+        else:
+            hotel_mapping = HotelMappingModel.new_hotel_mapping_from_ebooking(self.db,
+                    chain_hotel_id, hotel.name, hotel.address, hotel.city_id, main_hotel_id, merchant_id, merchant_name)
 
         self.finish_json(result=dict(
             hotel_mapping=hotel_mapping.todict(),
