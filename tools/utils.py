@@ -11,3 +11,4 @@ def exe_time(func):
             print "@%.3fs taken for {%s}" % (time.time() - t0, func.__name__)
             return back
     return _
+

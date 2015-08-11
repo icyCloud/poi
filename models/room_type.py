@@ -81,6 +81,11 @@ class RoomTypeModel(Base):
         return q.all()
 
     @classmethod
+    def get_by_id(cls,session,id=None):
+        q = session.query(RoomTypeModel).filter(RoomTypeModel.id==id)
+        return q.first()
+
+    @classmethod
     def new(cls, session, hotel_id, name, area=0,
             floor="", comments="", description="",
             capacity=-1, facility="", bed_type=-1,

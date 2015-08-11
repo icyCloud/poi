@@ -22,6 +22,7 @@ NAVIGATION = ObjectDict(
     SECONDVALID=3,
     POLYMER=4,
     ROOMTYPE = 5,
+    OPERATELOG=6,
     )
 
 #Memcached

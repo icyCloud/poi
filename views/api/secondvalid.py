@@ -12,8 +12,12 @@ from models.hotel_mapping import HotelMappingModel as HotelMapping
 from models.hotel import HotelModel as Hotel
 from models.room_type_mapping import RoomTypeMappingModel as RoomTypeMapping
 from models.room_type import RoomTypeModel as RoomType
+from models.poi_operate_log_mapping import PoiOperateLogModel as PoiOperateLogMapping
 from models.city import CityModel
 from models.district import DistrictModel
+from config import motivations
+from config import modules
+import traceback
 
 from tools.log import Log, log_request
 import time
@@ -114,6 +118,21 @@ class SecondValidHotelAPIHandler(BtwBaseHandler):
                     return
 
             hotel_mapping = HotelMapping.set_secondvalid_complete(self.db, hotel_mapping_id)
+
+            try:
+                module = modules['second_valid']
+                motivation = motivations['pass_hotel']
+                operator = self.current_user
+                poi_hotel_id = hotel_mapping.main_hotel_id
+                otaId = hotel_mapping.provider_id
+                hotelName = hotel_mapping.provider_hotel_name
+                hotelModel = Hotel.get_by_id(self.db,id=poi_hotel_id)
+                operate_content = hotelName + "<->" + hotelModel.name
+                hotel_id = hotel_mapping_id
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 hotel_mapping=hotel_mapping.todict(),
                 ))
@@ -128,6 +147,21 @@ class SecondValidHotelAPIHandler(BtwBaseHandler):
         if hotel_mapping and hotel_mapping.status == hotel_mapping.STATUS.wait_second_valid:
             hotel_mapping = HotelMapping.revert_to_firstvalid(self.db, hotel_mapping_id)
             RoomTypeMapping.revert_to_firstvalid_by_provider_hotel_id(self.db, hotel_mapping.provider_hotel_id)
+
+            try:
+                module = modules['second_valid']
+                motivation = motivations['back_hotel']
+                operator = self.current_user
+                poi_hotel_id = hotel_mapping.main_hotel_id
+                otaId = hotel_mapping.provider_id
+                hotelName = hotel_mapping.provider_hotel_name
+                hotelModel = Hotel.get_by_id(self.db,id=poi_hotel_id)
+                operate_content = hotelName + "<->" + hotelModel.name
+                hotel_id = hotel_mapping_id
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 hotel_mapping=hotel_mapping.todict(),
                 ))
@@ -145,6 +179,25 @@ class SecondValidRoomTypeAPIHandler(BtwBaseHandler):
         if mapping and mapping.status == mapping.STATUS.wait_second_valid\
                 and mapping.main_hotel_id != 0:
             mapping = RoomTypeMapping.set_secondvalid_complete(self.db, roomtype_mapping_id)
+
+            try:
+                module = modules['second_valid']
+                motivation = motivations['pass_roomtype']
+                operator = self.current_user
+                poi_hotel_id = mapping.main_hotel_id
+                poi_roomtype_id = mapping.main_roomtype_id
+                otaId = mapping.provider_id
+                hotel_id = mapping.provider_hotel_id
+                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db,otaId,hotel_id,poi_hotel_id)
+                hotelName = hotelModel.provider_hotel_name
+                roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+                operate_content = mapping.provider_roomtype_name + " <-> " + roomType.name
+
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
+                                                poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 roomtype_mapping=mapping.todict(),
                 ))
@@ -160,6 +213,25 @@ class SecondValidRoomTypeAPIHandler(BtwBaseHandler):
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.wait_second_valid:
             mapping = RoomTypeMapping.revert_to_firstvalid(self.db, roomtype_mapping_id)
+
+            try:
+                module = modules['second_valid']
+                motivation = motivations['back_roomtype']
+                operator = self.current_user
+                poi_hotel_id = mapping.main_hotel_id
+                poi_roomtype_id = mapping.main_roomtype_id
+                otaId = mapping.provider_id
+                hotel_id = mapping.provider_hotel_id
+                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db,otaId,hotel_id,poi_hotel_id)
+                hotelName = hotelModel.provider_hotel_name
+                roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+                operate_content = mapping.provider_roomtype_name + " <-> " + roomType.name
+
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
+                                                poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 roomtype_mapping=mapping.todict(),
                 ))

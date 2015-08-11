@@ -10,11 +10,15 @@ from views.base import BtwBaseHandler, StockHandler
 from mixin.hotelmixin import HotelMixin
 
 from tools.auth import auth_login, auth_permission
+from config import modules
+from config import motivations
 from constants import PERMISSIONS
 from models.hotel_mapping import HotelMappingModel as HotelMapping
 from models.hotel import HotelModel as Hotel
 from models.room_type_mapping import RoomTypeMappingModel as RoomTypeMapping
 from models.room_type import RoomTypeModel as RoomType
+from models.poi_operate_log_mapping import PoiOperateLogModel as PoiOperateLogMapping
+import traceback
 
 from tools.log import Log, log_request
 
@@ -118,6 +122,20 @@ class FirstValidStatusAPIHandelr(BtwBaseHandler):
                     return
 
             r = HotelMapping.set_firstvalid_complete(self.db, hotel_mapping_id)
+            try:
+                module = modules['first_valid']
+                motivation = motivations['pass_hotel']
+                operator = self.current_user
+                poi_hotel_id = hotel_mapping.main_hotel_id
+                otaId = hotel_mapping.provider_id
+                hotelName = hotel_mapping.provider_hotel_name
+                hotelModel = Hotel.get_by_id(self.db,id=poi_hotel_id)
+                operate_content = hotelName + "<->" + hotelModel.name
+                hotel_id = hotel_mapping_id
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=dict(
                 hotel_mapping=r.todict(),
             ))
@@ -138,6 +156,25 @@ class FirstValidRoomTypeAPIHandler(BtwBaseHandler):
 
             r = RoomTypeMapping.set_firstvalid_complete(
                 self.db, roomtype_mapping_id)
+
+            try:
+                module = modules['first_valid']
+                motivation = motivations['pass_roomtype']
+                operator = self.current_user
+                poi_hotel_id = mapping.main_hotel_id
+                poi_roomtype_id = mapping.main_roomtype_id
+                otaId = mapping.provider_id
+                hotel_id = mapping.provider_hotel_id
+                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db,otaId,hotel_id,poi_hotel_id)
+                hotelName = hotelModel.provider_hotel_name
+                roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+                operate_content = mapping.provider_roomtype_name + " <-> " + roomType.name
+
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
+                                                poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 roomtype_mapping=r.todict(),
             ))

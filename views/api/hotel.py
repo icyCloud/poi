@@ -13,8 +13,11 @@ from tools.request_tools import get_and_valid_arguments
 from models.hotel import HotelModel as Hotel
 from models.room_type import RoomTypeModel
 from models.business_zone import BusinessZoneModel
+from models.poi_operate_log_mapping import PoiOperateLogModel as PoiOperateLogMapping
 from models.city import CityModel
-
+from config import motivations
+from config import modules
+import traceback
 from constants import EBOOKING_CHAIN_ID
 
 class HotelSearchAPIHandler(BtwBaseHandler):
@@ -104,6 +107,19 @@ class HotelAPIHandler(BtwBaseHandler):
         hotel = Hotel.new(self.db,
             name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
 
+        try:
+            module = modules['merge']
+            motivation = motivations['add_hotel']
+            operator = self.current_user
+            poi_hotel_id = hotel.id
+            otaId = -1
+            hotelName = hotel.name
+            operate_content = u'新增酒店 '+hotelName+"," + hotel.address
+            hotel_id = "-1"
+            PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+        except Exception,e:
+            traceback.print_exc()
+
         self.finish_json(result=dict(
             hotel=hotel.todict(),
             ))
@@ -120,9 +136,66 @@ class HotelAPIHandler(BtwBaseHandler):
         if not hotel:
             self.finish_json(errcode=404, errmsg="not found hotel " + hotel_id)
             return
+        oldName = hotel.name
+        oldAddress = hotel.address
+        oldStar = hotel.star
+        oldFacilities = hotel.facilities
+        if oldFacilities is None:
+            oldFacilities = u'无效设施'
+        oldBlog = hotel.blog
+        if oldBlog is None:
+            oldBlog = -999
+        oldBlat = hotel.blat
+        if oldBlat is None:
+            oldBlat = -999
+        oldCityId = hotel.city_id
+        if oldCityId is None:
+            oldCityId = -1
+        oldPhone = hotel.phone
+        if oldPhone is None:
+            oldPhone = u'无电话'
+        oldRequireIdcard = hotel.require_idcard
+        oldDistrictId = hotel.district_id
+        if oldDistrictId is None:
+            oldDistrictId = -1
+        oldBusinessZone = hotel.business_zone
+        if oldBusinessZone is None:
+            oldBusinessZone = -1
 
         hotel = Hotel.update(self.db, hotel_id,
             name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
+
+        try:
+            module = modules['merge']
+            motivation = motivations['add_hotel']
+            operator = self.current_user
+            poi_hotel_id = hotel.id
+            otaId = -1
+            operate_content = ''
+            if oldName != name:
+                operate_content += oldName + u' 修改为 ' + name + ","
+            if oldAddress != address:
+                operate_content += oldAddress + u' 修改为 ' + address + ","
+            if oldStar != hotel.star:
+                operate_content += str(oldStar) + u'星 修改为 ' + str(star) + "星,"
+            if oldFacilities != facilities:
+                operate_content += u'设施' + oldFacilities + u' 修改为 ' + facilities + ","
+            if float(oldBlog) != float(blog):
+                operate_content += u'经度' + str(oldBlog) + u' 修改为 ' + str(blog) + ","
+            if float(oldBlat) != float(blat):
+                operate_content += u'维度' + str(oldBlat) + u' 修改为 ' + str(blat) + ","
+            if oldCityId != city_id:
+                operate_content += u'城市' + str(oldCityId) + u'修改为' + str(city_id) + ","
+            if oldPhone != phone:
+                operate_content += u'电话' + oldPhone + u'修改为' + phone + ","
+            if oldDistrictId != district_id:
+                operate_content += u'地区' + str(oldDistrictId) + u'修改为' + str(district_id) + ","
+            if oldBusinessZone !=business_zone:
+                operate_content += u'商圈' + str(oldBusinessZone) + u'修改为' + str(business_zone)
+            hotel_id = "-1"
+            PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=oldName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+        except Exception,e:
+            traceback.print_exc()
 
         self.finish_json(result=dict(
             hotel=hotel.todict(),

@@ -63,6 +63,11 @@ class HotelModel(Base):
         return query.all()
 
     @classmethod
+    def get_by_id(cls,session,id=None):
+        query = session.query(HotelModel).filter(HotelModel.id==id)
+        return query.first()
+
+    @classmethod
     def query(cls, session, name=None, star=None, city_id=None, district_id=None, start=0, limit=10, filter_ids=None, within_ids=None, count_total=True):
         query = session.query(HotelModel)\
                 .filter(HotelModel.is_valid == 1)

@@ -27,6 +27,8 @@ from views.hotels import HotelsHandler
 from views.api.business_zone import BusinessZoneByCityAPIHandler
 from views.api.elong import ElongAPIHandler
 
+from views.poioperatelog import PoiOperateLogHandler
+from views.api.poi_operate_log import OperateLogAPIHandler
 handlers = [
         (r"/?", IndexHandler),
         (r"/login/?", LoginHandler),
@@ -77,4 +79,7 @@ handlers = [
 
         (r"/hotels/?", HotelsHandler),
         (r"/api/elong/hotel/(?P<hotel_id>\d+)/?", ElongAPIHandler),
+
+        (r"/operatelog/?",PoiOperateLogHandler),
+        (r"/api/operatelog/?",OperateLogAPIHandler),
         ]

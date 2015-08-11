@@ -16,10 +16,14 @@ from constants import PERMISSIONS
 from models.hotel_mapping import HotelMappingModel as HotelMapping
 from models.hotel import HotelModel as Hotel
 from models.room_type_mapping import RoomTypeMappingModel as RoomTypeMapping
+from models.poi_operate_log_mapping import PoiOperateLogModel as PoiOperateLogMapping
 from models.room_type import RoomTypeModel as RoomType
 from models.city import CityModel
 from models.district import DistrictModel
-
+from config import modules
+from config import motivations
+from tools import redisClient
+import traceback
 
 class PolymerAPIHandler(StockHandler, HotelMixin):
 
@@ -119,6 +123,30 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
                 RoomTypeMapping.disable_by_provider_hotel_id(self.db, hotel_mapping.provider_hotel_id)
 
             yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
+
+            try:
+                redisClient.put('poi_online',hotel_mapping.main_hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
+            try:
+                module = modules['merge']
+                motivation = None
+                if is_online == 0:
+                    motivation = motivations['offline_hotel']
+                else:
+                    motivation = motivations['online_hotel']
+                operator = self.current_user
+                poi_hotel_id = hotel_mapping.main_hotel_id
+                otaId = hotel_mapping.provider_id
+                hotelName = hotel_mapping.provider_hotel_name
+                hotelModel = Hotel.get_by_id(self.db,id=poi_hotel_id)
+                operate_content = hotelName + "<->" + hotelModel.name
+                hotel_id = hotel_mapping_id
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 hotel_mapping=hotel_mapping.todict(),
                 ))
@@ -133,6 +161,21 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
         if hotel_mapping and hotel_mapping.status == hotel_mapping.STATUS.valid_complete:
             hotel_mapping = HotelMapping.revert_to_firstvalid(self.db, hotel_mapping_id)
             RoomTypeMapping.revert_to_firstvalid_by_provider_hotel_id(self.db, hotel_mapping.provider_hotel_id)
+
+            try:
+                module = modules['merge']
+                motivation = motivations['back_hotel']
+                operator = self.current_user
+                poi_hotel_id = hotel_mapping.main_hotel_id
+                otaId = hotel_mapping.provider_id
+                hotelName = hotel_mapping.provider_hotel_name
+                hotelModel = Hotel.get_by_id(self.db,id=poi_hotel_id)
+                operate_content = hotelName + "<->" + hotelModel.name
+                hotel_id = hotel_mapping_id
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 hotel_mapping=hotel_mapping.todict(),
                 ))
@@ -161,6 +204,34 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
         if mapping and mapping.status == mapping.STATUS.valid_complete:
             RoomTypeMapping.set_online(self.db, roomtype_mapping_id, is_online)
             yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
+
+            try:
+                redisClient.put('poi_online',mapping.main_hotel_id)
+            except Exception,e:
+                traceback.print_exc()
+
+            try:
+                module = modules['merge']
+                motivation = None
+                if is_online == 1:
+                    motivation = motivations['online_roomtype']
+                else:
+                    motivation = motivations['offline_roomtype']
+                operator = self.current_user
+                poi_hotel_id = mapping.main_hotel_id
+                poi_roomtype_id = mapping.main_roomtype_id
+                otaId = mapping.provider_id
+                hotel_id = mapping.provider_hotel_id
+                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db,otaId,hotel_id,poi_hotel_id)
+                hotelName = hotelModel.provider_hotel_name
+                roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+                operate_content = mapping.provider_roomtype_name + " <-> " + roomType.name
+
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
+                                                poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 roomtype_mapping=mapping.todict(),
                 ))
@@ -176,6 +247,25 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.valid_complete:
             mapping = RoomTypeMapping.revert_to_firstvalid(self.db, roomtype_mapping_id)
+
+            try:
+                module = modules['merge']
+                motivation = motivations['back_roomtype']
+                operator = self.current_user
+                poi_hotel_id = mapping.main_hotel_id
+                poi_roomtype_id = mapping.main_roomtype_id
+                otaId = mapping.provider_id
+                hotel_id = mapping.provider_hotel_id
+                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db,otaId,hotel_id,poi_hotel_id)
+                hotelName = hotelModel.provider_hotel_name
+                roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+                operate_content = mapping.provider_roomtype_name + " <-> " + roomType.name
+
+                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
+                                                poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
+            except Exception,e:
+                traceback.print_exc()
+
             self.finish_json(result=ObjectDict(
                 roomtype_mapping=mapping.todict(),
                 ))
