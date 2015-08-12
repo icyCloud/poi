@@ -1,0 +1,523 @@
+# -*- coding: utf-8 -*-
+
+<%inherit file="nav_frame.html" />
+
+<%!
+from models.hotel_mapping import HotelMappingModel
+from models.room_type_mapping import RoomTypeMappingModel
+%>
+
+<%def name="body_define()">
+    ng-app="validapp"
+    ng-controller="validController"
+</%def>
+
+<%def name="content()" >
+
+<div class="container">
+    <div class="cow" style="margin-top: 20px">
+
+        <div class="col-lg-3">
+            <select class="form-control"
+                data-ng-model="searchProvider"
+                style="margin-top:5px;">
+                <option data-ng-repeat="provider in providers">{{provider.name}}</option>
+            </select>
+        </div>
+        
+        <div class="col-lg-3">
+            <input class="form-control floating-label" type="text"
+                data-ng-model="searchHotelName"
+                placeholder="酒店名称">
+        </div>
+
+        <div class="col-lg-3">
+            <select class="form-control" data-ng-model="searchMotivations" style="margin-top:5px;">
+            <option value='0'>任意行为</option>
+                  <option value='1'>通过酒店</option>
+                    <option value='2'>通过房型</option>
+                    <option value='3'>修改房型</option>
+                    <option value='4'>添加房型</option>
+                    <option value='5'>打回酒店</option>
+                    <option value='6'>打回房型</option>
+                    <option value='7'>上线酒店</option>
+                    <option value='8'>上线房型</option>
+                    <option value='9'>下线酒店</option>
+                    <option value='10'>下线房型</option>
+                    <option value='11'>新增酒店</option>
+                    <option value='12'>新增房型</option>
+            </select>
+        </div>
+
+        <div class="col-lg-3">
+            <select class="form-control" data-ng-model="searchModeuls" style="margin-top:5px;">
+                   <option value='0'>任意功能</option>
+                   <option value='1'>初审</option>
+                    <option value='2'>终审</option>
+                    <option value='3'>聚合</option>
+                    <option value='4'>酒店管理</option>
+            </select>
+        </div>
+        <br>
+        <div class="col-lg-3">
+            <input class="form-control floating-label" type="text"
+                data-ng-model="searchOperator"
+                placeholder="操作人" style="margin-top:15px;">
+        </div>
+
+        <div class="col-lg-3">
+            <input class="form-control floating-label" type="text"
+                data-ng-model="searchstartDate"
+                placeholder="开始时间" style="margin-top:15px;" id="liveStarTime">
+        </div>
+         <div class="col-lg-3">
+            <input class="form-control floating-label" type="text"
+                data-ng-model="searchendDate"
+                placeholder="结束时间" style="margin-top:15px;" id="liveEndTime">
+        </div>
+
+        <div class="col-lg-3">
+            <button class="btn btn-primary pull-left" data-ng-click="search()" style="">搜索</button>
+            <button class="btn btn-default pull-left" data-ng-click="resetSearch()" style="">重置</button>
+        </div>
+    </div>
+
+    
+
+    <div class="row">
+        <h4 class="col-md-2 title">供应商</h3>
+        <h4 class="col-md-3 title">酒店名称</h3>
+        <h4 class="col-md-1 title">功能</h3>
+        <h4 class="col-md-1 title">行为</h3>
+        <h4 class="col-md-2 title">详细</h3>
+        <h4 class="col-md-1 title">操作人</h3>
+        <h4 class="col-md-2 title">时间</h3>
+    </div>
+
+    <div class="row panel panel-default" ng-repeat="searchHotels in searchOp">
+        <div class=" panel-body clearfix">
+            <div class="col-md-2 ">
+                <p class="text-primary text-center" ><b ng-bind="getProviderName(searchHotels.otaId)"></b></p>
+            </div>
+            <div class="col-md-3 ">
+                <p class="text-center" data-ng-bind="searchHotels.hotelName"></p>
+            </div>
+            <div class="col-md-1 " style="margin-top:0; margin-buttom: 0;">
+                <p class="text-center" data-ng-bind="searchHotels.moduleName"></p>
+            </div>
+            <div class="col-md-1 ">
+                <p class="text-center" data-ng-bind="searchHotels.motivationName"></p>
+            </div>  
+            <div class="col-md-2 ">
+                <p class="text-center" data-ng-bind="searchHotels.operateContent"></p>
+            </div> 
+            <div class="col-md-1 ">
+                <p class="text-center" data-ng-bind="searchHotels.operator"></p>
+            </div>
+            <div class="col-md-2 ">
+               <p class="text-center" data-ng-bind="searchHotels.tsupdate"></p>
+            </div>
+        </div>       
+    </div>
+    <div class="row">
+        <nav style="text-align: center">
+            <pagination ng-hide="searchMode" total-items="hotelTotalItems" ng-model="hotelCurrentPage" boundary-links="true" rotate="false" items-per-page="hotelItemsPerPage" max-size="maxSize" ng-change="pageChanged()" ></pagination>
+        </nav>
+    </div>
+</div>
+
+
+</%def>
+
+
+<%def name="css()">
+${parent.css()}
+
+h4.title {
+    text-align: center;
+}
+
+.span-center {
+    width: 100%;
+    text-align: center;
+}
+
+p.text-center {
+    margin: 0 0 0 0;
+    text-align: center;
+    verial-align: center;
+}
+
+.room-mapping-btn {
+    margin: -7px 0px 0px 0px;
+}
+
+.rowstyle{
+    margin-top: 10px;
+}
+
+</%def>
+
+<%def name="js()"> 
+
+var validapp = angular.module('validapp', ['ui.bootstrap', 'cgBusy']);
+
+
+validapp.controller('validController',
+        ['$scope', '$http', '$location',
+        function($scope, $http, $location) {
+
+
+    $scope.totalItems = 0;
+    $scope.currentPage = 0;
+    $scope.itemsPerPage = 0;
+    $scope.maxSize = 10;
+
+    $scope.hotelMappings = [];
+    $scope.providers = [];
+    $scope.dialogMainRoomType = {};
+    $scope.dialogProviderRoomType = {};
+    $scope.changeDialogRoomType = {};
+    $scope.providerDialogRoomType = {};
+    $scope.changeDialogRoomTypes = [];
+    $scope.dialogHotel = {};
+    $scope.changeHotel = {};
+    $scope.citys = [];
+    $scope.searchHotels = [];
+    $scope.districts_by_city = [];
+    $scope.selectedHotel = undefined;
+
+    $scope.hotelTotalItems = 0;
+    $scope.hotelCurrentPage = 1;
+    $scope.hotelItemsPerPage = 10;
+    $scope.hotelMaxSize = 10;
+    $scope.hotelLoadingPromise = null;
+    $scope.hotelModalLoadingPromise = null;
+
+    $scope.searchProvider = undefined;
+    $scope.searchHotelName = undefined;
+    $scope.searchCityName = undefined;
+
+
+    $scope.currentHotel={};
+    $scope.changeHotelName;
+    $scope.changeDistrictName;
+    $scope.changeBusinessName;
+    $scope.flag;//0 添加 1 修改
+    $scope.hotelIndex;
+
+    $scope.hotelErrMsg="";
+
+
+    var roomtypes = [];
+    var currentEditRoomMapping = {};
+    var currentEditHotelMapping = {};
+    var districts = [];
+
+    $scope.searchMotivations = "0";
+    $scope.searchModeuls = "0";
+    $scope.searchOperator = "";
+    $scope.searchstartDate = "";
+    $scope.searchendDate = "";
+
+    $('#liveStarTime').datepicker({
+
+            format: "yyyy-mm-dd",
+            language: "zh-CN",
+            orientation: "top auto",
+            autoclose: true,
+            enableOnReadonly: true,
+            showOnFocus: true
+
+
+        });
+    $('#liveEndTime').datepicker({
+
+                format: "yyyy-mm-dd",
+                language: "zh-CN",
+                orientation: "top auto",
+                autoclose: true,
+                enableOnReadonly: true,
+                showOnFocus: true
+
+
+            });
+
+    $http.get("/api/provider/")
+        .success(function(resp) {
+            if (resp.errcode == 0) {
+                $scope.providers = resp.result.providers;
+                $scope.providers.unshift({name:'任意供应商'});
+            } else {
+                alert(resp.errmsg);
+            }
+        })
+        .error(function() {
+        });
+
+    function checkNull(params){
+        
+        if(params == null || params == undefined || $.trim(params) == "") {
+            return "";
+        }else {
+            return parseFloat($.trim(params));
+        }
+    }
+
+    function checkStrNull(params){
+        
+        if(params==null||params==undefined||params==""){
+            return "";
+        }else {
+            params=$.trim(params);
+            return params;
+        }
+    }
+
+    function getProviderId(provider_name) {
+        for (var i = 0; i < $scope.providers.length; i++) {
+            var provider = $scope.providers[i];
+            if (provider.name == provider_name) {
+                return provider.chain_id;
+            }
+        }
+
+        return "";
+    }
+
+   
+    $scope.searchResult = function() {
+        var url = '/api/operatelog?';
+        var start = ($scope.hotelCurrentPage - 1) * $scope.hotelItemsPerPage
+        var limit = $scope.hotelItemsPerPage;
+
+        url += ('start=' + start + '&limit=' + limit);
+        $scope.searchstartDate = $('#liveStarTime').val();
+        $scope.searchendDate = $('#liveEndTime').val();
+        var dayStart,dayEnd;
+        if($scope.searchstartDate!="" && $scope.searchendDate!="" && $scope.searchstartDate == $scope.searchendDate){
+            dayStart = $scope.searchstartDate + " 00:00:00";
+            dayEnd = $scope.searchendDate + " 23:59:59";
+        }else{
+            dayStart = $scope.searchstartDate && ($scope.searchstartDate + " 00:00:00");
+            dayEnd = $scope.searchendDate && ($scope.searchendDate + " 00:00:00");
+        }
+
+        if ($scope.searchProvider != undefined && $scope.searchProvider != "" && $scope.searchProvider != "任意供应商") {
+            url += '&otaId=' + getProviderId($scope.searchProvider);
+        }
+         if ($scope.searchModeuls != undefined && $scope.searchModeuls != "" && $scope.searchModeuls != 0) {
+            url += '&module=' + $scope.searchModeuls;
+        }
+        if ($scope.searchHotelName != undefined && $scope.searchHotelName != "") {
+            url += '&name=' + $scope.searchHotelName;
+        }
+        if ($scope.searchMotivations != undefined && $scope.searchMotivations != "" && $scope.searchMotivations != 0) {
+            url += '&motivation=' + $scope.searchMotivations;
+        }
+        if ($scope.searchOperator != undefined && $scope.searchOperator != "") {
+            url += '&operator=' + $scope.searchOperator;
+        }
+        if ($scope.searchstartDate != undefined && $scope.searchstartDate != "") {
+            url += '&startDate=' + dayStart;
+        }
+        if ($scope.searchendDate != undefined && $scope.searchendDate != "") {
+            url += '&endDate=' + dayEnd;
+        }
+        console.log(url);
+        $scope.hotelLoadingPromise = $http.get(url)
+            .success(function(resp) {
+                console.log(resp);
+                if (resp.errcode == 0) {
+                    $scope.searchOp = resp.result.operateDatas;
+                    $scope.hotelCurrentPage = Math.floor(resp.result.start / resp.result.limit) + 1;
+
+                    $scope.hotelTotalItems = resp.result.total;
+                    $scope.hotelItemsPerPage = resp.result.limit;
+                } else {
+                    alert(resp.errmsg);
+                }
+            })
+            .error(function(){
+                alert('network erroe');
+            }) 
+
+    }
+
+
+
+    $scope.getProviderName=function getProviderName(provider_id) {
+        for (var i = 0; i < $scope.providers.length; i++) {
+            var provider = $scope.providers[i];
+            if (provider.chain_id == provider_id) {
+                return provider.name;
+            }
+        }
+        return "无";
+    }
+
+    $scope.selectHotel = function(hotel) {
+        $scope.selectedHotel = hotel;
+    }
+
+    $scope.hotelPageChanged = function() {
+        $scope.queryHotel();
+    }
+
+    $scope.searchHotel = function () {
+        $scope.hotelCurrentPage = 1;
+        $scope.hotelItemsPerPage = 10;
+        $scope.queryHotel();
+    }
+
+    $scope.queryHotel = function() {
+        var url = '/api/hotel/search?';
+        var start = ($scope.hotelCurrentPage - 1) * $scope.hotelItemsPerPage
+        var limit = $scope.hotelItemsPerPage;
+
+        url += ('start=' + start + '&limit=' + limit + '&');
+
+        var city_id = $scope.getCityId($scope.changeHotel.cityName);
+        var district_id = $scope.getDistrictId($scope.changeHotel.districtName);
+        var name = $scope.changeHotel.name;
+        var star = $scope.changeHotel.star;
+        if (city_id != -1) {
+            url += 'city_id=' + city_id + '&';
+        }
+        if (district_id != -1) {
+            url += 'district_id=' + district_id + '&';
+        }
+        if (name != undefined) {
+            url += 'name=' + name + '&';
+        }
+        if (star != undefined && star != 'any') {
+            url += 'star=' + star;
+        }
+        $scope.hotelLoadingPromise = $http.get(url)
+            .success(function(resp) {
+                if (resp.errcode == 0) {
+                    $scope.searchHotels = resp.result.hotels;
+                    $scope.hotelTotalItems = resp.result.total;
+                    $scope.hotelItemsPerPage = resp.result.limit;
+                    $scope.hotelCurrentPage = Math.floor(resp.result.start / resp.result.limit) + 1;
+                    $scope.selectedHotel = undefined;
+                } else {
+                    alert(resp.errmsg);
+                }
+            })
+            .error(function(){
+                alert('network erroe');
+            }) 
+    }
+
+    $scope.pageChanged = function() {
+        var params = $location.search();
+        params.start = ($scope.hotelCurrentPage - 1) * $scope.hotelItemsPerPage;
+        params.limit = $scope.hotelItemsPerPage;
+        $location.search(params);
+    };
+
+
+
+    $scope.$watch(function() {
+        return $location.url();
+    },
+    function() {
+        console.log("watch");
+        var params = $location.search();
+        var start = params.start != undefined ? params.start : 0;
+        var limit = params.limit != undefined ? params.limit : 10;
+        if(params.otaId == 0){
+            $scope.searchProvider = $scope.getProviderName(params.otaId);
+        }else{
+            $scope.searchProvider =(params.otaId && $scope.getProviderName(params.otaId)) || "任意供应商";
+        }
+        $scope.searchModeuls=params.module || "0"; 
+        $scope.searchHotelName=params.name || "";
+        $scope.searchMotivations=params.motivation || "0";
+        $scope.searchOperator=params.operator || "";
+        $scope.searchstartDate=params.startDate || "";
+        $scope.searchendDate=params.endDate || "";
+
+        $('#liveStarTime').val($scope.searchstartDate);
+        $('#liveEndTime').val($scope.searchendDate);
+
+        $scope.hotelCurrentPage = Math.floor(start / limit) + 1;
+        $scope.hotelItemsPerPage = limit;
+
+        $scope.searchResult();
+    });
+
+
+
+    $scope.search = function() {
+        console.log("33");
+        console.log();
+        $scope.searchstartDate = $('#liveStarTime').val();
+        $scope.searchendDate = $('#liveEndTime').val();
+        $scope.hotelCurrentPage = 1;
+        $scope.hotelItemsPerPage = 10;
+        var urlParams = {};
+         if ($scope.searchProvider != undefined && $scope.searchProvider != "" && $scope.searchProvider != "任意供应商") {
+            urlParams.otaId=getProviderId($scope.searchProvider);
+        }
+         if ($scope.searchModeuls != undefined && $scope.searchModeuls != "" && $scope.searchModeuls != 0) {
+            urlParams.module=$scope.searchModeuls;
+        }
+        if ($scope.searchHotelName != undefined && $scope.searchHotelName != "") {
+            urlParams.name=$scope.searchHotelName;
+        }
+        if ($scope.searchMotivations != undefined && $scope.searchMotivations != "" && $scope.searchMotivations != 0) {
+            urlParams.motivation=$scope.searchMotivations;
+        }
+        if ($scope.searchOperator != undefined && $scope.searchOperator != "") {
+            urlParams.operator=$scope.searchOperator;
+        }
+        if ($scope.searchstartDate != undefined && $scope.searchstartDate != "") {
+            urlParams.startDate=$scope.searchstartDate;
+        }
+        if ($scope.searchendDate != undefined && $scope.searchendDate != "") {
+            urlParams.endDate=$scope.searchendDate;
+        }
+        urlParams.start = 0;
+        urlParams.limit = 10;
+
+        console.log(urlParams);
+        $location.search(urlParams);
+
+    }
+
+    $scope.resetSearch = function() {
+        $scope.searchProvider = '任意供应商';
+        $scope.searchModeuls = "0";
+        $scope.searchHotelName = "";
+        $scope.searchMotivations = "0";
+        $scope.searchOperator = "";
+        $scope.searchstartDate = "";
+        $scope.searchendDate = "";
+        $('#liveStarTime').val("");
+        $('#liveEndTime').val("");
+
+        $location.search({});
+    }
+}]);
+
+</%def>
+
+<%def name="end()">
+    ${parent.end()}
+    <script src="${static_url('js/angular-busy.min.js')}"></script>
+    <script src="${static_url('js/hotel_helper.js')}"></script>
+
+
+    <script type="text/javascript" src="${static_url('js/bootstrap.min.js')}"></script>
+    <script type="text/javascript" src="${static_url('js/bootstrap-datepicker.js')}"></script>
+    <script type="text/javascript" src="${static_url('js/bootstrap-datepicker.zh-CN.min.js')}"></script>
+</%def>
+
+<%def name="head()">
+    ${parent.head()}
+    <link href="${static_url('css/angular-busy.min.css')}" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="${static_url('css/bootstrap-datepicker3.css')}">
+</%def>
