@@ -122,13 +122,11 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
             if hotel_mapping.is_online == 0:
                 RoomTypeMapping.disable_by_provider_hotel_id(self.db, hotel_mapping.provider_hotel_id)
 
-            yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
-
             try:
                 redisClient.put('poi_online',hotel_mapping.main_hotel_id)
             except Exception,e:
                 traceback.print_exc()
-
+            yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
             try:
                 module = modules['merge']
                 motivation = None
@@ -203,13 +201,11 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.valid_complete:
             RoomTypeMapping.set_online(self.db, roomtype_mapping_id, is_online)
-            yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
-
             try:
                 redisClient.put('poi_online',mapping.main_hotel_id)
             except Exception,e:
                 traceback.print_exc()
-
+            yield self.notify_stock(hotel_mapping.provider_id, hotel_mapping.provider_hotel_id)
             try:
                 module = modules['merge']
                 motivation = None

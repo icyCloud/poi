@@ -5,7 +5,7 @@ from tornado.httpclient import AsyncHTTPClient
 
 from config import API, IS_PUSH_TO_STOCK
 from tools.log import Log, log_request
-
+import time
 class StockMixin(object):
 
     @gen.coroutine
@@ -14,7 +14,7 @@ class StockMixin(object):
             raise gen.Return()
 
         url = '{}/stock2/internal/hotel/update_time?chainId={}&chainHotelId={}'.format(API['STOCK'], chain_id, chain_hotel_id)
-
+        time.sleep(2)
         resp = yield AsyncHTTPClient().fetch(url)
         Log.info(resp.body)
         raise gen.Return()
