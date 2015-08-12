@@ -2,10 +2,10 @@
 __author__ = 'jiangfuqiang'
 
 import redis
-from config import REDIS_HOST
+from config import POI_REDIS_HOST
 
 def connectRedis():
-    r = redis.Redis(host=REDIS_HOST,port=6379)
+    r = redis.Redis(host=POI_REDIS_HOST,port=6379)
     return r
 
 def put(key,value):

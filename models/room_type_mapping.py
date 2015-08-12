@@ -28,7 +28,7 @@ class RoomTypeMappingModel(Base):
     main_hotel_id = Column('mainHotelId', INTEGER(unsigned=True), nullable=False)
     main_roomtype_id = Column('mainRoomTypeId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False, default=0)
+    is_online = Column('onlineStatus', INTEGER, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
     is_new =  Column('isNew', BIT, nullable=False, default=0)
     ts_update = Column('tsUpdate', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))

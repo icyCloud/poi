@@ -49,7 +49,11 @@ class PoiOperateLogModel(Base):
             query = query.filter(PoiOperateLogModel.operator == operator)
         if startDate:
             sd = datetime.datetime.strptime(startDate,'%Y-%m-%d %H:%M:%S')
-            ed = datetime.datetime.strptime(endDate,'%Y-%m-%d %H:%M:%S')
+            ed = None
+            if endDate:
+                ed = datetime.datetime.strptime(endDate,'%Y-%m-%d %H:%M:%S')
+            else:
+                ed = datetime.datetime.strptime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
             query = query.filter(PoiOperateLogModel.tsupdate.between(sd,ed))
         data = query.order_by(PoiOperateLogModel.id.desc()).offset(start).limit(limit).all()
         total = query.count()

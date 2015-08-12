@@ -32,7 +32,7 @@ class HotelMappingModel(Base):
     main_hotel_id = Column(
         'mainHotelId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    is_online = Column('isOnline', BIT, nullable=False, default=0)
+    is_online = Column('onlineStatus', INTEGER, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
     is_new =  Column('isNew', BIT, nullable=False, default=0)
     info = Column(VARCHAR(100))

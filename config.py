@@ -16,7 +16,7 @@ API = {
 IS_PUSH_TO_STOCK = False
 
 REDIS_HOST = 'localhost'
-
+POI_REDIS_HOST='localhost'
 BACKSTAGE_HOST = 'http://121.42.8.247:8080'
 BACKSTAGE_USERNAME_KEY = "test_op_username"
 
