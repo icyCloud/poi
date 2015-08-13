@@ -108,7 +108,7 @@ class HotelAPIHandler(BtwBaseHandler):
             name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
 
         try:
-            module = modules['merge']
+            module = modules['poi_manage']
             motivation = motivations['add_hotel']
             operator = self.current_user
             poi_hotel_id = hotel.id
@@ -166,8 +166,8 @@ class HotelAPIHandler(BtwBaseHandler):
             name, star, facilities, blog, blat, glog, glat, city_id, district_id, address, business_zone, phone, traffic, description, require_idcard, is_online, foreigner_checkin)
 
         try:
-            module = modules['merge']
-            motivation = motivations['add_hotel']
+            module = modules['poi_manage']
+            motivation = motivations['modify_hotel']
             operator = self.current_user
             poi_hotel_id = hotel.id
             otaId = -1

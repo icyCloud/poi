@@ -60,8 +60,8 @@ motivations = {
         'offline_hotel':9,   #下线酒店
         'offline_roomtype':10, #下线房型
         'add_hotel':11,    #新增酒店
-        'new_roomtype':12    #新增房型
-
+        'new_roomtype':12,    #新增房型
+        'modify_hotel':13  #修改酒店
 }
 
 showMotivations = {
@@ -76,7 +76,8 @@ showMotivations = {
     9:'下线酒店',
     10:'下线房型',
     11:'新增酒店',
-    12:'新增房型'
+    12:'新增房型',
+    13:'修改酒店'
 }
 
 roomtypes = {
