@@ -394,13 +394,13 @@ validapp.controller('validController',
     }
 
     $scope.validHotel = function(mapping) {
-        if(!confirm('Pass ?')) {
-            return;
-        }
+        //if(!confirm('Pass ?')) {
+           // return;
+       // }
         $http.put("/api/secondvalid/hotel/" + mapping.id + "/valid/")
             .success(function(resp) {
                 if (resp.errcode == 0) {
-                    alert('success');
+                    //alert('success');
                     mapping.status = resp.result.hotel_mapping.status;
                 } else {
                     alert(resp.errmsg);
@@ -447,9 +447,9 @@ validapp.controller('validController',
             alert('床型不同');
             return;
         }
-        if (!confirm("Pass ?")) {
-            return;
-        }
+       // if (!confirm("Pass ?")) {
+           // return;
+       // }
 
         if (room_mapping.provider_id == 10 || room_mapping.provider_id == 17 || room_mapping.provider_id == 19) {
             if (room_mapping.provider_roomtype_name != room_mapping.main_roomtype.name) {
