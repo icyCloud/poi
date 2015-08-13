@@ -578,10 +578,10 @@ validapp.controller('validController',
     }
 
     $scope.hotelOnline = function(hotelMapping) {
-        if (!confirm("Change ?")) {
-            hotelMapping.toggle = hotelMapping.is_online == 1;
-            return;
-        }
+        //if (!confirm("Change ?")) {
+            //hotelMapping.toggle = hotelMapping.is_online == 1;
+            //return;
+       // }
 
         var isOnline = hotelMapping.is_online == 1 ? 0 : 1;
         var params = {'hotel_mapping_id': hotelMapping.id, 'is_online': isOnline};
@@ -620,10 +620,10 @@ validapp.controller('validController',
             }
         }
 
-        if (!confirm("Change ?")) {
-            roomMapping.toggle = roomMapping.is_online == 1;
-            return;
-        }
+       // if (!confirm("Change ?")) {
+           // roomMapping.toggle = roomMapping.is_online == 1;
+           // return;
+       // }
 
         var isOnline = roomMapping.is_online == 1 ? 0 : 1;
         var params = {'roomtype_mapping_id': roomMapping.id,

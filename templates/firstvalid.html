@@ -631,13 +631,13 @@ validapp.controller('validController',
     }
 
     $scope.setValid = function(mapping) {
-        if(!confirm('Pass?')) {
-            return;
-        }
+        //if(!confirm('Pass?')) {
+           // return;
+        //}
         $http.put("/api/firstvalid/hotel/" + mapping.id + "/valid/")
             .success(function(resp) {
                 if (resp.errcode == 0) {
-                    alert('success');
+                   // alert('success');
                     mapping.status = resp.result.status;
                 } else {
                     alert(resp.errmsg);
@@ -736,9 +736,9 @@ validapp.controller('validController',
         }
 
 
-        if (!confirm("Pass?")) {
-            return;
-        }
+        //if (!confirm("Pass?")) {
+           // return;
+        //}
 
         $http.put('/api/firstvalid/roomtype/' + room_mapping.id + '/valid/')
             .success(function(resp) {
