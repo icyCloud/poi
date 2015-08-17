@@ -5,6 +5,7 @@ from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT
 from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
+from sqlalchemy import  or_, and_
 
 class RoomTypeMappingModel(Base):
 
@@ -91,7 +92,7 @@ class RoomTypeMappingModel(Base):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.provider_hotel_id.in_(ids))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
-                .filter(RoomTypeMappingModel.status == cls.STATUS.wait_first_valid)\
+                .filter(RoomTypeMappingModel.status != cls.STATUS.init)\
                 .all()
 
     @classmethod
@@ -99,7 +100,7 @@ class RoomTypeMappingModel(Base):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.provider_hotel_id.in_(ids))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
-                .filter(RoomTypeMappingModel.status == cls.STATUS.wait_second_valid)\
+                .filter(or_(RoomTypeMappingModel.status == cls.STATUS.wait_second_valid,RoomTypeMappingModel.status == cls.STATUS.valid_complete))\
                 .all()
 
     @classmethod

@@ -112,7 +112,7 @@ class HotelMappingModel(Base):
                 .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.status != cls.STATUS.init)\
-                .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_first_valid))
+                .filter(or_(stmt, HotelMappingModel.status != cls.STATUS.init))
 
 
         r = query.offset(start).limit(limit).all()
@@ -141,7 +141,7 @@ class HotelMappingModel(Base):
                 .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
                 .filter(HotelMappingModel.status != cls.STATUS.init)\
-                .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_second_valid))
+                .filter(or_(stmt, HotelMappingModel.status == cls.STATUS.wait_second_valid,HotelMappingModel.status == cls.STATUS.valid_complete))
 
 
         r = query.offset(start).limit(limit).all()
