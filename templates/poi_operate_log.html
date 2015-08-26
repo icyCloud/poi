@@ -113,7 +113,7 @@ from models.room_type_mapping import RoomTypeMappingModel
                 <p class="text-center" data-ng-bind="searchHotels.operateContent"></p>
             </div> 
             <div class="col-md-1 ">
-                <p class="text-center" data-ng-bind="searchHotels.operator"></p>
+                <p class="text-center" data-ng-bind="getOperatorName(searchHotels.operator)"></p>
             </div>
             <div class="col-md-2 ">
                <p class="text-center" data-ng-bind="searchHotels.tsupdate"></p>
@@ -214,6 +214,7 @@ validapp.controller('validController',
     var currentEditRoomMapping = {};
     var currentEditHotelMapping = {};
     var districts = [];
+    $scope.operators = {};
 
     $scope.searchMotivations = "0";
     $scope.searchModeuls = "0";
@@ -255,6 +256,15 @@ validapp.controller('validController',
         })
         .error(function() {
         });
+
+    $http.jsonp("http://op.betterwood.com/interface/user/list?jsonpcallback=JSON_CALLBACK")
+        .success(function(resp) {
+                $scope.operators = resp;
+        })
+        .error(function(msg) {
+
+        });
+
 
     function checkNull(params){
         
@@ -355,6 +365,15 @@ validapp.controller('validController',
             }
         }
         return "无";
+    }
+
+    $scope.getOperatorName = function getOperatorName(user) {
+       var username = $scope.operators[user];
+        if(username) {
+            return username;
+        } else {
+            return user;
+        }
     }
 
     $scope.selectHotel = function(hotel) {
