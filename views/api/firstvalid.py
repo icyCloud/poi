@@ -35,11 +35,11 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
         provider_id = self.get_query_argument('provider_id', None)
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
-
+        status = self.get_query_argument('statusId',-1)
         t0 = time.time()
         hotel_mappings, total = HotelMapping.gets_show_in_firstvalid(self.db,
                                                                      provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
-                                                                     start=start, limit=limit)
+                                                                     start=start, limit=limit,status=status)
         Log.info(">> get show in first valid")
         hotels = [hotel.todict() for hotel in hotel_mappings]
 

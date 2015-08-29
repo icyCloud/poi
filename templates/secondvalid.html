@@ -34,6 +34,10 @@ from models.room_type_mapping import RoomTypeMappingModel
                 data-ng-model="searchCityName"
                 typeahead="city.name for city in citys | filter:$viewValue | limitTo:8"
                 placeholder="城市">
+            <select ng-model="status" convert-to-number>
+              <option value=-1>全部</option>
+              <option value=2>未通过</option>
+            </select>
         </div>
         <div class="col-lg-3">
             <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
@@ -271,7 +275,7 @@ validapp.controller('validController',
     $scope.searchProvider = undefined;
     $scope.searchHotelName = undefined;
     $scope.searchCityName = undefined;
-
+    $scope.status = -1;
     var roomtypes = [];
 
     $http.get("/api/provider/")
@@ -297,7 +301,7 @@ validapp.controller('validController',
             }
         });
 
-    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name) {
+    function loadHotelMappings(start, limit, provider_id, city_id, hotel_name,statusId) {
         var url = "/api/secondvalid?start=" + start + "&limit=" + limit;
         if (provider_id != undefined) {
             url += ("&provider_id=" + provider_id);
@@ -308,7 +312,9 @@ validapp.controller('validController',
         if (hotel_name != undefined) {
             url += ("&hotel_name=" + hotel_name);
         }
-
+        if(statusId && statusId != -1) {
+            url += ("&statusId="+statusId);
+        }
         $http.get(url)
             .success(function(data) {
                 console.log(data);
@@ -509,7 +515,8 @@ validapp.controller('validController',
         var provider_id = params.provider_id;
         var city_id = params.city_id;
         var hotel_name = params.hotel_name;
-        loadHotelMappings(start, limit, provider_id, city_id, hotel_name);
+        var statusId = params.statusId
+        loadHotelMappings(start, limit, provider_id, city_id, hotel_name,statusId);
 
     });
 
@@ -540,7 +547,9 @@ validapp.controller('validController',
         if ($scope.searchHotelName != undefined) {
             urlParams.hotel_name = $scope.searchHotelName;
         }
-
+        if($scope.status != undefined && $scope.status != -1) {
+            urlParams.statusId = $scope.status;
+        }
         console.log(urlParams);
         $location.search(urlParams);
     }

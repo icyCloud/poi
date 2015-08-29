@@ -93,8 +93,9 @@ class HotelMappingModel(Base):
 
 
     @classmethod
-    def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
+    def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20,status=-1):
         from models.room_type_mapping import RoomTypeMappingModel
+
         stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
                 RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
@@ -107,12 +108,17 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.city_id == city_id)
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
+        if status != -1:
+            query = query.filter(HotelMappingModel.status == status)
 
         query = query\
                 .filter(HotelMappingModel.provider_id != 6)\
                 .filter(HotelMappingModel.is_delete == 0)\
-                .filter(HotelMappingModel.status != cls.STATUS.init)\
-                .filter(or_(stmt, HotelMappingModel.status != cls.STATUS.init))
+                .filter(HotelMappingModel.status != cls.STATUS.init)
+        # if status == -1:
+        query = query.filter(or_(stmt, HotelMappingModel.status != cls.STATUS.init))
+        # else:
+        #         query = query.filter(and_(stmt))
 
 
         r = query.offset(start).limit(limit).all()
@@ -121,7 +127,7 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
-    def gets_show_in_secondvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
+    def gets_show_in_secondvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20,status=-1):
         from models.room_type_mapping import RoomTypeMappingModel
         stmt = exists(
         ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
@@ -136,6 +142,9 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.city_id == city_id)
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
+        if status != -1:
+            query = query.filter(HotelMappingModel.status==status)
+
 
         query = query\
                 .filter(HotelMappingModel.provider_id != 6)\
