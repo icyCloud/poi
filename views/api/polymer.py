@@ -24,6 +24,9 @@ from config import modules
 from config import motivations
 from tools import redisClient
 import traceback
+from tools import log
+import datetime
+
 
 class PolymerAPIHandler(StockHandler, HotelMixin):
 
@@ -267,3 +270,28 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
                 ))
         else:
             self.finish_json(errcode=401, errmsg="not in second valid")
+
+class PolymerHotelLineHandler(BtwBaseHandler):
+
+    @auth_login(json=True)
+    @auth_permission(PERMISSIONS.admin | PERMISSIONS.polymer, json=True)
+    @log_request
+    def put(self):
+        jon = self.get_json_arguments()
+        startTime = jon['startTime']
+        endTime = jon['endTime']
+        line = jon['line']
+        chainIds = jon['chainIds']
+        errcode = 0
+        errmsg = 'success'
+        try:
+            if startTime and endTime and chainIds:
+                HotelMapping.set_mult_line(self.db,chainIds=chainIds,startTime=startTime,endTime=endTime,is_online=int(line))
+            else:
+                errcode = 1
+                errmsg = 'failure'
+        except Exception,e:
+            traceback.print_exc()
+        finally:
+            Log.info(self.current_user+'在'+datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "批量修改了"+chainIds+"的酒店状态为：" + str(line))
+            self.finish_json(errcode=errcode, errmsg=errmsg)

@@ -5,7 +5,8 @@ from sqlalchemy import Column, or_, and_
 from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP, TINYINT
 from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
-
+import datetime
+from models.room_type_mapping import RoomTypeMappingModel
 
 class HotelMappingModel(Base):
 
@@ -127,7 +128,7 @@ class HotelMappingModel(Base):
         return r, total
 
     @classmethod
-    def gets_show_in_secondvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20,status=-1):
+    def gets_show_in_secondvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20):
         from models.room_type_mapping import RoomTypeMappingModel
         stmt = exists(
         ).where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
@@ -142,8 +143,6 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.city_id == city_id)
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
-        if status != -1:
-            query = query.filter(HotelMappingModel.status==status)
 
 
         query = query\
@@ -173,7 +172,7 @@ class HotelMappingModel(Base):
         if show_online_type == 1:
             query = query.filter(HotelMappingModel.is_online == 1)
         elif show_online_type == 2:
-            query = query.filter(HotelMappingModel.is_online == 0)
+            query = query.filter(HotelMappingModel.is_online.in_([-1, 0]))
 
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
@@ -269,11 +268,42 @@ class HotelMappingModel(Base):
     def set_online(cls, session, id, is_online):
         r = cls.get_by_id(session, id)
         if r:
+            if is_online == 0:
+                is_online = -1
             r.is_online =  is_online
             r.is_new = 0
             session.commit()
 
         return r
+
+    @classmethod
+    def set_mult_line(cls,session,chainIds=None, startTime=None,endTime=None, is_online=None):
+        if startTime and endTime and chainIds:
+            sd = datetime.datetime.strptime(startTime,'%Y-%m-%d')
+            ed = datetime.datetime.strptime(endTime,'%Y-%m-%d')
+            cids = chainIds.split(',')
+            if is_online == 0:  #下线
+                query = session.query(RoomTypeMappingModel)\
+                    .filter(RoomTypeMappingModel.is_delete == 0,RoomTypeMappingModel.status==3,RoomTypeMappingModel.ts_update.between(sd,ed),RoomTypeMappingModel.provider_id.in_(cids),RoomTypeMappingModel.is_online != -1)
+                query.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
+                session.commit()
+                hquery = session.query(HotelMappingModel)\
+                        .filter(HotelMappingModel.is_delete == 0,HotelMappingModel.status == 3,HotelMappingModel.ts_update.between(sd,ed),HotelMappingModel.provider_id.in_(cids),HotelMappingModel.is_online != -1)
+                hquery.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
+                session.commit()
+            else:
+                query = session.query(HotelMappingModel)\
+                        .filter(HotelMappingModel.is_delete == 0,HotelMappingModel.status == 3,HotelMappingModel.ts_update.between(sd,ed),HotelMappingModel.provider_id.in_(cids),HotelMappingModel.is_online != -1)
+                query.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
+                session.commit()
+                rquery = session.query(RoomTypeMappingModel)\
+                    .filter(RoomTypeMappingModel.is_delete == 0,RoomTypeMappingModel.status==3,RoomTypeMappingModel.ts_update.between(sd,ed),RoomTypeMappingModel.provider_id.in_(cids),RoomTypeMappingModel.is_online != -1)
+                rquery.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
+                session.commit()
+
+
+
+
 
     @classmethod
     def delete(cls, session, id):

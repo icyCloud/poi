@@ -134,7 +134,7 @@ class RoomTypeMappingModel(Base):
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .filter(RoomTypeMappingModel.status == cls.STATUS.wait_first_valid)\
                 .filter(RoomTypeMappingModel.provider_id == provider_id)\
-                .filter(RoomTypeMappingModel.provider_hotel_id == hotel_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(hotel_id))\
                 .all()
 
     @classmethod
@@ -195,7 +195,7 @@ class RoomTypeMappingModel(Base):
         r = cls.get_by_id(session, id)
         if r:
             r.status = cls.STATUS.wait_first_valid
-            r.is_online = 0
+            r.is_online = -1
             session.commit()
         return r
 
@@ -205,21 +205,23 @@ class RoomTypeMappingModel(Base):
                 .filter(RoomTypeMappingModel.provider_hotel_id == provider_hotel_id)\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .update({RoomTypeMappingModel.status: cls.STATUS.wait_first_valid,
-                            RoomTypeMappingModel.is_online: 0})
+                            RoomTypeMappingModel.is_online: -1})
         session.commit()
 
     @classmethod
     def disable_by_provider_hotel_id(cls, session, provider_hotel_id):
         session.query(RoomTypeMappingModel)\
-                .filter(RoomTypeMappingModel.provider_hotel_id == provider_hotel_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(provider_hotel_id))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
-                .update({RoomTypeMappingModel.is_online: 0})
+                .update({RoomTypeMappingModel.is_online: -1})
         session.commit()
 
     @classmethod
     def set_online(cls, session, id, is_online):
         r = cls.get_by_id(session, id)
         if r:
+            if is_online == 0:
+                is_online = -1
             r.is_online =  is_online
             r.is_new = 0
             session.commit()

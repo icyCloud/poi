@@ -38,14 +38,16 @@ modules = {
       'first_valid':1,
       'second_valid':2,
       'merge':3,
-      'poi_manage':4
+      'poi_manage':4,
+      'pre_match':5
 }
 
 showModeuls = {
     1:'初审',
     2:'终审',
     3:'聚合',
-    4:'酒店管理'
+    4:'酒店管理',
+    5:'自动匹配'
 }
 
 motivations = {
@@ -61,7 +63,8 @@ motivations = {
         'offline_roomtype':10, #下线房型
         'add_hotel':11,    #新增酒店
         'new_roomtype':12,    #新增房型
-        'modify_hotel':13  #修改酒店
+        'modify_hotel':13,  #修改酒店
+        'pre_match':14  #预匹配
 }
 
 showMotivations = {
@@ -77,7 +80,8 @@ showMotivations = {
     10:'下线房型',
     11:'新增酒店',
     12:'新增房型',
-    13:'修改酒店'
+    13:'修改酒店',
+    14:'预匹配'
 }
 
 roomtypes = {

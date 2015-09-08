@@ -43,7 +43,9 @@ from models.room_type_mapping import RoomTypeMappingModel
         <div class="col-lg-3">
             <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
             <button class="btn btn-default pull-left" data-ng-click="resetSearch()" style="margin-top: -7px; margin-left: 5px">重置</button>
+            <button type="buttion" class="btn btn-primary pull-left" style="margin-top: -7px; margin-left: 5px" ng-click="show()">批量上下线酒店</button>
         </div>
+
     </div>
 
     <div class="row">
@@ -223,6 +225,43 @@ from models.room_type_mapping import RoomTypeMappingModel
     </div>
 </div>
 
+<div class="modal" id="modal-onlineall">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">批量上下线--------请谨慎批量上下线</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="row rowstyle">
+                    <label class="col-lg-3" >
+                        <font size="4" color="red">*&nbsp;</font>供应商:
+                    </label>
+                   <label class="col-lg-8" id="providers"></label>
+                </div>
+            <div class="row rowstyle">
+                <div class="col-lg-6">
+                    <input class="form-control floating-label" type="text"
+                        data-ng-model="searchstartDate"
+                        placeholder="开始时间" style="margin-top:15px;" id="liveStarTime">
+                </div>
+                 <div class="col-lg-6">
+                    <input class="form-control floating-label" type="text"
+                        data-ng-model="searchendDate"
+                        placeholder="结束时间" style="margin-top:15px;" id="liveEndTime">
+                </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-ng-click="multiOnline()">批量上线</button>
+                <button type="button" class="btn btn-primary" data-ng-click="multiOffline()">批量下线</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </%def>
 
 
@@ -294,6 +333,29 @@ validapp.controller('validController',
     $scope.showOnlineType = 0;
 
     var roomtypes = [];
+
+    $('#liveStarTime').datepicker({
+
+            format: "yyyy-mm-dd",
+            language: "zh-CN",
+            orientation: "top auto",
+            autoclose: true,
+            enableOnReadonly: true,
+            showOnFocus: true
+
+
+        });
+    $('#liveEndTime').datepicker({
+
+                format: "yyyy-mm-dd",
+                language: "zh-CN",
+                orientation: "top auto",
+                autoclose: true,
+                enableOnReadonly: true,
+                showOnFocus: true
+
+
+            });
 
     $http.get("/api/provider/")
         .success(function(resp) {
@@ -602,6 +664,82 @@ validapp.controller('validController',
             });
     }
 
+    $scope.show=function(){
+
+        $('#modal-onlineall').modal({
+            keyboard: true
+        });
+        var html = "";
+        for (var i = 0; i < $scope.providers.length; i++) {
+            var provider = $scope.providers[i];
+
+            html += "<span><input type=\"checkbox\" class=\"ps\" value=\""+provider.chain_id+"\"/>" + provider.name+"</span>&nbsp;&nbsp;";
+        }
+        $("#providers").html(html);
+        $('#modal-onlineall').modal('show');
+
+    }
+
+    $scope.multiOffline = function() {
+        var chks = $(".ps:checked")
+        if(!chks || chks.length < 1) {
+            return;
+        }
+        var checkeds = [];
+        for(var i = 0; i < chks.length; i++) {
+            checkeds.push($(chks[i]).val());
+        }
+        var startTime =  $('#liveStarTime').val();
+        var endTime = $('#liveEndTime').val();
+        if(!startTime || !endTime) {
+            return;
+        }
+        var params = {'chainIds':checkeds.join(','),'startTime':startTime,'endTime':endTime,'line':0}
+        $http.put('/api/polymer/hotel/line', params)
+            .success(function(resp) {
+                    if(resp.errcode == 0) {
+                        alert("success");
+                    } else {
+                        alert('下线失败');
+                    }
+
+            })
+            .error(function() {
+
+                alert("network error");
+            });
+    }
+
+    $scope.multiOnline = function() {
+        var chks = $(".ps:checked")
+        if(!chks || chks.length < 1) {
+            return;
+        }
+        var checkeds = [];
+        for(var i = 0; i < chks.length; i++) {
+            checkeds.push($(chks[i]).val());
+        }
+        var startTime =  $('#liveStarTime').val();
+        var endTime = $('#liveEndTime').val();
+        if(!startTime || !endTime) {
+            return;
+        }
+        var params = {'chainIds':checkeds.join(','),'startTime':startTime,'endTime':endTime,'line':1}
+        $http.put('/api/polymer/hotel/line', params)
+            .success(function(resp) {
+                    if(resp.errcode == 0) {
+                        alert("success");
+                    } else {
+                        alert('上线失败');
+                    }
+
+            })
+            .error(function() {
+
+                alert("network error");
+            });
+    }
+
     $scope.roomOnline = function(hotelMapping, roomMapping) {
         if (hotelMapping.is_online == 0) {
             return;
@@ -657,9 +795,14 @@ validapp.controller('validController',
     ${parent.end()}
     <script src="${static_url('js/angular-toggle-switch.min.js')}"></script>
     <script src="${static_url('js/hotel_helper.js')}"></script>
+
+    <script type="text/javascript" src="${static_url('js/bootstrap.min.js')}"></script>
+    <script type="text/javascript" src="${static_url('js/bootstrap-datepicker.js')}"></script>
+    <script type="text/javascript" src="${static_url('js/bootstrap-datepicker.zh-CN.min.js')}"></script>
 </%def>
 
 <%def name="head()">
     ${parent.head()}
     <link href="${static_url('css/angular-toggle-switch.css')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="${static_url('css/bootstrap-datepicker3.css')}">
 </%def>

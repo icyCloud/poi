@@ -18,6 +18,7 @@ from views.api.polymer import PolymerAPIHandler, PolymerHotelAPIHandler, Polymer
 from views.api.roomtype import RoomTypeAPIHandler
 from views.api.city import CityAPIHandler
 from views.api.district import DistrictAPIHandler, DistrictByCityAPIHandler
+from views.api.polymer import PolymerHotelLineHandler
 
 from views.ebooking import EbookingHandler
 from views.api.ebooking import EbookingAPIHandler, MerchantListHandler
@@ -76,6 +77,7 @@ handlers = [
         (r"/polymer/ebooking/?", EbookingHandler),
         (r"/api/polymer/ebooking/?", EbookingAPIHandler),
         (r"/api/polymer/ebooking/merchant/all/?", MerchantListHandler),
+        (r"/api/polymer/hotel/line?",PolymerHotelLineHandler),
 
         (r"/hotels/?", HotelsHandler),
         (r"/api/elong/hotel/(?P<hotel_id>\d+)/?", ElongAPIHandler),
