@@ -43,18 +43,20 @@ class RoomTypeMappingModel(Base):
         return mapping
 
     @classmethod
-    def get_by_provider_roomtype(cls, session, provider_id, provider_roomtype_id):
+    def get_by_provider_roomtype(cls, session, provider_id, provider_roomtype_id,chain_hotel_id):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.provider_id == provider_id)\
-                .filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id==str(chain_hotel_id))\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == str(provider_roomtype_id))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .first()
 
     @classmethod
-    def get_by_provider_and_main_roomtype(cls, session, provider_id, provider_roomtype_id, main_roomtype_id):
+    def get_by_provider_and_main_roomtype(cls, session, provider_id, provider_roomtype_id, main_roomtype_id,chain_hotel_id):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.provider_id == provider_id)\
-                .filter(RoomTypeMappingModel.provider_roomtype_id == provider_roomtype_id,
+                .filter(RoomTypeMappingModel.provider_hotel_id==str(chain_hotel_id))\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == str(provider_roomtype_id),
                         RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .first()
@@ -148,7 +150,7 @@ class RoomTypeMappingModel(Base):
     @classmethod
     def reset_mapping_by_provider_hotel_id(cls, session, provider_hotel_id, main_hotel_id):
         session.query(RoomTypeMappingModel)\
-                .filter(RoomTypeMappingModel.provider_hotel_id == provider_hotel_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(provider_hotel_id))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .update({RoomTypeMappingModel.main_hotel_id: main_hotel_id,
                          RoomTypeMappingModel.main_roomtype_id: 0,
@@ -202,7 +204,7 @@ class RoomTypeMappingModel(Base):
     @classmethod
     def revert_to_firstvalid_by_provider_hotel_id(cls, session, provider_hotel_id):
         session.query(RoomTypeMappingModel)\
-                .filter(RoomTypeMappingModel.provider_hotel_id == provider_hotel_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(provider_hotel_id))\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
                 .update({RoomTypeMappingModel.status: cls.STATUS.wait_first_valid,
                             RoomTypeMappingModel.is_online: -1})

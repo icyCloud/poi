@@ -40,8 +40,8 @@ class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
         else:
             return self.finish_json(errcode=404, errmsg="无效的Hotel")
 
-    #@auth_login(json=True)
-    #@auth_permission(PERMISSIONS.admin | PERMISSIONS.POI)
+    @auth_login(json=True)
+    @auth_permission(PERMISSIONS.admin | PERMISSIONS.POI)
     def post(self, hotel_id):
         roomtype = ObjectDict(json_decode(self.request.body))
         if not self.valid_roomtype(roomtype):

@@ -39,7 +39,7 @@ class RoomTypeMappingEbookingPushAPIHandler(BtwBaseHandler):
                 'chain_hotel_id', 'chain_roomtype_id', 'main_roomtype_id')
         roomtype = RoomTypeModel.get_by_id(self.db, main_roomtype_id)
 
-        roomtype_mapping = RoomTypeMappingModel.get_by_provider_and_main_roomtype(self.db, 6, chain_roomtype_id, main_roomtype_id)
+        roomtype_mapping = RoomTypeMappingModel.get_by_provider_and_main_roomtype(self.db, 6, chain_roomtype_id, main_roomtype_id,chain_hotel_id)
         if roomtype_mapping:
             raise JsonException(errcode=1000, errmsg="already exist")
 
@@ -79,7 +79,7 @@ class RoomTypeMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
 
     def add_roomtype(self, roomtype):
         Log.info(">>> push ebooking room {}".format(roomtype))
-        roomtype_mapping = RoomTypeMappingModel.get_by_provider_roomtype(self.db, 6, roomtype['chain_roomtype_id'])
+        roomtype_mapping = RoomTypeMappingModel.get_by_provider_roomtype(self.db, 6, roomtype['chain_roomtype_id'],roomtype['chain_hotel_id'])
         
         main_roomtype = RoomTypeModel.get_by_id(self.db, roomtype['main_roomtype_id'])
 

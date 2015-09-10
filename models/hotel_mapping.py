@@ -109,8 +109,6 @@ class HotelMappingModel(Base):
             query = query.filter(HotelMappingModel.city_id == city_id)
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
-        if status != -1:
-            query = query.filter(HotelMappingModel.status == status)
 
         query = query\
                 .filter(HotelMappingModel.provider_id != 6)\
