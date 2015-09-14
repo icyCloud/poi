@@ -163,7 +163,7 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 
 	$scope.setHotelOnline = function(hotel) {
 		var url = '/api/polymer/hotel/online/';
-		var params = {hotel_mapping_id: hotel.id, is_online: hotel.is_online == 0 ? 1 : 0}
+		var params = {hotel_mapping_id: hotel.id, is_online: hotel.is_online != 1 ? 1 : 0}
 		$http.put(url, params)
 			.success(function(resp) {
 				console.log(resp);
@@ -175,7 +175,7 @@ EbookingApp.controller('EbookingCtrl',  ['$scope', '$http', '$modal', '$location
 
 	$scope.setRoomOnline = function(hotel, room) {
 		var url = '/api/polymer/roomtype/online/';
-		var params = {hotel_mapping_id: hotel.id, roomtype_mapping_id: room.id, is_online: room.is_online == 0 ? 1 : 0}
+		var params = {hotel_mapping_id: hotel.id, roomtype_mapping_id: room.id, is_online: room.is_online != 1 ? 1 : 0}
 		$http.put(url, params)
 			.success(function(resp) {
 				console.log(resp);
