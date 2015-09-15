@@ -15,11 +15,12 @@ from views.api.hotel import HotelSearchAPIHandler, HotelAPIHandler
 from views.api.hotel_mapping import HotelMappingAPIHandler, HotelMappingEbookingPushAPIHandler, HotelMappingEbookingBatchPushAPIHandler
 from views.api.room_type_mapping import RoomTypeMappingAPIHandler, RoomTypeMappingEbookingPushAPIHandler, RoomTypeMappingEbookingBatchPushAPIHandler
 from views.api.polymer import PolymerAPIHandler, PolymerHotelAPIHandler, PolymerRoomTypeAPIHandler
+from views.api.hotel_mapping import HotelMappingEbookingDeleteAPIHandler
 from views.api.roomtype import RoomTypeAPIHandler
 from views.api.city import CityAPIHandler
 from views.api.district import DistrictAPIHandler, DistrictByCityAPIHandler
 from views.api.polymer import PolymerHotelLineHandler
-
+from views.api.room_type_mapping import RoomTypeMappingEbookingDeleteAPIHandler
 from views.ebooking import EbookingHandler
 from views.api.ebooking import EbookingAPIHandler, MerchantListHandler
 
@@ -73,6 +74,8 @@ handlers = [
         (r"/api/push/ebooking/hotels/?", HotelMappingEbookingBatchPushAPIHandler),
         (r"/api/push/ebooking/room/?", RoomTypeMappingEbookingPushAPIHandler),
         (r"/api/push/ebooking/rooms/?", RoomTypeMappingEbookingBatchPushAPIHandler),
+        (r"/api/delete/ebooking/room/?",RoomTypeMappingEbookingDeleteAPIHandler),
+        (r"/api/delete/ebooking/hotel/?",HotelMappingEbookingDeleteAPIHandler),
 
         (r"/polymer/ebooking/?", EbookingHandler),
         (r"/api/polymer/ebooking/?", EbookingAPIHandler),

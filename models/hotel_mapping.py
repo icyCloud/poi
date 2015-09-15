@@ -66,12 +66,14 @@ class HotelMappingModel(Base):
                 .all()
 
     @classmethod
-    def get_by_provider_hotel(cls, session, provider_id, provider_hotel_id):
-        return session.query(HotelMappingModel)\
+    def get_by_provider_hotel(cls, session, provider_id, provider_hotel_id,is_delete=0):
+        query = session.query(HotelMappingModel)\
                 .filter(HotelMappingModel.provider_id==provider_id,
-                        HotelMappingModel.provider_hotel_id==str(provider_hotel_id))\
-                .filter(HotelMappingModel.is_delete == 0)\
-                .first()
+                        HotelMappingModel.provider_hotel_id==str(provider_hotel_id))
+        if is_delete != -1:
+            return query.filter(HotelMappingModel.is_delete == 0).first()
+        else:
+            return query.first()
 
     @classmethod
     def gets_wait_firstvalid(cls, session, start=0, limit=20):
@@ -299,7 +301,13 @@ class HotelMappingModel(Base):
                 rquery.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
                 session.commit()
 
+    @classmethod
+    def set_chainhotel_delete(cls,session,chainId,chainHotelId,is_delete ):
 
+        session.query(HotelMappingModel)\
+                .filter(HotelMappingModel.provider_id==chainId,HotelMappingModel.provider_hotel_id==str(chainHotelId))\
+                .update({HotelMappingModel.is_delete:is_delete})
+        session.commit()
 
 
 

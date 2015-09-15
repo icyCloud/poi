@@ -38,12 +38,16 @@ class RoomTypeMappingEbookingPushAPIHandler(BtwBaseHandler):
         chain_hotel_id, chain_roomtype_id, main_roomtype_id = get_and_valid_arguments(args,
                 'chain_hotel_id', 'chain_roomtype_id', 'main_roomtype_id')
         roomtype = RoomTypeModel.get_by_id(self.db, main_roomtype_id)
-
-        roomtype_mapping = RoomTypeMappingModel.get_by_provider_and_main_roomtype(self.db, 6, chain_roomtype_id, main_roomtype_id,chain_hotel_id)
+        Log.info('args: ' + str(args))
+        roomtype_mapping = RoomTypeMappingModel.get_by_provider_and_main_roomtype(self.db, 6, chain_roomtype_id, main_roomtype_id,chain_hotel_id,is_delete=-1)
         if roomtype_mapping:
-            raise JsonException(errcode=1000, errmsg="already exist")
-
-        roomtype_mapping = RoomTypeMappingModel.new_roomtype_mapping_from_ebooking(self.db, chain_hotel_id, chain_roomtype_id, roomtype.name, roomtype.hotel_id, main_roomtype_id)
+            Log.info('exist roomtype mapping: ' + str(args))
+            if roomtype_mapping.is_delete == 1:
+                RoomTypeMappingModel.delete_mapping_by_provider_hotel_id(self.db,6,chain_hotel_id,chain_roomtype_id,is_delete=0)
+            else:
+                raise JsonException(errcode=1000, errmsg="already exist")
+        else:
+            roomtype_mapping = RoomTypeMappingModel.new_roomtype_mapping_from_ebooking(self.db, chain_hotel_id, chain_roomtype_id, roomtype.name, roomtype.hotel_id, main_roomtype_id)
 
         self.finish_json(result=dict(
             roomtype_mapping=roomtype_mapping.todict()
@@ -100,8 +104,21 @@ class RoomTypeMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
                     roomtype['main_roomtype_id'])
         return roomtype_mapping
 
+class RoomTypeMappingEbookingDeleteAPIHandler(BtwBaseHandler):
 
+    def post(self):
+        args = self.get_json_arguments()
+        Log.info('args: ' + str(args))
+        chain_hotel_id, chain_roomtype_id = get_and_valid_arguments(args,
+                'chain_hotel_id', 'chain_roomtype_id')
 
+        if chain_hotel_id and chain_roomtype_id:
+
+            RoomTypeMappingModel.delete_mapping_by_provider_hotel_id(self.db,6, chain_hotel_id, chain_roomtype_id)
+
+            self.finish_json()
+        else:
+            self.finish_json(errcode=1)
 
 
 

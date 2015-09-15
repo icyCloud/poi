@@ -52,14 +52,15 @@ class RoomTypeMappingModel(Base):
                 .first()
 
     @classmethod
-    def get_by_provider_and_main_roomtype(cls, session, provider_id, provider_roomtype_id, main_roomtype_id,chain_hotel_id):
-        return session.query(RoomTypeMappingModel)\
+    def get_by_provider_and_main_roomtype(cls, session, provider_id, provider_roomtype_id, main_roomtype_id,chain_hotel_id,is_delete=0):
+        query = session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.provider_id == provider_id)\
                 .filter(RoomTypeMappingModel.provider_hotel_id==str(chain_hotel_id))\
                 .filter(RoomTypeMappingModel.provider_roomtype_id == str(provider_roomtype_id),
-                        RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)\
-                .filter(RoomTypeMappingModel.is_delete == 0)\
-                .first()
+                        RoomTypeMappingModel.main_roomtype_id == main_roomtype_id)
+        if is_delete != -1:
+            query.filter(RoomTypeMappingModel.is_delete == is_delete)
+        return query.first()
 
 
     @classmethod
@@ -229,6 +230,25 @@ class RoomTypeMappingModel(Base):
             session.commit()
 
         return r
+
+    @classmethod
+    def delete_mapping_by_provider_hotel_id(cls, session, provider_id,provider_hotel_id, provider_roomtype_id, is_delete=1):
+        session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(provider_hotel_id))\
+                .filter(RoomTypeMappingModel.provider_roomtype_id == str(provider_roomtype_id))\
+                .update({
+                         RoomTypeMappingModel.is_delete: is_delete})
+        session.commit()
+
+    @classmethod
+    def delete_mapping_by_hotel_id(cls, session, provider_id,provider_hotel_id, is_delete=1):
+        session.query(RoomTypeMappingModel)\
+                .filter(RoomTypeMappingModel.provider_id == provider_id)\
+                .filter(RoomTypeMappingModel.provider_hotel_id == str(provider_hotel_id))\
+                .update({
+                         RoomTypeMappingModel.is_delete: is_delete})
+        session.commit()
 
     def todict(self):
         return ObjectDict(

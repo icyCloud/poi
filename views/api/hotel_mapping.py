@@ -44,7 +44,7 @@ class HotelMappingEbookingPushAPIHandler(BtwBaseHandler):
                 'chain_hotel_id', 'main_hotel_id', 'merchant_id', 'merchant_name')
         hotel = HotelModel.get_by_id(self.db, main_hotel_id)
 
-        hotel_mapping = HotelMappingModel.get_by_provider_hotel(self.db, 6, chain_hotel_id)
+        hotel_mapping = HotelMappingModel.get_by_provider_hotel(self.db, 6, chain_hotel_id,is_delete=-1)
         if hotel_mapping:
             Log.info(">>> modify exist ebooking hotel {}".format(hotel_mapping.todict()))
             hotel_mapping.merchant_id = merchant_id
@@ -55,6 +55,7 @@ class HotelMappingEbookingPushAPIHandler(BtwBaseHandler):
             hotel_mapping.provider_hotel_name = hotel.name
             hotel_mapping.provider_hotel_address = hotel.address
             hotel_mapping.main_hotel_id = hotel.id
+            hotel_mapping.is_delete = 0
             self.db.commit()
         else:
             hotel_mapping = HotelMappingModel.new_hotel_mapping_from_ebooking(self.db,
@@ -93,7 +94,7 @@ class HotelMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
 
     def add_hotel_mapping(self, hotel):
         Log.info(">>> push ebooking hotel {}".format(hotel))
-        hotel_mapping = HotelMappingModel.get_by_provider_hotel(self.db, 6, hotel['chain_hotel_id'])
+        hotel_mapping = HotelMappingModel.get_by_provider_hotel(self.db, 6, hotel['chain_hotel_id'],is_delete=-1)
         main_hotel = HotelModel.get_by_id(self.db, hotel['main_hotel_id'])
 
         if hotel_mapping:
@@ -106,6 +107,7 @@ class HotelMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
             hotel_mapping.provider_hotel_name = main_hotel.name
             hotel_mapping.provider_hotel_address = main_hotel.address
             hotel_mapping.main_hotel_id = main_hotel.id
+            hotel_mapping.is_delete = 0
             self.db.commit()
         else:
             Log.info(">>> new exist ebooking hotel {}".format(hotel))
@@ -114,3 +116,14 @@ class HotelMappingEbookingBatchPushAPIHandler(BtwBaseHandler):
 
         return hotel_mapping
 
+class HotelMappingEbookingDeleteAPIHandler(BtwBaseHandler):
+    def post(self):
+        args = self.get_json_arguments()
+        try:
+            chain_hotel_id = args['chain_hotel_id']
+            RoomTypeMappingModel.delete_mapping_by_hotel_id(self.db,6,chain_hotel_id,is_delete=1)
+            HotelMappingModel.set_chainhotel_delete(self.db,6,chain_hotel_id,is_delete=1)
+            self.finish_json()
+        except Exception,e:
+            traceback.print_exc()
+            self.finish_json(errcode=1)
