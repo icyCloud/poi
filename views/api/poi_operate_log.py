@@ -31,7 +31,7 @@ class OperateLogAPIHandler(BtwBaseHandler):
         operateLogs,total = PoiOperateLogMapping.get_poilog(self.db,otaId=otaId,hotelName=name,module=module,motivation=motivation,operator=operator,startDate=startDate,endDate=endDate,start=start,limit=limit)
         operateDatas = []
         for operateLog in operateLogs:
-            olDict = operateLog.todict()
+            olDict = operateLog
             olDict['motivationName'] = showMotivations[olDict['motivation']]
             olDict['moduleName']=showModeuls[olDict['module']]
             operateDatas.append(olDict)

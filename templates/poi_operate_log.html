@@ -309,11 +309,11 @@ validapp.controller('validController',
         $scope.searchendDate = $('#liveEndTime').val();
         var dayStart,dayEnd;
         if($scope.searchstartDate!="" && $scope.searchendDate!="" && $scope.searchstartDate == $scope.searchendDate){
-            dayStart = $scope.searchstartDate + " 00:00:00";
-            dayEnd = $scope.searchendDate + " 23:59:59";
+            dayStart = $scope.searchstartDate;
+            dayEnd = $scope.searchendDate;
         }else{
-            dayStart = $scope.searchstartDate && ($scope.searchstartDate + " 00:00:00");
-            dayEnd = $scope.searchendDate && ($scope.searchendDate + " 00:00:00");
+            dayStart = $scope.searchstartDate && ($scope.searchstartDate);
+            dayEnd = $scope.searchendDate && ($scope.searchendDate);
         }
 
         if ($scope.searchProvider != undefined && $scope.searchProvider != "" && $scope.searchProvider != "任意供应商") {

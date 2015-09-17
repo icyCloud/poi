@@ -23,7 +23,8 @@ BACKSTAGE_USERNAME_KEY = "test_op_username"
 DEBUG = True
 
 COOKIE_SALT = 'TY30Rbs0k83ZAOSjApGlsNBlJ33kmNik'
-
+#searchapi= 'http://m.rdev.betterwood.com/searchService/api/hotel/poi/log'
+searchapi='http://10.165.99.13:8080/searchService/api/hotel/poi/log'
 BACKSTAGE_PERMISSION = {
         'admin': 55,
         'polymer': 56,

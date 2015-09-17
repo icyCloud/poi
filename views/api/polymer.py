@@ -122,7 +122,7 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
         if hotel_mapping and hotel_mapping.status == hotel_mapping.STATUS.valid_complete:
             hotel_mapping = HotelMapping.set_online(self.db, hotel_mapping_id, is_online)
-            if hotel_mapping.is_online == 0:
+            if hotel_mapping.is_online in [0, -1]:
                 RoomTypeMapping.disable_by_provider_hotel_id(self.db, hotel_mapping.provider_hotel_id)
 
             try:
@@ -133,7 +133,7 @@ class PolymerHotelAPIHandler(BtwBaseHandler, StockMixin):
             try:
                 module = modules['merge']
                 motivation = None
-                if is_online == 0:
+                if is_online in [0, -1]:
                     motivation = motivations['offline_hotel']
                 else:
                     motivation = motivations['online_hotel']
@@ -197,7 +197,7 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
         is_online = req.is_online
 
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
-        if not hotel_mapping or hotel_mapping.is_online == 0:
+        if not hotel_mapping or hotel_mapping.is_online in [0, -1]:
             self.finish_json(errcode=402, errmsg="hotel mapping not online")
             return
 

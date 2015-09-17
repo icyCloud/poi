@@ -6,6 +6,12 @@ from sqlalchemy import Column, or_,and_
 from sqlalchemy.dialects.mysql import BIT,INTEGER,VARCHAR,DATETIME,TIMESTAMP,TINYINT,BIGINT
 from tornado.util import ObjectDict
 import datetime
+import json
+from config import searchapi
+import traceback
+import urllib2
+import urllib
+from tools.log import Log, log_request
 
 class PoiOperateLogModel(Base):
     __tablename__ = 'poi_operate_log'
@@ -34,30 +40,51 @@ class PoiOperateLogModel(Base):
 
     @classmethod
     def get_poilog(cls,session,otaId=None,hotelName=None,module=None,motivation=None,operator=None,startDate=None,endDate=None,start=0,limit=10):
-        query = session.query(PoiOperateLogModel)
 
-
-        if otaId is not None:
-            query = query.filter(PoiOperateLogModel.ota_id==otaId)
+        tsearchApi = searchapi
+        tsearchApi += '?start=' + str(start) + "&limit=" + str(limit)
+        if otaId:
+            tsearchApi += '&chain_id=' + str(otaId)
         if hotelName:
-            query = query.filter(PoiOperateLogModel.hotel_name.like(u'%{}%'.format(hotelName)))
+            tsearchApi += "&"+urllib.urlencode({'hotel_name':hotelName})
+            # tsearchApi += "&hotel_name=" + hotelName.encode('utf-8')
         if module:
-            query = query.filter(PoiOperateLogModel.module==module)
+            tsearchApi += "&module=" + str(module)
         if motivation:
-            query = query.filter(PoiOperateLogModel.motivation == motivation)
+            tsearchApi += "&motivation=" + str(motivation)
         if operator:
-            query = query.filter(PoiOperateLogModel.operator == operator)
+            tsearchApi += '&operator=' + operator
         if startDate:
-            sd = datetime.datetime.strptime(startDate,'%Y-%m-%d %H:%M:%S')
-            ed = None
-            if endDate:
-                ed = datetime.datetime.strptime(endDate,'%Y-%m-%d %H:%M:%S')
-            else:
-                ed = datetime.datetime.strptime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-            query = query.filter(PoiOperateLogModel.tsupdate.between(sd,ed))
-        data = query.order_by(PoiOperateLogModel.id.desc()).offset(start).limit(limit).all()
-        total = query.count()
-        return data,total
+            tsearchApi += '&from_date=' + startDate
+        if endDate:
+            tsearchApi += '&to_date=' + endDate
+        Log.info('tsearchapi==' + tsearchApi)
+        total = 0
+        logs = []
+        try:
+            headers = { 'Content-Type' : 'application/json;charset=utf-8' }
+            req = urllib2.Request(tsearchApi, headers=headers)
+            response = urllib2.urlopen(req)
+            data = response.read()
+            jon = json.loads(data)
+            if int(jon['errcode']) == 0:
+                result = jon['result']
+                total = result['count']
+                rows = result['rows']
+
+                if len(rows) > 0:
+                    for row in rows:
+                        row['operateContent'] = row['content']
+                        row['otaId'] = row['chain_id']
+                        row['hotelName'] = row['hotel_name']
+                        logs.append(row)
+        except Exception,e:
+            traceback.print_exc()
+        finally:
+            return logs,total
+
+
+
 
     @classmethod
     def record_log(cls,session,otaId=None,hotelName=None,module=None,motivation=None,operator=None,operate_content = None,poi_hotel_id=None,poi_roomtype_id=None,hotel_id=None):
