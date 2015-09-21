@@ -197,9 +197,10 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
         is_online = req.is_online
 
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
-        if not hotel_mapping or hotel_mapping.is_online in [0, -1]:
-            self.finish_json(errcode=402, errmsg="hotel mapping not online")
-            return
+        if is_online == 1:
+            if not hotel_mapping or hotel_mapping.is_online in [0, -1]:
+                self.finish_json(errcode=402, errmsg="hotel mapping not online")
+                return
 
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
         if mapping and mapping.status == mapping.STATUS.valid_complete:
