@@ -85,6 +85,7 @@ from models.room_type_mapping import RoomTypeMappingModel
     <div class="row">
         <nav style="text-align: center">
             <pagination ng-hide="searchMode" total-items="totalItems" ng-model="currentPage" boundary-links="true" rotate="false" items-per-page="itemsPerPage" max-size="maxSize" ng-change="pageChanged()" ></pagination>
+            <input type="text" id="page_text" value="" size="5"  />
         </nav>
     </div>
 </div>
@@ -834,7 +835,12 @@ validapp.controller('validController',
 
     $scope.pageChanged = function() {
         var params = $location.search();
-        params.start = ($scope.currentPage - 1) * $scope.itemsPerPage;
+        var skipPage = $("#page_text").val()
+        if (skipPage) {
+            params.start = (skipPage - 1)*$scope.itemsPerPage;
+        } else {
+            params.start = ($scope.currentPage - 1) * $scope.itemsPerPage;
+        }
         params.limit = $scope.itemsPerPage;
         $location.search(params);
     };
