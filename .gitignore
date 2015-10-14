@@ -11,6 +11,7 @@
 ._README.md
 .idea
 .git
+/idea
 
 /config.py
 config.py
