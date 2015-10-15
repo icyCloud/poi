@@ -10,8 +10,6 @@
 ._.DS_Store
 ._README.md
 .idea
-.git
-/idea
 
 /config.py
 config.py
