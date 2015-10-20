@@ -247,8 +247,13 @@ from models.room_type_mapping import RoomTypeMappingModel
         </div>
     </div>
 </div>
-
-
+<!--loading-->
+<div class="messageDiv" ng-show="ifloading" style="z-index:999999" ng-cloak>
+    <div class="messageBlack">
+        <img style="width: 90px;height: 90px;position: absolute;left: 50%;top: 50%;
+             margin-top: -50px;margin-left: -50px;" src="${static_url('image/load1.gif')}"/>
+    </div>
+</div>
 </%def>
 
 
@@ -290,6 +295,7 @@ validapp.controller('validController',
         function($scope, $http, $location) {
 
 
+    $scope.ifloading = true;
     $scope.totalItems = 0;
     $scope.currentPage = 0;
     $scope.itemsPerPage = 0;
@@ -584,6 +590,7 @@ validapp.controller('validController',
         }
         console.log(url);
 
+        $scope.ifloading = true;
         $http.get(url)
             .success(function(data) {
                 console.log(data);
@@ -598,8 +605,10 @@ validapp.controller('validController',
                 } else {
                     alert(data.errmsg);
                 }
+                $scope.ifloading = false;
             })
             .error(function(data, status){
+                $scope.ifloading = false;
                 if (status != 0) {
                     alert("网络错误");
                 }

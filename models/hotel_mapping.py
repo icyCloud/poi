@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import BIT, INTEGER, VARCHAR, DATETIME, TIMESTAMP
 from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
 import datetime
+from models.hotel import HotelModel
 from models.room_type_mapping import RoomTypeMappingModel
 
 class HotelMappingModel(Base):
@@ -96,12 +97,13 @@ class HotelMappingModel(Base):
 
 
     @classmethod
-    def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0, limit=20,status=-1):
+    def gets_show_in_firstvalid(cls, session, provider_id=None, hotel_name=None, city_id=None, start=0,
+                                limit=20, status=-1):
         from models.room_type_mapping import RoomTypeMappingModel
 
         stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
-                RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
+                RoomTypeMappingModel.status == cls.STATUS.wait_first_valid,
                 RoomTypeMappingModel.is_delete == 0))
 
         query = session.query(HotelMappingModel)
@@ -112,17 +114,15 @@ class HotelMappingModel(Base):
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         if status != -1:
-            query = query.filter(HotelMappingModel.status==status)
+            query = query.filter(HotelMappingModel.status == status)
 
-        query = query\
-                .filter(HotelMappingModel.provider_id != 6)\
-                .filter(HotelMappingModel.is_delete == 0)\
-                .filter(HotelMappingModel.status != cls.STATUS.init)
+        query = query.filter(HotelMappingModel.provider_id != 6)\
+            .filter(HotelMappingModel.is_delete == 0)\
+            .filter(HotelMappingModel.status != HotelMappingModel.STATUS.init)
         # if status == -1:
-        query = query.filter(or_(stmt, HotelMappingModel.status != cls.STATUS.init))
+        query = query.filter(or_(stmt, HotelMappingModel.status != HotelMappingModel.STATUS.init))
         # else:
         #         query = query.filter(and_(stmt))
-
 
         r = query.offset(start).limit(limit).all()
         total = query.count()
@@ -280,27 +280,39 @@ class HotelMappingModel(Base):
         return r
 
     @classmethod
-    def set_mult_line(cls,session,chainIds=None, startTime=None,endTime=None, is_online=None):
+    def set_mult_line(cls,session,chainIds=None, cityIds=None, startTime=None,endTime=None, is_online=None):
         if startTime and endTime and chainIds:
             sd = datetime.datetime.strptime(startTime,'%Y-%m-%d')
-            ed = datetime.datetime.strptime(endTime,'%Y-%m-%d')
+            ed = datetime.datetime.strptime(endTime,'%Y-%m-%d') + datetime.timedelta(1)
             cids = chainIds.split(',')
             if is_online == 0:  #下线
                 query = session.query(RoomTypeMappingModel)\
                     .filter(RoomTypeMappingModel.is_delete == 0,RoomTypeMappingModel.status==3,RoomTypeMappingModel.ts_update.between(sd,ed),RoomTypeMappingModel.provider_id.in_(cids),RoomTypeMappingModel.is_online != -1)
+                if cityIds:
+                    citys = cityIds.split(',')
+                    query = query.filter(RoomTypeMappingModel.main_hotel_id == HotelModel.id).filter(HotelModel.city_id.in_(citys))
                 query.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
                 session.commit()
                 hquery = session.query(HotelMappingModel)\
                         .filter(HotelMappingModel.is_delete == 0,HotelMappingModel.status == 3,HotelMappingModel.ts_update.between(sd,ed),HotelMappingModel.provider_id.in_(cids),HotelMappingModel.is_online != -1)
+                if cityIds:
+                    citys = cityIds.split(',')
+                    hquery = hquery.filter(HotelMappingModel.main_hotel_id == HotelModel.id).filter(HotelModel.city_id.in_(citys))
                 hquery.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
                 session.commit()
             else:
                 query = session.query(HotelMappingModel)\
                         .filter(HotelMappingModel.is_delete == 0,HotelMappingModel.status == 3,HotelMappingModel.ts_update.between(sd,ed),HotelMappingModel.provider_id.in_(cids),HotelMappingModel.is_online != -1)
+                if cityIds:
+                    citys = cityIds.split(',')
+                    query = query.filter(HotelMappingModel.main_hotel_id == HotelModel.id).filter(HotelModel.city_id.in_(citys))
                 query.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
                 session.commit()
                 rquery = session.query(RoomTypeMappingModel)\
                     .filter(RoomTypeMappingModel.is_delete == 0,RoomTypeMappingModel.status==3,RoomTypeMappingModel.ts_update.between(sd,ed),RoomTypeMappingModel.provider_id.in_(cids),RoomTypeMappingModel.is_online != -1)
+                if cityIds:
+                    citys = cityIds.split(',')
+                    rquery = rquery.filter(RoomTypeMappingModel.main_hotel_id == HotelModel.id).filter(HotelModel.city_id.in_(citys))
                 rquery.update({HotelMappingModel.is_online:is_online},synchronize_session=False)
                 session.commit()
 
@@ -311,8 +323,6 @@ class HotelMappingModel(Base):
                 .filter(HotelMappingModel.provider_id==chainId,HotelMappingModel.provider_hotel_id==str(chainHotelId))\
                 .update({HotelMappingModel.is_delete:is_delete})
         session.commit()
-
-
 
     @classmethod
     def delete(cls, session, id):
@@ -349,5 +359,6 @@ class HotelMappingModel(Base):
             info=self.info,
             merchant_id=self.merchant_id,
             merchant_name=self.merchant_name,
+            ts_update=self.ts_update,
             is_new=self.is_new,
             )

@@ -1,0 +1,10 @@
+
+.supply-section {top:46px;left:9%;width:auto;height:auto; min-height: 210px; overflow:auto; z-index:999; float:left; background:#FFF;border:1px solid #ccc;box-shadow: 1px 2px 3px rgba(0,0,0,0.1);}
+.supply-section .m {margin-top:17px;overflow:auto;padding:0 10px;}
+.supply-section .m label { float:left;width:20%; display:block;line-height:110%;min-height:32px; }
+.supply-section .m label span {float:left; }
+.supply-section .m label input { float:left;margin-top:0px;}
+
+/* 弹窗浮层 */
+.messageDiv {border: 0px;margin: 0px;padding: 0px;height: 100%;width: 100%;left: 0px;top: 0px;position: fixed;z-index: 999; background:none;}
+.messageDiv .messageBlack { background:#000;position: fixed;height: 100%;width: 100%;left: 0px;top: 0px;filter:alpha(opacity=30); -moz-opacity:0.3; opacity:0.3;}

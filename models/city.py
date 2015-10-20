@@ -44,5 +44,6 @@ class CityModel(Base):
         return ObjectDict(
                 id=self.id,
                 name=self.name,
+                prov_id=self.prov_id,
                 )
 
