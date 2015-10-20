@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from views.api.province import ProvinceAPIHandler
 
 from views.index import IndexHandler
 from views.login import LoginHandler, LogoutHandler
@@ -64,6 +65,7 @@ handlers = [
         (r"/hotel/(?P<hotel_id>\d+)/roomtype/?", RoomTypeHandler),
         (r"/api/hotel/(?P<hotel_id>\d+)/roomtype/?", RoomTypeAPIHandler),
         (r"/api/city/?", CityAPIHandler),
+        (r"/api/province/?", ProvinceAPIHandler),
         (r"/api/district/?", DistrictAPIHandler),
         (r"/api/city/(?P<city_id>\d+)/district/?", DistrictByCityAPIHandler),
         (r"/api/city/(?P<city_id>\d+)/businesszone/?", BusinessZoneByCityAPIHandler),

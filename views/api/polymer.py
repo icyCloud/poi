@@ -272,6 +272,7 @@ class PolymerRoomTypeAPIHandler(BtwBaseHandler, StockMixin):
         else:
             self.finish_json(errcode=401, errmsg="not in second valid")
 
+
 class PolymerHotelLineHandler(BtwBaseHandler):
 
     @auth_login(json=True)
@@ -283,16 +284,19 @@ class PolymerHotelLineHandler(BtwBaseHandler):
         endTime = jon['endTime']
         line = jon['line']
         chainIds = jon['chainIds']
+        cityIds = jon['cityIds'] if jon.has_key('cityIds') else None
         errcode = 0
         errmsg = 'success'
         try:
             if startTime and endTime and chainIds:
-                HotelMapping.set_mult_line(self.db,chainIds=chainIds,startTime=startTime,endTime=endTime,is_online=int(line))
+                HotelMapping.set_mult_line(self.db,chainIds=chainIds, cityIds=cityIds,startTime=startTime,endTime=endTime,is_online=int(line))
             else:
                 errcode = 1
                 errmsg = 'failure'
         except Exception,e:
             traceback.print_exc()
         finally:
-            Log.info(self.current_user+'在'+datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "批量修改了"+chainIds+"的酒店状态为：" + str(line))
+            Log.info('用户{}在{} 批量修改酒店上线状态为{} ==>> 供应商：{}, 城市列表：{}'
+                     .format(self.current_user, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                             str(line), chainIds, cityIds))
             self.finish_json(errcode=errcode, errmsg=errmsg)

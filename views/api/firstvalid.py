@@ -24,7 +24,6 @@ from tools.log import Log, log_request
 
 
 class FirstValidAPIHandler(StockHandler, HotelMixin):
-
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     @log_request
@@ -35,11 +34,24 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
         provider_id = self.get_query_argument('provider_id', None)
         hotel_name = self.get_query_argument('hotel_name', None)
         city_id = self.get_query_argument('city_id', None)
-        status = self.get_query_argument('statusId',-1)
+        status = self.get_query_argument('statusId', -1)
         t0 = time.time()
-        hotel_mappings, total = HotelMapping.gets_show_in_firstvalid(self.db,
-                                                                     provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
-                                                                     start=start, limit=limit,status=status)
+
+        match_status = self.get_query_argument('match_status', None)
+        if match_status == '0':
+            hotel_room_mappings, total = RoomTypeMapping \
+                .gets_show_in_first_valid(self.db, provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
+                                          start=start, limit=limit, status=status, match_status=match_status)
+            self.finish_json(result=dict(
+                hotel_room_mappings=hotel_room_mappings,
+                start=start,
+                limit=limit,
+                total=total
+            ))
+
+        hotel_mappings, total = HotelMapping \
+            .gets_show_in_firstvalid(self.db, provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
+                                     start=start, limit=limit, status=status)
         Log.info(">> get show in first valid")
         hotels = [hotel.todict() for hotel in hotel_mappings]
 
@@ -56,8 +68,7 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
         Log.info(">> add provider roomtype mapping")
         t5 = time.time()
 
-
-        cost = t1-t0, t2-t1, t4-t2, t5-t4 
+        cost = t1 - t0, t2 - t1, t4 - t2, t5 - t4
         Log.info(cost)
 
         self.finish_json(result=dict(
@@ -77,7 +88,6 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
         roomtype_mappings = RoomTypeMapping.get_firstvalid_by_provider_hotel_ids(
             self.db, provider_hotel_ids)
         roomtype_mappings = [mapping.todict() for mapping in roomtype_mappings]
-
 
         main_hotel_ids = [
             mapping.main_hotel_id for mapping in roomtype_mappings]
@@ -104,18 +114,18 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
 
 
 class FirstValidStatusAPIHandelr(BtwBaseHandler):
-
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     def put(self, hotel_mapping_id):
         Log.info("First>>Hotel {}>>Valid>> user:{}".format(hotel_mapping_id, self.current_user))
         hotel_mapping = HotelMapping.get_by_id(self.db, hotel_mapping_id)
-        if hotel_mapping and\
+        if hotel_mapping and \
                 (hotel_mapping.status == hotel_mapping.STATUS.wait_first_valid
-                 or hotel_mapping.status == hotel_mapping.STATUS.init)\
+                 or hotel_mapping.status == hotel_mapping.STATUS.init) \
                 and hotel_mapping.main_hotel_id != 0:
 
-            hotels = HotelMapping.get_by_chain_id_and_main_hotel_id(self.db, hotel_mapping.provider_id, hotel_mapping.main_hotel_id)
+            hotels = HotelMapping.get_by_chain_id_and_main_hotel_id(self.db, hotel_mapping.provider_id,
+                                                                    hotel_mapping.main_hotel_id)
             for hotel in hotels:
                 if hotel.id != hotel_mapping.id and hotel.status > hotel_mapping.status:
                     self.finish_json(errcode=402, errmsg=u"已有Hotel{}绑定相同基础酒店".format(hotel.provider_hotel_name))
@@ -129,11 +139,13 @@ class FirstValidStatusAPIHandelr(BtwBaseHandler):
                 poi_hotel_id = hotel_mapping.main_hotel_id
                 otaId = hotel_mapping.provider_id
                 hotelName = hotel_mapping.provider_hotel_name
-                hotelModel = Hotel.get_by_id(self.db,id=poi_hotel_id)
+                hotelModel = Hotel.get_by_id(self.db, id=poi_hotel_id)
                 operate_content = hotelName + "<->" + hotelModel.name
                 hotel_id = hotel_mapping_id
-                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id)
-            except Exception,e:
+                PoiOperateLogMapping.record_log(self.db, otaId=otaId, hotelName=hotelName, module=module,
+                                                motivation=motivation, operator=operator, poi_hotel_id=poi_hotel_id,
+                                                operate_content=operate_content, hotel_id=hotel_id)
+            except Exception, e:
                 traceback.print_exc()
 
             self.finish_json(result=dict(
@@ -144,14 +156,13 @@ class FirstValidStatusAPIHandelr(BtwBaseHandler):
 
 
 class FirstValidRoomTypeAPIHandler(BtwBaseHandler):
-
     @auth_login(json=True)
     @auth_permission(PERMISSIONS.admin | PERMISSIONS.first_valid, json=True)
     def put(self, roomtype_mapping_id):
         Log.info("First>>RoomType {}>>Valid>> user:{}".format(roomtype_mapping_id, self.current_user))
         mapping = RoomTypeMapping.get_by_id(self.db, roomtype_mapping_id)
 
-        if mapping and mapping.status in [mapping.STATUS.wait_first_valid, mapping.STATUS.init]\
+        if mapping and mapping.status in [mapping.STATUS.wait_first_valid, mapping.STATUS.init] \
                 and mapping.main_roomtype_id != 0:
 
             r = RoomTypeMapping.set_firstvalid_complete(
@@ -165,14 +176,16 @@ class FirstValidRoomTypeAPIHandler(BtwBaseHandler):
                 poi_roomtype_id = mapping.main_roomtype_id
                 otaId = mapping.provider_id
                 hotel_id = mapping.provider_hotel_id
-                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db,otaId,hotel_id,poi_hotel_id)
+                hotelModel = HotelMapping.get_by_provider_and_main_hotel(self.db, otaId, hotel_id, poi_hotel_id)
                 hotelName = hotelModel.provider_hotel_name
-                roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+                roomType = RoomType.get_by_id(self.db, id=poi_roomtype_id)
                 operate_content = mapping.provider_roomtype_name + " <-> " + roomType.name
 
-                PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
-                                                poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
-            except Exception,e:
+                PoiOperateLogMapping.record_log(self.db, otaId=otaId, hotelName=hotelName, module=module,
+                                                motivation=motivation, operator=operator,
+                                                poi_hotel_id=poi_hotel_id, operate_content=operate_content,
+                                                hotel_id=hotel_id, poi_roomtype_id=poi_roomtype_id)
+            except Exception, e:
                 traceback.print_exc()
 
             self.finish_json(result=ObjectDict(

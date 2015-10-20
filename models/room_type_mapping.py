@@ -7,6 +7,7 @@ from sqlalchemy.sql import exists, text
 from tornado.util import ObjectDict
 from sqlalchemy import  or_, and_
 
+
 class RoomTypeMappingModel(Base):
 
     __tablename__ = 'roomTypeMapping'
@@ -29,6 +30,7 @@ class RoomTypeMappingModel(Base):
     main_hotel_id = Column('mainHotelId', INTEGER(unsigned=True), nullable=False)
     main_roomtype_id = Column('mainRoomTypeId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
+    match_status = Column('match_status', TINYINT(4, unsigned=True), nullable=False)
     is_online = Column('onlineStatus', INTEGER, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
     is_new =  Column('isNew', BIT, nullable=False, default=0)
@@ -141,6 +143,41 @@ class RoomTypeMappingModel(Base):
                 .all()
 
     @classmethod
+    def gets_show_in_first_valid(cls, session, provider_id=None, hotel_name=None, city_id=None,
+                                 start=0, limit=20,status=-1, match_status=0):
+        from models.hotel_mapping import HotelMappingModel
+        stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+                HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
+                RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
+                RoomTypeMappingModel.match_status == match_status,
+                RoomTypeMappingModel.is_delete == 0))
+
+        query = session.query(RoomTypeMappingModel)
+        if provider_id:
+            query = query.filter(HotelMappingModel.provider_id == provider_id)
+        if city_id:
+            query = query.filter(HotelMappingModel.city_id == city_id)
+        if hotel_name:
+            query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
+        if status != -1:
+            query = query.filter(HotelMappingModel.status==status)
+
+        query = query\
+                .filter(HotelMappingModel.provider_id != 6)\
+                .filter(HotelMappingModel.is_delete == 0)\
+                .filter(HotelMappingModel.status != cls.STATUS.init)
+        # if status == -1:
+        query = query.filter(or_(stmt, HotelMappingModel.status != cls.STATUS.init))
+        # else:
+        #         query = query.filter(and_(stmt))
+
+
+        r = query.offset(start).limit(limit).all()
+        total = query.count()
+
+        return r, total
+
+    @classmethod
     def gets_wait_secondvalid_by_provider(cls, session, provider_id):
         return session.query(RoomTypeMappingModel)\
                 .filter(RoomTypeMappingModel.is_delete == 0)\
@@ -182,6 +219,7 @@ class RoomTypeMappingModel(Base):
         r = cls.get_by_id(session, id)
         if r:
             r.status = cls.STATUS.wait_second_valid
+            r.match_status = 1
             session.commit()
         return r
 
