@@ -128,3 +128,38 @@ class RoomTypeAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
             _facilities = [facility.name for facility in facilities if str(facility.id) in fas]
             roomtype.facility = '|'.join(_facilities)
 
+
+class RoomTypeInnerAPIHandler(BtwBaseHandler, RoomTypeValidMixin):
+
+    def post(self, hotel_id):
+        roomtype = ObjectDict(json_decode(self.request.body))
+        if not self.valid_roomtype(roomtype):
+            return self.finish_json(errcode=401, errmsg="无效的参数")
+
+        hotel = Hotel.get_by_id(self.db, hotel_id)
+
+        if not hotel:
+            return self.finish_json(errcode=404, errmsg="无效的Hotel")
+
+        _roomtype = RoomType.new(self.db, hotel_id, **roomtype)
+
+        try:
+            module = modules['first_valid']
+            motivation = motivations['add_roomtype']
+            operator = '程序自动匹配'
+            poi_hotel_id =hotel.id
+            poi_roomtype_id = _roomtype.id
+            otaId = -1
+            hotel_id = "-1"
+            hotelModel = Hotel.get_by_id(self.db,poi_hotel_id)
+            hotelName = hotelModel.name
+            roomType = RoomType.get_by_id(self.db,id=poi_roomtype_id)
+            operate_content = u"新增"+_roomtype.name+"," + roomtypes[_roomtype.bed_type]+"," + str(_roomtype.floor) + u"楼"
+
+            PoiOperateLogMapping.record_log(self.db,otaId=otaId,hotelName=hotelName,module=module,motivation=motivation,operator=operator,
+                                            poi_hotel_id=poi_hotel_id,operate_content=operate_content,hotel_id=hotel_id,poi_roomtype_id=poi_roomtype_id)
+        except Exception,e:
+            traceback.print_exc()
+        return self.finish_json(result=ObjectDict(
+            roomtype=_roomtype.todict(),
+            ))

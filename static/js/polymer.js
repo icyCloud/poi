@@ -11,7 +11,7 @@
             function ($scope, $http, $location) {
 
                 $scope.ifloading = true;
-                $scope.multi_line_msg = false;
+                $scope.multi_line_msg = '';
                 $scope.totalItems = 0;
                 $scope.currentPage = 0;
                 $scope.itemsPerPage = 0;
