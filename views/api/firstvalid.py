@@ -42,8 +42,12 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
             hotel_room_mappings, total = RoomTypeMapping \
                 .gets_show_in_first_valid(self.db, provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
                                           start=start, limit=limit, status=status, match_status=match_status)
+            hotel_rooms = [dict(
+                hotel=mapping[0].todict(),
+                room=mapping[1].todict()
+            ) for mapping in hotel_room_mappings]
             self.finish_json(result=dict(
-                hotel_room_mappings=hotel_room_mappings,
+                hotel_room_mappings=hotel_rooms,
                 start=start,
                 limit=limit,
                 total=total

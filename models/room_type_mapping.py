@@ -30,7 +30,7 @@ class RoomTypeMappingModel(Base):
     main_hotel_id = Column('mainHotelId', INTEGER(unsigned=True), nullable=False)
     main_roomtype_id = Column('mainRoomTypeId', INTEGER(unsigned=True), nullable=False)
     status = Column(TINYINT(4, unsigned=True), nullable=False)
-    match_status = Column('match_status', TINYINT(4, unsigned=True), nullable=False)
+    match_status = Column('match_status', TINYINT(4, unsigned=True), nullable=False, default=1)
     is_online = Column('onlineStatus', INTEGER, nullable=False, default=0)
     is_delete = Column('isDelete', BIT, nullable=False, default=0)
     is_new =  Column('isNew', BIT, nullable=False, default=0)
@@ -146,13 +146,12 @@ class RoomTypeMappingModel(Base):
     def gets_show_in_first_valid(cls, session, provider_id=None, hotel_name=None, city_id=None,
                                  start=0, limit=20,status=-1, match_status=0):
         from models.hotel_mapping import HotelMappingModel
-        stmt = exists().where(and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
+        stmt = and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
-                RoomTypeMappingModel.status == RoomTypeMappingModel.STATUS.wait_first_valid,
-                RoomTypeMappingModel.match_status == match_status,
-                RoomTypeMappingModel.is_delete == 0))
+                HotelMappingModel.status == HotelMappingModel.STATUS.wait_first_valid,
+                HotelMappingModel.is_delete == 0)
 
-        query = session.query(RoomTypeMappingModel)
+        query = session.query(HotelMappingModel, RoomTypeMappingModel).filter(RoomTypeMappingModel.match_status == match_status)
         if provider_id:
             query = query.filter(HotelMappingModel.provider_id == provider_id)
         if city_id:
@@ -160,14 +159,14 @@ class RoomTypeMappingModel(Base):
         if hotel_name:
             query = query.filter(HotelMappingModel.provider_hotel_name.like(u'%{}%'.format(hotel_name)))
         if status != -1:
-            query = query.filter(HotelMappingModel.status==status)
+            query = query.filter(HotelMappingModel.status == status)
 
         query = query\
-                .filter(HotelMappingModel.provider_id != 6)\
-                .filter(HotelMappingModel.is_delete == 0)\
-                .filter(HotelMappingModel.status != cls.STATUS.init)
+            .filter(RoomTypeMappingModel.provider_id != 6)\
+            .filter(RoomTypeMappingModel.is_delete == 0)\
+            .filter(RoomTypeMappingModel.status != cls.STATUS.init)
         # if status == -1:
-        query = query.filter(or_(stmt, HotelMappingModel.status != cls.STATUS.init))
+        query = query.filter(stmt)
         # else:
         #         query = query.filter(and_(stmt))
 
