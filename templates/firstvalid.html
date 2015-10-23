@@ -42,12 +42,61 @@ from models.room_type_mapping import RoomTypeMappingModel
         <div class="col-lg-3">
             <button class="btn btn-primary pull-left" data-ng-click="search()" style="margin-top: -7px">搜索</button>
             <button class="btn btn-default pull-left" data-ng-click="resetSearch()" style="margin-top: -7px; margin-left: 5px">重置</button>
+            <button class="btn btn-primary pull-left" data-ng-click="search(true)" style="margin-top: -7px; margin-left: 5px">未匹配房型</button>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" ng-show="search_for_hotel">
         <h4 class="col-md-6 title">供应商酒店</h4>
         <h4 class="col-md-6 title">基础酒店</h4>
+    </div>
+
+    <div class="row" ng-hide="search_for_hotel">
+        <h4 class="col-md-6 title">供应商房型</h4>
+        <h4 class="col-md-6 title">基础房型</h4>
+    </div>
+
+    <div class="row panel pannel-default" ng-repeat="mapping in hotel_room_mappings" ng-if="!mapping.is_delete">
+        <div class="col-sm-1">
+            <p ng-cloak ng-bind="getProvider(mapping.provider_id).name"></p>
+        </div>
+        <div class="col-sm-2">
+            <p class="text-primary text-center" ng-cloak><b ng-bind="mapping.provider_hotel_name"></b></p>
+            <br>{{mapping.provider_hotel_id}}
+            <br>{{mapping.provider_hotel_address}}
+        </div>
+        <div class="col-sm-2">
+            <a class="text-center text-primary" data-ng-click="showRoomType(mapping.roomtype_mappings[0])" ng-cloak><b>{{ mapping.roomtype_mappings[0].provider_roomtype.name }}</b></a>
+            <br/>{{mapping.roomtype_mappings[0].provider_roomtype.id}}
+            <p>{{getBedNameByType(mapping.roomtype_mappings[0].provider_roomtype.bed_type)}}</p>
+        </div>
+        <div class="col-sm-1">
+            <span class="span-center glyphicon glyphicon-arrow-right"></span>
+        </div>
+        <div class="col-sm-2">
+            <b><a class="text-center text-primary"  data-ng-click="showHotelInfo(mapping)">{{showMainHotelName(mapping)}}</a></b><br/>
+            <br>{{mapping.main_hotel.id}}
+            <br>{{mapping.main_hotel.address}}
+        </div>
+        <div class="col-sm-2">
+            <a class="text-center text-primary" data-ng-click="showRoomType(mapping.roomtype_mappings[0])" ng-cloak><b>{{ mapping.roomtype_mappings[0].main_roomtype.name }}</b></a>
+            <br/>{{mapping.roomtype_mappings[0].main_roomtype.id}}
+            <p>{{getBedNameByType(mapping.roomtype_mappings[0].main_roomtype.bed_type)}}</p>
+        </div>
+        <div class="col-sm-1">
+            <button class="btn btn-default  btn-sm room-mapping-btn"
+            data-ng-click="changeRoomType(mapping.roomtype_mappings[0])"
+            data-ng-show="mapping.roomtype_mappings[0].status <= ${RoomTypeMappingModel.STATUS.wait_first_valid}"
+            ng-disabled="mapping.status <= ${HotelMappingModel.STATUS.wait_first_valid}" >Change</button>
+        </div>
+        <div class="col-sm-1">
+            <button class="btn btn-primary btn-sm room-mapping-btn"
+                data-ng-disabled="mapping.roomtype_mappings[0].main_roomtype_id == 0 ||  mapping.status <= ${HotelMappingModel.STATUS.wait_first_valid}"
+                data-ng-show="mapping.roomtype_mappings[0].status <= ${RoomTypeMappingModel.STATUS.wait_first_valid}"
+                data-ng-click="validRoomMapping(mapping.roomtype_mappings[0])" >
+                通过
+            </button>
+        </div>
     </div>
 
     <div class="row panel panel-default" ng-repeat="mapping in hotelMappings" ng-if="!mapping.is_delete">

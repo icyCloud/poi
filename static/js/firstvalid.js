@@ -15,6 +15,7 @@
                 $scope.maxSize = 10;
 
                 $scope.hotelMappings = [];
+                $scope.hotel_room_mappings = [];
                 $scope.providers = [];
                 $scope.dialogMainRoomType = {};
                 $scope.dialogProviderRoomType = {};
@@ -70,7 +71,7 @@
                         }
                     });
 
-                function loadHotelMappings(start, limit, provider_id, city_id, hotel_name, statusId) {
+                function loadHotelMappings(start, limit, provider_id, city_id, hotel_name, statusId, match_status) {
                     var url = "/api/firstvalid?start=" + start + "&limit=" + limit;
                     if (provider_id != undefined) {
                         url += ("&provider_id=" + provider_id);
@@ -84,15 +85,23 @@
                     if (statusId && statusId != -1) {
                         url += ("&statusId=" + statusId);
                     }
+                    if (match_status || match_status == 0){
+                        url += ("&match_status=" + match_status)
+                    }
                     $scope.ifloading = true;
                     $http.get(url)
                         .success(function (data) {
                             console.log(data);
                             if (data.errcode == 0) {
                                 var result = data.result;
-                                $scope.hotelMappings = result.hotel_mappings;
+                                if(result.hasOwnProperty('hotel_mappings')){
+                                    $scope.hotel_room_mappings = [];
+                                    $scope.hotelMappings = result.hotel_mappings;
+                                }else{
+                                    $scope.hotelMappings = [];
+                                    $scope.hotel_room_mappings = result.hotel_room_mappings;
+                                }
                                 roomtypes = result.roomtypes;
-
                                 $scope.totalItems = result.total;
                                 $scope.currentPage = Math.floor(result.start / result.limit) + 1;
                                 $scope.itemsPerPage = result.limit;
@@ -477,12 +486,12 @@
                         var city_id = params.city_id;
                         var hotel_name = params.hotel_name;
                         var statusId = params.statusId;
-                        loadHotelMappings(start, limit, provider_id, city_id, hotel_name, statusId);
+                        var match_status = params.match_status;
+                        loadHotelMappings(start, limit, provider_id, city_id, hotel_name, statusId, match_status);
 
                     });
 
-
-                $scope.search = function () {
+                $scope.search = function (serchMatch) {
                     console.log($scope.searchProvider);
                     console.log($scope.searchHotelName);
                     console.log($scope.searchCityName);
@@ -509,6 +518,9 @@
                     }
                     if ($scope.status != undefined && $scope.status != -1) {
                         urlParams.statusId = $scope.status;
+                    }
+                    if(serchMatch){
+                        urlParams.match_status = '0';
                     }
                     console.log(urlParams);
                     $location.search(urlParams);

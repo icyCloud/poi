@@ -148,7 +148,9 @@ class RoomTypeMappingModel(Base):
         from models.hotel_mapping import HotelMappingModel
         stmt = and_(HotelMappingModel.provider_id == RoomTypeMappingModel.provider_id,
                 HotelMappingModel.provider_hotel_id == RoomTypeMappingModel.provider_hotel_id,
-                HotelMappingModel.status == HotelMappingModel.STATUS.wait_first_valid,
+                HotelMappingModel.main_hotel_id == RoomTypeMappingModel.main_hotel_id,
+                HotelMappingModel.main_hotel_id > 0,
+                HotelMappingModel.status >= HotelMappingModel.STATUS.wait_first_valid,
                 HotelMappingModel.is_delete == 0)
 
         query = session.query(HotelMappingModel, RoomTypeMappingModel).filter(RoomTypeMappingModel.match_status == match_status)
@@ -302,3 +304,28 @@ class RoomTypeMappingModel(Base):
                 info=self.info,
                 is_new=self.is_new,
                 )
+    #
+    # def todict_all(self):
+    #     _dict = self.todict()
+    #     _dict['area'] = self['room_size'];
+    #     return ObjectDict(
+    #         id=self.id,
+    #         provider_id=self.provider_id,
+    #         provider_hotel_id=self.provider_hotel_id,
+    #         provider_roomtype_id=self.provider_roomtype_id,
+    #         provider_roomtype_name=self.provider_roomtype_name,
+    #         main_hotel_id=self.main_hotel_id,
+    #         main_roomtype_id=self.main_roomtype_id,
+    #         status=self.status,
+    #         is_online=self.is_online,
+    #         is_delete=self.is_delete,
+    #         info=self.info,
+    #         is_new=self.is_new,
+    #         provider_roomtype={}
+    #
+    #     )
+    # roomtype_mapping['provider_roomtype'] = roomtype
+    #                     roomtype_mapping['provider_roomtype']['area'] = roomtype.get('room_size', 0)
+    #                     roomtype_mapping['provider_roomtype']['description'] = roomtype.get('desc', '')
+    #                     roomtype_mapping['provider_roomtype']['capacity'] = roomtype.get('occupancy', '')
+    #                     roomtype_mapping['provider_roomtype_name'] = roomtype.get('name')

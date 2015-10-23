@@ -39,49 +39,57 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
 
         match_status = self.get_query_argument('match_status', None)
         if match_status == '0':
+            Log.info(">> get unmatch_status roomtypes start:")
+            t1 = time.time()
             hotel_room_mappings, total = RoomTypeMapping \
                 .gets_show_in_first_valid(self.db, provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
                                           start=start, limit=limit, status=status, match_status=match_status)
-            hotel_rooms = [dict(
-                hotel=mapping[0].todict(),
-                room=mapping[1].todict()
-            ) for mapping in hotel_room_mappings]
+            hotel_rooms = []
+            for mapping in hotel_room_mappings:
+                hotel = mapping[0].todict()
+                hotel['roomtype_mappings'] = [mapping[1].todict()]
+                hotel_rooms.append(hotel)
+            self.merge_hotels(hotel_rooms)
+            self.merge_rooms(hotel_rooms)
+            self.add_provider_roomtype(hotel_rooms)
+            t2 = time.time()
+            Log.info(">> get unmatch_status roomtypes end: cost {}".format(t2 - t1))
             self.finish_json(result=dict(
                 hotel_room_mappings=hotel_rooms,
+                roomtypes=self.roomtypes,
                 start=start,
                 limit=limit,
                 total=total
             ))
+        else:
+            hotel_mappings, total = HotelMapping \
+                .gets_show_in_firstvalid(self.db, provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
+                                         start=start, limit=limit, status=status)
+            Log.info(">> get show in first valid")
+            hotels = [hotel.todict() for hotel in hotel_mappings]
 
-        hotel_mappings, total = HotelMapping \
-            .gets_show_in_firstvalid(self.db, provider_id=provider_id, hotel_name=hotel_name, city_id=city_id,
-                                     start=start, limit=limit, status=status)
-        Log.info(">> get show in first valid")
-        hotels = [hotel.todict() for hotel in hotel_mappings]
+            Log.info(">> merge hotel mapping")
+            t1 = time.time()
+            self.merge_main_hotel_info(hotels)
+            Log.info(">> merge main hotel info")
+            t2 = time.time()
 
-        Log.info(">> merge hotel mapping")
-        t1 = time.time()
-        self.merge_main_hotel_info(hotels)
-        Log.info(">> merge main hotel info")
-        t2 = time.time()
+            self.merge_room_type_mapping(hotels)
+            Log.info(">> merge roomtype mapping")
+            t4 = time.time()
+            self.add_provider_roomtype(hotels)
+            Log.info(">> add provider roomtype mapping")
+            t5 = time.time()
 
-        self.merge_room_type_mapping(hotels)
-        Log.info(">> merge roomtype mapping")
-        t4 = time.time()
-        self.add_provider_roomtype(hotels)
-        Log.info(">> add provider roomtype mapping")
-        t5 = time.time()
+            cost = t1 - t0, t2 - t1, t4 - t2, t5 - t4
+            Log.info(cost)
 
-        cost = t1 - t0, t2 - t1, t4 - t2, t5 - t4
-        Log.info(cost)
-
-        self.finish_json(result=dict(
-            hotel_mappings=hotels,
-            roomtypes=self.roomtypes,
-            start=start,
-            limit=limit,
-            total=total))
-
+            self.finish_json(result=dict(
+                hotel_mappings=hotels,
+                roomtypes=self.roomtypes,
+                start=start,
+                limit=limit,
+                total=total))
 
     def merge_room_type_mapping(self, hotel_dicts):
 
@@ -115,6 +123,27 @@ class FirstValidAPIHandler(StockHandler, HotelMixin):
             for roomtype in roomtypes:
                 if mapping.main_roomtype_id == roomtype.id:
                     mapping['main_roomtype'] = roomtype
+
+    def merge_hotels(self, hotel_room):
+        hotel_ids = [hotel['main_hotel_id'] for hotel in hotel_room]
+
+        self.roomtypes = RoomType.gets_by_hotel_ids(self.db, hotel_ids)
+        self.roomtypes = [roomtype.todict() for roomtype in self.roomtypes]
+
+        hotels = Hotel.get_by_ids(self.db, hotel_ids)
+        hotel_mapping = {hotel.todict()['id']: hotel.todict() for hotel in hotels}
+        for hotel in hotel_room:
+            if hotel['main_hotel_id'] in hotel_mapping:
+                hotel['main_hotel'] = hotel_mapping[hotel['main_hotel_id']]
+
+    def merge_rooms(self, hotel_room):
+        room_ids = [hotel['roomtype_mappings'][0]['main_roomtype_id'] for hotel in hotel_room]
+        rooms = RoomType.get_by_ids(self.db, room_ids, need_valid=True)
+        room_mapping = {room.todict()['id']: room.todict() for room in rooms}
+        for hotel in hotel_room:
+            chain_room = hotel['roomtype_mappings'][0]
+            if chain_room['main_roomtype_id'] in room_mapping:
+                chain_room['main_roomtype'] = room_mapping[chain_room['main_roomtype_id']]
 
 
 class FirstValidStatusAPIHandelr(BtwBaseHandler):
